@@ -10,6 +10,7 @@ const SERVICES_DATA = [
         description: 'Ace your mid-terms with help from seniors who topped the class.',
         icon: <BookOpen size={40} />,
         availableCount: 42,
+        provider: 'Aarya Nadiger'
     },
     {
         id: 'printing',
@@ -17,6 +18,7 @@ const SERVICES_DATA = [
         description: 'Fast, cheap printing delivered to your hostel room. Assignments & theses.',
         icon: <Printer size={40} />,
         availableCount: 8,
+        provider: 'Rushi Shah'
     },
     {
         id: 'repair',
@@ -24,6 +26,7 @@ const SERVICES_DATA = [
         description: 'Broken laptop screen or phone issues? Student-run reliable fixes.',
         icon: <Wrench size={40} />,
         availableCount: 12,
+        provider: 'Meemoh Shukla'
     },
     {
         id: 'coding',
@@ -31,6 +34,7 @@ const SERVICES_DATA = [
         description: 'Debug help for C++, Python, and Java semester projects.',
         icon: <Code size={40} />,
         availableCount: 25,
+        provider: 'Prithish Gurbani'
     },
     {
         id: 'photography',
@@ -38,6 +42,7 @@ const SERVICES_DATA = [
         description: 'Hire photographers and videographers for your club events.',
         icon: <Camera size={40} />,
         availableCount: 5,
+        provider: 'Tanish Parekh'
     },
     {
         id: 'events',
@@ -45,6 +50,7 @@ const SERVICES_DATA = [
         description: 'Find committees recruiting new members or hosting workshops.',
         icon: <Calendar size={40} />,
         availableCount: 7,
+        provider: 'Sarvesh Nimbalkar'
     }
 ];
 
@@ -64,10 +70,15 @@ const ServiceCard = ({ service, index }) => {
                 </p>
 
                 <div className="flex items-center gap-4">
-                    <span className="text-xs font-bold uppercase tracking-wider text-accent">
-                        {service.availableCount} Active Listed
-                    </span>
-                    <Button variant="outline" className="px-6 py-2">
+                    <div className="flex flex-col">
+                        <span className="text-xs font-bold uppercase tracking-wider text-accent mb-1">
+                            {service.availableCount} Active Listed
+                        </span>
+                        <span className="text-[10px] uppercase tracking-widest text-gray-500">
+                            Head: {service.provider}
+                        </span>
+                    </div>
+                    <Button variant="outline" className="px-6 py-2 ml-auto">
                         View
                     </Button>
                 </div>

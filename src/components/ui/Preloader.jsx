@@ -5,12 +5,18 @@ const messages = [
     "Finishing the prompt...",
     "Stuck in traffic...",
     "Uploading the assignment...",
-    "Wearing ID card..."
+    "Wearing ID card...",
+    "Taking the fish for a walk...",
+    "Mass bunking...",
+    "Eating ice cream...",
+    "ICA farming..."
 ];
 
 const Preloader = () => {
     const { active, progress } = useProgress();
     const [loading, setLoading] = useState(true);
+    // Shuffle messages on mount so every reload feels different
+    const [shuffledMessages] = useState(() => [...messages].sort(() => Math.random() - 0.5));
     const [messageIndex, setMessageIndex] = useState(0);
     const [fadeOut, setFadeOut] = useState(false);
 
@@ -49,7 +55,7 @@ const Preloader = () => {
                 CAMPUS NODES
             </div>
             <div className="text-zinc-400 font-mono text-sm h-6">
-                {messages[messageIndex]}
+                {shuffledMessages[messageIndex]}
             </div>
 
             {/* Optional Progress Bar */}
