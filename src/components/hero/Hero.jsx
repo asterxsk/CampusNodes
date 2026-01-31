@@ -9,7 +9,7 @@ const Hero = () => {
     const { user } = useAuth();
 
     return (
-        <section className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden bg-background">
+        <section className="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden bg-transparent">
             {/* Background Abstract Elements */}
             <div className="absolute inset-0 bg-grid-white/[0.02] -z-10" />
             <div className="absolute top-1/4 -left-20 w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none" />

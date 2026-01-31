@@ -15,10 +15,22 @@ const messages = [
 const Preloader = () => {
     const { active, progress } = useProgress();
     const [loading, setLoading] = useState(true);
-    // Shuffle messages on mount so every reload feels different
-    const [shuffledMessages] = useState(() => [...messages].sort(() => Math.random() - 0.5));
+    // Shuffle messages on mount
+    const [shuffledMessages, setShuffledMessages] = useState([]);
     const [messageIndex, setMessageIndex] = useState(0);
     const [fadeOut, setFadeOut] = useState(false);
+
+    useEffect(() => {
+        // Fisher-Yates shuffle for better randomness
+        const shuffled = [...messages];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setShuffledMessages(shuffled);
+        // Also start at a random index just in case
+        setMessageIndex(Math.floor(Math.random() * shuffled.length));
+    }, []);
 
     // Cycle messages every 1.5s
     useEffect(() => {
@@ -29,13 +41,26 @@ const Preloader = () => {
         return () => clearInterval(interval);
     }, [loading]);
 
+    // Fail-safe: Force load after 8 seconds if assets get stuck
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (loading) {
+                console.warn("Preloader timed out, forcing display.");
+                setFadeOut(true);
+                setTimeout(() => setLoading(false), 500);
+            }
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
     // Effect to watch progress
     useEffect(() => {
         // Minimum load time to read messages
         const minLoadTime = 2500;
         const start = Date.now();
 
-        if (progress === 100 && !active) {
+        // If progress is 100 OR we decide to treat it as done
+        if ((progress === 100 && !active)) {
             const elapsed = Date.now() - start;
             const remaining = Math.max(0, minLoadTime - elapsed);
 
@@ -55,7 +80,7 @@ const Preloader = () => {
                 CAMPUS NODES
             </div>
             <div className="text-zinc-400 font-mono text-sm h-6">
-                {shuffledMessages[messageIndex]}
+                {shuffledMessages.length > 0 ? shuffledMessages[messageIndex] : "Loading..."}
             </div>
 
             {/* Optional Progress Bar */}

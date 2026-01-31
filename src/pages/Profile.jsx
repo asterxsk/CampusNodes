@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import anime from 'animejs/lib/anime.es.js';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload } from 'lucide-react';
@@ -21,6 +22,24 @@ const Profile = () => {
 
     const initial = user.user_metadata?.first_name ? user.user_metadata.first_name[0] : user.email[0].toUpperCase();
     const avatarUrl = user.user_metadata?.avatar_url;
+
+    useEffect(() => {
+        // Simple animation on mount
+        anime({
+            targets: '.trust-score-counter',
+            innerHTML: [0, 95], // Mock score for now
+            round: 1,
+            easing: 'easeInOutExpo',
+            duration: 2000,
+        });
+        anime({
+            targets: '.trust-ring-path',
+            strokeDashoffset: [283, 283 - (283 * 95) / 100],
+            easing: 'easeInOutExpo',
+            duration: 2500,
+            delay: 500
+        });
+    }, []);
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -201,12 +220,29 @@ const Profile = () => {
                                 <p className="text-gray-300 italic mb-6 max-w-xl">{user.user_metadata?.bio || 'No bio yet.'}</p>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="p-4 bg-white/5 border border-white/10 rounded flex items-center gap-3">
-                                        <Shield className="text-accent" size={20} />
-                                        <div>
-                                            <p className="text-xs text-gray-500 uppercase tracking-wider">Trust Score</p>
-                                            <p className="text-xl font-bold text-white">0</p>
+                                    <div className="p-6 bg-white/5 border border-white/10 rounded-xl flex flex-col items-center justify-center relative overflow-hidden group">
+                                        <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="relative w-32 h-32 flex items-center justify-center mb-4">
+                                            <svg className="absolute inset-0 w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="45" fill="none" stroke="#222" strokeWidth="2" />
+                                                <circle
+                                                    className="trust-ring-path"
+                                                    cx="50"
+                                                    cy="50"
+                                                    r="45"
+                                                    fill="none"
+                                                    stroke="#fff"
+                                                    strokeWidth="2"
+                                                    strokeDasharray="283"
+                                                    strokeDashoffset="283" // Will animate
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
+                                            <div className="text-center z-10">
+                                                <span className="trust-score-counter text-3xl font-display font-bold text-white">0</span>
+                                            </div>
                                         </div>
+                                        <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Trust Score</p>
                                     </div>
                                     <div className="p-4 bg-white/5 border border-white/10 rounded flex items-center gap-3">
                                         <BookOpen className="text-blue-400" size={20} />

@@ -14,6 +14,7 @@ import Connections from './pages/Connections';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
+import Friends from './pages/Friends';
 import Settings from './pages/Settings';
 import Payment from './pages/Payment';
 import ProductDetails from './pages/ProductDetails';
@@ -29,7 +30,12 @@ const ScrollToTop = () => {
 // Wrapper to handle background visibility based on route
 const GlobalBackground = () => {
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/'; // Handle potential subpath issues
+
+  // Debug log
+  useEffect(() => {
+    console.log("Current Path:", location.pathname, "Is Home:", isHome);
+  }, [location.pathname]);
 
   return (
     <div
@@ -42,7 +48,7 @@ const GlobalBackground = () => {
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
 
   return (
     <div className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white pl-20 cursor-none relative z-10 transition-colors duration-500 ${isHome ? 'bg-transparent' : 'bg-background'}`}>
@@ -67,6 +73,7 @@ const App = () => {
           <MainLayout>
             <Routes>
               <Route path="/" element={<Hero />} />
+              <Route path="/friends" element={<Friends />} />
               <Route path="/market" element={<Marketplace />} />
               <Route path="/services" element={<Services />} />
               <Route path="/connections" element={<Connections />} />

@@ -1,129 +1,115 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import Button from '../components/ui/Button';
-import { Shield, Trophy } from 'lucide-react';
+import { Shield, Trophy, UserPlus, Search } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
 
 const Connections = () => {
-    // For now, default to 0 for new users. In future, this comes from user profile.
-    const score = 0;
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        // Score counter animation
-        anime({
-            targets: '.trust-score-counter',
-            innerHTML: [0, score],
-            round: 1,
-            easing: 'easeInOutExpo',
-            duration: 2000,
-        });
+        const fetchUsers = async () => {
+            try {
+                // Try fetching from profiles table
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .limit(20);
 
-        // Circle progress animation
-        const maxDash = 283;
-        const dashOffset = maxDash - (maxDash * score) / 100;
+                if (error || !data || data.length === 0) {
+                    throw new Error("No data or error");
+                }
+                setUsers(data);
+            } catch (err) {
+                console.log("Error fetching users", err);
+                setUsers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        anime({
-            targets: '.trust-ring-path',
-            strokeDashoffset: [maxDash, dashOffset],
-            easing: 'easeInOutExpo',
-            duration: 2500,
-            delay: 500
-        });
-    }, [score]);
+        fetchUsers();
+    }, []);
+
+    const filteredUsers = users.filter(user =>
+        (user.first_name + ' ' + user.last_name).toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12 relative overflow-hidden">
             {/* Decorative Background */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
 
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-                {/* Left: Trust Score Visualization */}
-                <div className="relative">
-                    <div className="relative w-80 h-80 mx-auto lg:mx-0 flex items-center justify-center">
-                        {/* Outer Ring */}
-                        <svg className="absolute inset-0 w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="#222" strokeWidth="2" />
-                            <circle
-                                className="trust-ring-path"
-                                cx="50"
-                                cy="50"
-                                r="45"
-                                fill="none"
-                                stroke="#fff"
-                                strokeWidth="2"
-                                strokeDasharray="283"
-                                strokeDashoffset="283"
-                                strokeLinecap="round"
-                            />
-                        </svg>
-
-                        {/* Center Content */}
-                        <div className="text-center z-10 px-6 flex flex-col items-center justify-center w-full h-full absolute inset-0">
-                            <span className="block text-gray-400 text-xs tracking-widest uppercase mb-1">Your Trust Score</span>
-                            <span className="trust-score-counter text-7xl font-display font-bold text-white mb-2">0</span>
-                            <span className="block text-accent text-[10px] uppercase font-bold tracking-wider max-w-[180px] leading-tight">
-                                {score === 0 ? "Complete an order to increase score" : "Excellent"}
-                            </span>
-                        </div>
+            <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                    <div>
+                        <h1 className="text-5xl font-display font-bold text-white mb-2">Add Connections</h1>
+                        <p className="text-gray-400">Discover and connect with students across campus.</p>
                     </div>
 
-                    <div className="mt-12 space-y-4">
-                        <div className="p-4 bg-white/5 border border-white/10 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer">
-                            <div className="w-10 h-10 bg-accent/20 flex items-center justify-center text-accent rounded-full">
-                                <Shield size={20} />
-                            </div>
-                            <div>
-                                <h4 className="text-white font-bold">Verified NMIMS Student</h4>
-                                <p className="text-gray-400 text-xs">Email Verification Complete</p>
-                            </div>
-                        </div>
-                        <div className="p-4 bg-white/5 border border-white/10 flex items-center gap-4 hover:bg-white/10 transition-colors cursor-pointer">
-                            <div className="w-10 h-10 bg-green-500/20 flex items-center justify-center text-green-500 rounded-full">
-                                <Trophy size={20} />
-                            </div>
-                            <div>
-                                <h4 className="text-white font-bold">Top Seller Badge</h4>
-                                <p className="text-gray-400 text-xs">Based on 15+ successful trades</p>
-                            </div>
-                        </div>
+                    {/* Search Bar */}
+                    <div className="relative w-full md:w-96">
+                        <input
+                            type="text"
+                            placeholder="Search students..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-full px-5 py-3 pl-12 text-white focus:outline-none focus:border-white/30 transition-colors"
+                        />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                     </div>
                 </div>
 
-                {/* Right: Content */}
-                <div className="text-center lg:text-left">
-                    <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-6">
-                        Build meaningful <br />
-                        <span className="text-gray-500">connections.</span>
-                    </h1>
-                    <p className="text-xl text-gray-400 mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                        A community built on trust. Verify your college ID to unlock exclusive trading privileges, mentorship opportunities, and committee events.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <Button variant="primary" className="px-8 py-4">
-                            Connect ID Card
-                        </Button>
-                        <Button variant="outline" className="px-8 py-4">
-                            Join Community Design
-                        </Button>
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                     </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredUsers.map((user) => (
+                            <div key={user.id} className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-all duration-300 group relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    <div className="mt-16 grid grid-cols-3 gap-8 border-t border-white/10 pt-8">
-                        <div>
-                            <h3 className="text-3xl font-bold text-white mb-1">2.5k+</h3>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider">Verified Students</p>
-                        </div>
-                        <div>
-                            <h3 className="text-3xl font-bold text-white mb-1">500+</h3>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider">Daily Trades</p>
-                        </div>
-                        <div>
-                            <h3 className="text-3xl font-bold text-white mb-1">50+</h3>
-                            <p className="text-gray-500 text-xs uppercase tracking-wider">Active Events</p>
-                        </div>
+                                <div className="relative z-10 flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl border border-white/20">
+                                            {user.avatar_url ? (
+                                                <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover rounded-full" />
+                                            ) : (
+                                                user.first_name ? user.first_name[0] : 'U'
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white font-bold text-lg">{user.first_name} {user.last_name}</h3>
+                                            <p className="text-accent text-xs uppercase tracking-wider font-bold mb-1">{user.role || 'Student'}</p>
+                                            <div className="flex gap-2 text-[10px] text-gray-400">
+                                                {user.skills && user.skills.slice(0, 3).map((skill, i) => (
+                                                    <span key={i} className="bg-white/5 px-2 py-0.5 rounded-sm">{skill}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button className="text-gray-400 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/20">
+                                        <UserPlus size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="mt-6 flex justify-between items-center border-t border-white/10 pt-4">
+                                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                                        <Shield size={12} className="text-green-500" />
+                                        <span>Verified Student</span>
+                                    </div>
+                                    <Button variant="outline" className="px-4 py-1.5 text-xs h-auto">
+                                        Connect
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
-
+                )}
             </div>
         </div>
     );
