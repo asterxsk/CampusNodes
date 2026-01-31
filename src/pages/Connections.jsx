@@ -1,29 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import Button from '../components/ui/Button';
-import { Shield, Trophy, UserPlus, Search } from 'lucide-react';
+import { Shield, Trophy, UserPlus, Search, UserCheck, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 const Connections = () => {
+    const { user } = useAuth();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [processing, setProcessing] = useState(null); // ID of user being processed
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                // Try fetching from profiles table
-                const { data, error } = await supabase
+                // 1. Fetch profiles (limit 50 for now)
+                const { data: profiles, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
-                    .limit(20);
+                    .limit(50);
 
-                if (error || !data || data.length === 0) {
-                    throw new Error("No data or error");
+                if (profileError) throw profileError;
+
+                let usersWithStatus = profiles;
+
+                // 2. If logged in, fetch friendships to determine status
+                if (user) {
+                    const { data: friendships, error: friendError } = await supabase
+                        .from('friendships')
+                        .select('*')
+                        .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+                    if (!friendError && friendships) {
+                        usersWithStatus = profiles.map(profile => {
+                            if (profile.id === user.id) return null; // Exclude self
+
+                            const friendship = friendships.find(f =>
+                                (f.user1_id === user.id && f.user2_id === profile.id) ||
+                                (f.user2_id === user.id && f.user1_id === profile.id)
+                            );
+
+                            let status = 'none';
+                            if (friendship) {
+                                if (friendship.status === 'accepted') {
+                                    status = 'accepted';
+                                } else if (friendship.status === 'pending') {
+                                    status = friendship.user1_id === user.id ? 'sent' : 'received';
+                                }
+                            }
+                            return { ...profile, status };
+                        }).filter(Boolean); // Remove nulls (self)
+                    }
                 }
-                setUsers(data);
+
+                setUsers(usersWithStatus);
             } catch (err) {
-                console.log("Error fetching users", err);
+                console.error("Error fetching users", err);
                 setUsers([]);
             } finally {
                 setLoading(false);
@@ -31,11 +64,50 @@ const Connections = () => {
         };
 
         fetchUsers();
-    }, []);
+    }, [user]);
 
-    const filteredUsers = users.filter(user =>
-        (user.first_name + ' ' + user.last_name).toLowerCase().includes(searchTerm.toLowerCase())
+    const handleConnect = async (targetId) => {
+        if (!user) return;
+        setProcessing(targetId);
+        try {
+            const { error } = await supabase.from('friendships').insert({
+                user1_id: user.id,
+                user2_id: targetId,
+                status: 'pending' // Default, but being explicit
+            });
+
+            if (error) throw error;
+
+            // Optimistic update
+            setUsers(prev => prev.map(u =>
+                u.id === targetId ? { ...u, status: 'sent' } : u
+            ));
+        } catch (err) {
+            console.error("Error sending request:", err);
+            alert("Could not check connectivity.");
+        } finally {
+            setProcessing(null);
+        }
+    };
+
+    const filteredUsers = users.filter(u =>
+        (u.first_name + ' ' + u.last_name).toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const getButtonContent = (status, userId) => {
+        if (processing === userId) return <span className="animate-pulse">...</span>;
+
+        switch (status) {
+            case 'accepted':
+                return <><UserCheck size={14} className="mr-1" /> Connected</>;
+            case 'sent':
+                return <><Clock size={14} className="mr-1" /> Requested</>;
+            case 'received':
+                return 'Accept Request'; // TODO: Implement Accept logic if needed here, or redirect
+            default:
+                return 'Connect';
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12 relative overflow-hidden">
@@ -69,27 +141,22 @@ const Connections = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredUsers.map((user) => (
-                            <div key={user.id} className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-all duration-300 group relative overflow-hidden">
+                        {filteredUsers.map((profile) => (
+                            <div key={profile.id} className="bg-white/5 border border-white/10 p-6 rounded-xl hover:bg-white/10 transition-all duration-300 group relative overflow-hidden">
                                 <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                 <div className="relative z-10 flex items-start justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl border border-white/20">
-                                            {user.avatar_url ? (
-                                                <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover rounded-full" />
+                                        <div className="w-14 h-14 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-white font-bold text-xl border border-white/20 overflow-hidden">
+                                            {profile.avatar_url ? (
+                                                <img src={profile.avatar_url} alt={profile.first_name} className="w-full h-full object-cover" />
                                             ) : (
-                                                user.first_name ? user.first_name[0] : 'U'
+                                                profile.first_name ? profile.first_name[0] : 'U'
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold text-lg">{user.first_name} {user.last_name}</h3>
-                                            <p className="text-accent text-xs uppercase tracking-wider font-bold mb-1">{user.role || 'Student'}</p>
-                                            <div className="flex gap-2 text-[10px] text-gray-400">
-                                                {user.skills && user.skills.slice(0, 3).map((skill, i) => (
-                                                    <span key={i} className="bg-white/5 px-2 py-0.5 rounded-sm">{skill}</span>
-                                                ))}
-                                            </div>
+                                            <h3 className="text-white font-bold text-lg">{profile.first_name} {profile.last_name}</h3>
+                                            <p className="text-accent text-xs uppercase tracking-wider font-bold mb-1">{profile.role || 'Student'}</p>
                                         </div>
                                     </div>
                                     <button className="text-gray-400 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-white/20">
@@ -102,8 +169,13 @@ const Connections = () => {
                                         <Shield size={12} className="text-green-500" />
                                         <span>Verified Student</span>
                                     </div>
-                                    <Button variant="outline" className="px-4 py-1.5 text-xs h-auto">
-                                        Connect
+                                    <Button
+                                        onClick={() => handleConnect(profile.id)}
+                                        disabled={profile.status === 'sent' || profile.status === 'accepted' || processing === profile.id}
+                                        variant={profile.status === 'sent' || profile.status === 'accepted' ? 'outline' : 'primary'}
+                                        className={`px-4 py-1.5 text-xs h-auto min-w-[100px] ${profile.status === 'sent' ? 'opacity-70' : ''}`}
+                                    >
+                                        {getButtonContent(profile.status, profile.id)}
                                     </Button>
                                 </div>
                             </div>

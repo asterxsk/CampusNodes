@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload } from 'lucide-react';
+import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload, LogOut } from 'lucide-react';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
+    const [showSignOutModal, setShowSignOutModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [avatarLoading, setAvatarLoading] = useState(false);
@@ -17,11 +18,6 @@ const Profile = () => {
         lastName: user?.user_metadata?.last_name || '',
         bio: user?.user_metadata?.bio || '',
     });
-
-    if (!user) return <div className="pt-32 px-12 text-white">Please log in to view profile.</div>;
-
-    const initial = user.user_metadata?.first_name ? user.user_metadata.first_name[0] : user.email[0].toUpperCase();
-    const avatarUrl = user.user_metadata?.avatar_url;
 
     useEffect(() => {
         // Simple animation on mount
@@ -40,6 +36,20 @@ const Profile = () => {
             delay: 500
         });
     }, []);
+
+    if (!user) return <div className="pt-32 px-12 text-white">Please log in to view profile.</div>;
+
+    const initial = user.user_metadata?.first_name ? user.user_metadata.first_name[0] : user.email[0].toUpperCase();
+    const avatarUrl = user.user_metadata?.avatar_url;
+
+    const handleSignOut = () => {
+        setShowSignOutModal(true);
+    };
+
+    const confirmSignOut = async () => {
+        await signOut();
+        setShowSignOutModal(false);
+    };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -110,17 +120,27 @@ const Profile = () => {
         <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12">
             <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-8 items-start mb-12 relative group/profile">
-                    {/* Edit Toggle */}
+                    {/* Action Buttons */}
                     {!isEditing && (
-                        <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                setIsEditing(true);
-                            }}
-                            className="absolute top-0 right-0 p-3 text-gray-400 hover:text-white border border-white/10 rounded-full hover:bg-white/10 transition-colors z-50 cursor-pointer"
-                        >
-                            <Edit2 size={20} />
-                        </button>
+                        <div className="absolute top-0 right-0 flex gap-2 z-50">
+                            <button
+                                onClick={handleSignOut}
+                                className="p-3 text-red-500 hover:text-red-400 border border-red-500/30 rounded-full hover:bg-red-500/10 transition-colors"
+                                title="Sign Out"
+                            >
+                                <LogOut size={20} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setIsEditing(true);
+                                }}
+                                className="p-3 text-gray-400 hover:text-white border border-white/10 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Edit Profile"
+                            >
+                                <Edit2 size={20} />
+                            </button>
+                        </div>
                     )}
 
                     {/* Avatar Section */}
@@ -265,6 +285,32 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Custom Sign Out Modal */}
+            {showSignOutModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+                    {/* Invisible overlay to block clicks but show 3D BG */}
+                    <div className="absolute inset-0 bg-transparent" onClick={() => setShowSignOutModal(false)} />
+                    <div className="relative bg-black border border-white/10 p-6 rounded-xl w-full max-w-sm shadow-2xl animate-fade-in">
+                        <h3 className="text-xl font-bold text-white mb-2">Sign Out</h3>
+                        <p className="text-gray-400 mb-6">Are you sure you want to sign out of your account?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowSignOutModal(false)}
+                                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-all border border-transparent hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmSignOut}
+                                className="px-4 py-2 text-sm font-bold bg-red-600 hover:bg-red-500 text-white rounded transition-all shadow-lg hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]"
+                            >
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -27,23 +27,25 @@ const Sidebar = () => {
             className="fixed top-0 left-0 h-screen bg-black border-r border-white/10 z-50 flex flex-col overflow-hidden"
         >
             {/* Header / Logo */}
-            <div className="h-24 flex items-center px-5 relative shrink-0">
+            <div className={`flex items-center px-5 relative shrink-0 transition-all duration-300 ${isCollapsed ? 'h-32 flex-col justify-start pt-6 gap-4' : 'h-24 flex-row justify-between'}`}>
                 <Link to="/" className="hover:scale-110 transition-transform flex-shrink-0 z-20">
                     <Logo className="w-10 h-10" />
                 </Link>
 
-                {/* Toggle Button - always present but moves/fades */}
+                {/* Toggle Button */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="absolute right-5 text-gray-500 hover:text-white transition-colors z-10"
+                    // When collapsed: Static position in flex-col (gap handles spacing)
+                    // When expanded: Absolute position on right
+                    className={`${isCollapsed
+                        ? 'relative'
+                        : 'absolute right-4 top-1/2 -translate-y-1/2'
+                        } flex items-center justify-center w-8 h-8 rounded-full bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all z-50`}
                 >
                     {isCollapsed ? (
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 ">
-                            {/* Invisible overlay hit area if needed, but chevron is clearer */}
-                            <ChevronRight size={24} className="ml-1 opacity-50 hover:opacity-100" />
-                        </div>
+                        <ChevronRight size={18} />
                     ) : (
-                        <ArrowLeftCircle size={24} />
+                        <ArrowLeftCircle size={18} />
                     )}
                 </button>
             </div>
