@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import anime from 'animejs/lib/anime.es.js';
 import Button from '../components/ui/Button';
 import { Shield, Trophy, UserPlus, Search, UserCheck, Clock } from 'lucide-react';
@@ -7,15 +8,16 @@ import { useAuth } from '../context/AuthContext';
 
 const Connections = () => {
     const { user } = useAuth();
+    const navigate = useNavigate(); // Hook
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [processing, setProcessing] = useState(null); // ID of user being processed
+    const [processing, setProcessing] = useState(null);
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                // 1. Fetch profiles (limit 50 for now)
+                // 1. Fetch profiles
                 const { data: profiles, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
@@ -25,17 +27,18 @@ const Connections = () => {
 
                 let usersWithStatus = profiles;
 
-                // 2. If logged in, fetch friendships to determine status
+                // 2. Filter Self & Determine Status
                 if (user) {
+                    // Filter self immediately
+                    usersWithStatus = profiles.filter(p => p.id !== user.id);
+
                     const { data: friendships, error: friendError } = await supabase
                         .from('friendships')
                         .select('*')
                         .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
 
                     if (!friendError && friendships) {
-                        usersWithStatus = profiles.map(profile => {
-                            if (profile.id === user.id) return null; // Exclude self
-
+                        usersWithStatus = usersWithStatus.map(profile => {
                             const friendship = friendships.find(f =>
                                 (f.user1_id === user.id && f.user2_id === profile.id) ||
                                 (f.user2_id === user.id && f.user1_id === profile.id)
@@ -50,7 +53,7 @@ const Connections = () => {
                                 }
                             }
                             return { ...profile, status };
-                        }).filter(Boolean); // Remove nulls (self)
+                        });
                     }
                 }
 
@@ -67,24 +70,26 @@ const Connections = () => {
     }, [user]);
 
     const handleConnect = async (targetId) => {
-        if (!user) return;
+        if (!user) {
+            navigate('/signup'); // Redirect to Signup if not logged in
+            return;
+        }
         setProcessing(targetId);
         try {
             const { error } = await supabase.from('friendships').insert({
                 user1_id: user.id,
                 user2_id: targetId,
-                status: 'pending' // Default, but being explicit
+                status: 'pending'
             });
 
             if (error) throw error;
 
-            // Optimistic update
             setUsers(prev => prev.map(u =>
                 u.id === targetId ? { ...u, status: 'sent' } : u
             ));
         } catch (err) {
             console.error("Error sending request:", err);
-            alert("Could not check connectivity.");
+            alert(`Connection failed: ${err.message || JSON.stringify(err)}`);
         } finally {
             setProcessing(null);
         }
@@ -103,7 +108,7 @@ const Connections = () => {
             case 'sent':
                 return <><Clock size={14} className="mr-1" /> Requested</>;
             case 'received':
-                return 'Accept Request'; // TODO: Implement Accept logic if needed here, or redirect
+                return 'Accept Request';
             default:
                 return 'Connect';
         }

@@ -9,7 +9,15 @@ const messages = [
     "Taking the fish for a walk...",
     "Mass bunking...",
     "Eating ice cream...",
-    "ICA farming..."
+    "ICA farming...",
+    "Checking Defalter List...",
+    "Avoiding eye contact with faculty...",
+    "Avoiding the library...",
+    "Connecting to VPN...",
+    "Pretending to understand quantum physics...",
+    "Attempting Re-Exam... ",
+    "Finding an empty class...",
+    "Scrolling Reels..."
 ];
 
 const Preloader = () => {

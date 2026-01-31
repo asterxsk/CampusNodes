@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import Button from '../components/ui/Button';
 
 const Friends = () => {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [friends, setFriends] = useState([]);
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -79,8 +79,13 @@ const Friends = () => {
     };
 
     useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            setLoading(false);
+            return;
+        }
         fetchConnections();
-    }, [user]);
+    }, [user, authLoading]);
 
     const handleAccept = async (friendshipId) => {
         try {

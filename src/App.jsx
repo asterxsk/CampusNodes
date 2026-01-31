@@ -19,6 +19,8 @@ import Settings from './pages/Settings';
 import Payment from './pages/Payment';
 import ProductDetails from './pages/ProductDetails';
 
+import VersionBanner from './components/ui/VersionBanner'; // Import Banner
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -29,21 +31,7 @@ const ScrollToTop = () => {
 
 // Wrapper to handle background visibility based on route
 const GlobalBackground = () => {
-  const location = useLocation();
-  const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/'; // Handle potential subpath issues
-
-  // Debug log
-  useEffect(() => {
-    console.log("Current Path:", location.pathname, "Is Home:", isHome);
-  }, [location.pathname]);
-
-  return (
-    <div
-      className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isHome ? 'opacity-100 pointer-events-auto' : 'opacity-10 pointer-events-none'}`}
-    >
-      <Scene3D />
-    </div>
-  );
+  // ...
 };
 
 const MainLayout = ({ children }) => {
@@ -66,6 +54,7 @@ const App = () => {
         <Router>
           <Preloader />
           <ScrollToTop />
+          <VersionBanner />
 
           {/* Global Persistent 3D Background */}
           <GlobalBackground />

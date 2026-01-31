@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext'; // Import useAuth
 import { MARKET_ITEMS } from '../data/marketItems';
 import { ArrowLeft, Star, ShoppingCart, CreditCard } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -9,8 +10,25 @@ const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const { user } = useAuth(); // Auth Check
     const product = MARKET_ITEMS.find(item => item.id === parseInt(id));
     const [selectedImage, setSelectedImage] = useState(0);
+
+    const handleBuy = () => {
+        if (!user) {
+            navigate('/signup');
+            return;
+        }
+        navigate('/payment');
+    };
+
+    const handleAddToCart = () => {
+        if (!user) {
+            navigate('/signup');
+            return;
+        }
+        addToCart(product);
+    };
 
     if (!product) return <div className="text-white pt-32 text-center">Product not found</div>;
 
@@ -69,7 +87,7 @@ const ProductDetails = () => {
 
                         <div className="flex flex-col gap-4">
                             <Button
-                                onClick={() => navigate('/payment')}
+                                onClick={handleBuy}
                                 variant="primary"
                                 fullWidth
                                 className="flex items-center justify-center gap-2"
@@ -78,7 +96,7 @@ const ProductDetails = () => {
                             </Button>
 
                             <Button
-                                onClick={() => addToCart(product)}
+                                onClick={handleAddToCart}
                                 variant="outline"
                                 fullWidth
                                 className="flex items-center justify-center gap-2"

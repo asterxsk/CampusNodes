@@ -15,8 +15,24 @@ const CustomCursor = () => {
     const [clicked, setClicked] = useState(false);
     const [linkHovered, setLinkHovered] = useState(false);
 
+    // Mobile/Touch Check
+    const [isTouch, setIsTouch] = useState(false);
+    useEffect(() => {
+        setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+    }, []);
+
     // Config
     const LERP_FACTOR = 0.15;
+
+    // ... (rest of logic)
+
+    useEffect(() => {
+        // ... (existing listeners) ...
+    }, [linkHovered]);
+
+    // ... (existing listeners 2) ...
+
+    if (isTouch || hidden) return null;
 
     useEffect(() => {
         let rafId;
