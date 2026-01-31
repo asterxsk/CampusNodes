@@ -1,16 +1,66 @@
-# React + Vite
+# Campus Nodes by asterxsk
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> The ultimate campus marketplace and community platform.
+> Built for students, by students.
 
-Currently, two official plugins are available:
+This is the official GitHub repository for the **CampusNodes** project. An immersive e-commerce and social platform designed to connect students for buying, selling, services, and networking.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌐 Socials:
+[![Discord](https://img.shields.io/badge/Discord-%237289DA.svg?logo=discord&logoColor=white)](https://discord.gg/pTrdZ3vN) [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://youtube.com/@asterxsk) [![email](https://img.shields.io/badge/Email-D14836?logo=gmail&logoColor=white)](mailto:itslace100@gmail.com) 
 
-## React Compiler
+---
+[![](https://visitcount.itsvg.in/api?id=asterxsk&icon=0&color=0)](https://visitcount.itsvg.in)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Visit the live site: [asterxsk.github.io/CampusNodes](https://asterxsk.github.io/CampusNodes/)
 
-## Expanding the ESLint configuration
+### Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*   **🛒 Campus Marketplace:** A dedicated platform for students to buy and sell textbooks, tech, and essentials.
+*   **🛠️ Service Hub:** Find verified peer tutors, local printing services, and tech repairs.
+*   **🤝 Connections & Trust:** Unique "Trust Score" system for verified students and safe trading.
+*   **🎨 Immersive UI:**
+    *   **3D Hero Scene:** Interactive 3D background with physics-based floating elements.
+    *   **Custom Cursor:** Physics-driven cursor with lag, reactive scaling, and particle trails.
+    *   **Exploding Buttons:** Dynamic interactions with massive doodle explosions on click.
+*   **🔐 Secure Auth:** Full authentication system via Supabase using specific college domains.
+*   **⚡ Blazing Fast:** Built on Vite + React for instant load times and interactions.
+
+### Tech Stack
+
+*   **Frontend Library:** [React](https://reactjs.org/) (v19)
+*   **Build Tool:** [Vite](https://vitejs.dev/)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+*   **Backend / Auth:** [Supabase](https://supabase.com/)
+*   **3D Graphics:** [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) / [Drei](https://github.com/pmndrs/drei)
+*   **Animations:** [Anime.js](https://animejs.com/)
+
+### How to Build from Source
+
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/asterxsk/CampusNodes.git
+    cd CampusNodes
+    ```
+
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment**
+    Create a `.env` file in the root directory and add your Supabase credentials:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+
+4.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
+    The site will be available at `http://localhost:5173`.
+
+5.  **Build for Production**
+    ```bash
+    npm run build
+    ```
