@@ -14,12 +14,14 @@ const Button = ({
     fullWidth = false,
     to,
     href,
-    withDoodles = true
+    withDoodles = true,
+    disabled
 }) => {
     const btnRef = useRef(null);
     const [exploding, setExploding] = useState(false);
 
     const handleExplosion = (e) => {
+        if (disabled) return;
         setExploding(true);
         setTimeout(() => setExploding(false), 700);
         if (onClick) onClick(e);
@@ -142,6 +144,7 @@ const Button = ({
             type={type}
             className={combinedClassName}
             onClick={handleExplosion}
+            disabled={disabled}
         >
             {content}
         </button>

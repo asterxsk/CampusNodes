@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext'; // Import useAuth
+import { useAuth } from '../context/AuthContext';
+import { useUI } from '../context/UIContext'; // Import UI
 import { MARKET_ITEMS } from '../data/marketItems';
 import { ArrowLeft, Star, ShoppingCart, CreditCard } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -10,13 +11,14 @@ const ProductDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
-    const { user } = useAuth(); // Auth Check
+    const { user } = useAuth();
+    const { openAuthModal } = useUI(); // UI Hook
     const product = MARKET_ITEMS.find(item => item.id === parseInt(id));
     const [selectedImage, setSelectedImage] = useState(0);
 
     const handleBuy = () => {
         if (!user) {
-            navigate('/signup');
+            openAuthModal();
             return;
         }
         navigate('/payment');
@@ -24,7 +26,7 @@ const ProductDetails = () => {
 
     const handleAddToCart = () => {
         if (!user) {
-            navigate('/signup');
+            openAuthModal();
             return;
         }
         addToCart(product);
@@ -45,24 +47,50 @@ const ProductDetails = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {/* Image Gallery */}
                     <div className="space-y-4">
-                        <div className="aspect-[4/3] bg-surface border border-white/10 rounded-lg overflow-hidden">
-                            <img
-                                src={product.images[selectedImage]}
-                                alt={product.title}
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="aspect-[4/3] bg-surface border border-white/10 rounded-lg overflow-hidden relative">
+                            {product.images && product.images.length > 0 ? (
+                                <>
+                                    <img
+                                        src={product.images[selectedImage]}
+                                        alt={product.title}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            const fallback = e.currentTarget.parentElement.querySelector('.fallback-placeholder');
+                                            if (fallback) fallback.classList.remove('hidden');
+                                            if (fallback) fallback.classList.add('flex');
+                                        }}
+                                    />
+                                    <div className="fallback-placeholder hidden absolute inset-0 bg-zinc-900 flex-col items-center justify-center gap-4">
+                                        <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                            <span className="font-display font-bold text-5xl text-white">C</span>
+                                        </div>
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Seller did not upload an image</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center gap-4">
+                                    <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                        <span className="font-display font-bold text-5xl text-white">C</span>
+                                    </div>
+                                    <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Seller did not upload an image</p>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex gap-4 overflow-x-auto pb-2">
-                            {product.images.map((img, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setSelectedImage(idx)}
-                                    className={`w-24 h-24 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-accent' : 'border-transparent opacity-50 hover:opacity-100'}`}
-                                >
-                                    <img src={img} alt="" className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
+
+                        {product.images && product.images.length > 1 && (
+                            <div className="flex gap-4 overflow-x-auto pb-2">
+                                {product.images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedImage(idx)}
+                                        className={`w-24 h-24 shrink-0 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-accent' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                                    >
+                                        <img src={img} alt="" className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Product Info */}

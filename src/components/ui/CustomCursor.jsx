@@ -27,17 +27,24 @@ const CustomCursor = () => {
     // ... (rest of logic)
 
     useEffect(() => {
-        // ... (existing listeners) ...
-    }, [linkHovered]);
+        const handleMouseOver = (e) => {
+            const isClickable = e.target.closest('a, button, [role="button"], input[type="submit"], .clickable');
+            setLinkHovered(!!isClickable);
+        };
+
+        document.addEventListener('mouseover', handleMouseOver);
+        return () => document.removeEventListener('mouseover', handleMouseOver);
+    }, [location]);
 
     // ... (existing listeners 2) ...
 
-    if (isTouch || hidden) return null;
+    // Mobile Check (Moved to end)
 
     useEffect(() => {
         let rafId;
 
         const onMouseMove = (e) => {
+            setHidden(false);
             pos.current = { x: e.clientX, y: e.clientY };
             if (dotRef.current) {
                 dotRef.current.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
@@ -47,13 +54,16 @@ const CustomCursor = () => {
 
         const onMouseDown = () => setClicked(true);
         const onMouseUp = () => setClicked(false);
+        // On mouse leave, we just hide visually, but keep the loop running safely or paused.
         const onMouseEnter = () => setHidden(false);
-        const onMouseLeave = () => setHidden(true);
+        const onMouseOut = (e) => {
+            if (e.relatedTarget === null) setHidden(true);
+        };
 
         const spawnParticle = (x, y) => {
-            // ... (Particle logic omitted for brevity, keeping existing references if possible or rewrite to be safe)
-            // Since we are replacing the whole block, lets paste the particle logic back:
+            if (!document.body) return; // Safety check
             const particle = document.createElement('div');
+            // ... logic ...
             const size = Math.random() * 4 + 2;
             const shape = linkHovered
                 ? 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
@@ -80,16 +90,21 @@ const CustomCursor = () => {
             const driftY = (Math.random() - 0.5) * 60;
 
             requestAnimationFrame(() => {
+                if (!particle) return;
                 particle.style.transform = `translate(${x - driftX}px, ${y - driftY}px) rotate(${angle + 180}deg) scale(0)`;
                 particle.style.opacity = 0;
             });
 
-            setTimeout(() => particle.remove(), 600);
+            setTimeout(() => {
+                if (particle && particle.parentNode) particle.remove();
+            }, 600);
         };
 
         // Ring Physics Loop
         const loop = () => {
+            // Check if refs exist. If hidden (opacity 0), they still exist in DOM.
             if (!ringRef.current) return;
+
             ringPos.current.x += (pos.current.x - ringPos.current.x) * LERP_FACTOR;
             ringPos.current.y += (pos.current.y - ringPos.current.y) * LERP_FACTOR;
 
@@ -105,7 +120,7 @@ const CustomCursor = () => {
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
         document.addEventListener("mouseenter", onMouseEnter);
-        document.addEventListener("mouseleave", onMouseLeave);
+        document.addEventListener("mouseout", onMouseOut);
 
         return () => {
             cancelAnimationFrame(rafId);
@@ -113,60 +128,37 @@ const CustomCursor = () => {
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("mouseenter", onMouseEnter);
-            document.removeEventListener("mouseleave", onMouseLeave);
+            document.removeEventListener("mouseout", onMouseOut);
         };
-    }, [linkHovered]);
+    }, [linkHovered]); // Dependency stays same
 
-    useEffect(() => {
-        const handleLinkHover = () => setLinkHovered(true);
-        const handleLinkLeave = () => setLinkHovered(false);
+    // Mobile/Touch Check - Moved here to respect Rules of Hooks
+    if (isTouch) return null;
 
-        const attachListeners = () => {
-            const elements = document.querySelectorAll("a, button, input, textarea, .cursor-hover, .group\\/btn");
-            elements.forEach(el => {
-                el.addEventListener("mouseenter", handleLinkHover);
-                el.addEventListener("mouseleave", handleLinkLeave);
-            });
-            return () => {
-                elements.forEach(el => {
-                    el.removeEventListener("mouseenter", handleLinkHover);
-                    el.removeEventListener("mouseleave", handleLinkLeave);
-                });
-            };
-        };
-        const cleanup = attachListeners();
-        const t = setTimeout(attachListeners, 500);
-        return () => { cleanup(); clearTimeout(t); };
-    }, [location]);
-
-    if (hidden) return null;
-
-    // SVG Paths (40x40 ViewBox)
-    // Hexagon: Points logic. Center 20,20. R=19.
-    // Points approx: (20,1), (37,10.5), (37,29.5), (20,39), (3,29.5), (3,10.5)
-    // Circle: cx 20 cy 20 r 19
+    // SVG Paths
     const hexPath = "M 20 1 L 37 10.5 L 37 29.5 L 20 39 L 3 29.5 L 3 10.5 Z";
-    const circlePath = "M 20 1 A 19 19 0 1 1 20 39 A 19 19 0 1 1 20 1 Z"; // Simplified Circle Path logic for morphing if needed
+    const circlePath = "M 20 1 A 19 19 0 1 1 20 39 A 19 19 0 1 1 20 1 Z";
 
     return (
         <>
-            {/* Center Dot (Instant Position, Smooth Scale) */}
+            {/* Center Dot */}
             <div
                 ref={dotRef}
                 className="fixed top-0 left-0 z-[9999] pointer-events-none will-change-transform"
                 style={{ top: 0, left: 0 }}
             >
                 <div
-                    className={`w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-transform duration-300 ${clicked ? 'scale-50' : linkHovered ? 'scale-150' : 'scale-100'}`}
+                    className={`w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-all duration-300 ease-out ${hidden ? 'scale-0 opacity-0' : clicked ? 'scale-50 opacity-100' : linkHovered ? 'scale-150 opacity-100' : 'scale-100 opacity-100'}`}
                 />
             </div>
+            {/* Ring */}
             <div
                 ref={ringRef}
-                className={`fixed top-0 left-0 w-10 h-10 pointer-events-none z-[9998] mix-blend-difference will-change-transform transition-colors duration-300`}
+                className="fixed top-0 left-0 w-10 h-10 pointer-events-none z-[9998] mix-blend-difference will-change-transform"
                 style={{ top: 0, left: 0 }}
             >
                 <svg
-                    className={`w-full h-full transition-transform duration-300 ${clicked ? 'scale-75' : linkHovered ? 'scale-125 rotate-180' : 'scale-100'}`}
+                    className={`w-full h-full transition-all duration-500 ease-out ${hidden ? 'scale-0 opacity-0' : clicked ? 'scale-75 opacity-100' : linkHovered ? 'scale-125 rotate-180 opacity-100' : 'scale-100 opacity-100'}`}
                     viewBox="0 0 40 40"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +168,7 @@ const CustomCursor = () => {
                         stroke="white"
                         strokeWidth="2"
                         strokeLinecap="round"
-                        style={{ transition: 'd 0.3s ease-out' }} // Standard CSS transition for path data
+                        style={{ transition: 'd 0.3s ease-out' }}
                     />
                 </svg>
             </div>
