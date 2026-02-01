@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.9.3';
+const CURRENT_VERSION = '7.9.4';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
@@ -42,6 +42,10 @@ const PATCH_NOTES = [
     {
         title: "Storage Optimization",
         description: "Removing a friend clears chat history to save database space."
+    },
+    {
+        title: "Jelly Mode Activated",
+        description: "The sidebar now bounces with a fun elastic animation! 🏀"
     },
     {
         title: "Smoother Navigation",

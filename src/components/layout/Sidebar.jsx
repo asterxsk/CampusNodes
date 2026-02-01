@@ -46,11 +46,11 @@ const Sidebar = () => {
                 }}
                 transition={{
                     type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                    mass: 0.6
+                    stiffness: 400,
+                    damping: 15,
+                    mass: 1
                 }}
-                className={`hidden md:flex flex-col fixed z-50 bg-black/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl origin-left`}
+                className={`hidden md:flex flex-col fixed z-50 bg-black/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl origin-left ${isCollapsed ? 'items-center' : ''}`}
             >
                 {/* Header / Logo */}
                 <div className={`flex items-center w-full shrink-0 ${isCollapsed ? 'py-4 justify-center' : 'h-20 px-6'}`}>

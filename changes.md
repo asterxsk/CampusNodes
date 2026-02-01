@@ -1,11 +1,10 @@
 # Changelog
 
-## 7.9.3 (Current)
--   **UI**: **Physics**: Tuned sidebar animations to be ultra-smooth (spring: 120/20).
--   **UI**: **Alignment**: Minimized icons are now strictly centered with zero padding issues.
--   **FIX**: Version banner now correctly reflects the latest version.
+## 7.9.4 (Current)
+-   **UI**: **Jelly Animation**: Sidebar now uses elastic spring physics (400/15) for a fun bounce effect.
+-   **UI**: **Strict Alignment**: Fixed "left-leaning" icons by enforcing flex centering on the main sidebar container.
 
-## 7.9.2
+## 7.9.3
 -   **UI**: **Sidebar Refactor**: Minimized sidebar now displays centered icons for all navigation items (Market, Services, Connections, Chat).
 -   **UI**: **Cleanup**: Removed the global floating chat button (FAB) in favor of the sidebar "Chat" link.
 -   **FIX**: Navbar logic now properly handles collapsed state visibility.
