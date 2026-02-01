@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import { UIProvider } from './context/UIContext'; // Import UIProvider
+import { UIProvider, useUI } from './context/UIContext';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import CustomCursor from './components/ui/CustomCursor';
