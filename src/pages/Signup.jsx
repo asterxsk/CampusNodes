@@ -92,14 +92,14 @@ const Signup = () => {
 
             // Success
 
-            // Create Profile manually now that they are verified
-            const { error: profileError } = await supabase.from('profiles').insert({
+            // Create/Update Profile safely (Trigger also handles this, but this is a fallback)
+            const { error: profileError } = await supabase.from('profiles').upsert({
                 id: data.user.id,
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 role: 'Student',
-                email: formData.email // Optional, good for admin view
-            });
+                email: formData.email
+            }, { onConflict: 'id' });
 
             if (profileError) {
                 console.warn("Profile creation note:", profileError);
