@@ -1,6 +1,10 @@
 # Changelog
 
-## 7.7.2 (Current)
+## 7.7.3 (Current)
+-   **FIX**: Mobile chat overlay now extends to bottom of screen.
+-   **UI**: Discover People section now left-aligned on mobile.
+
+## 7.7.2
 -   **UI**: Collapsed sidebar is now a floating pill, centered vertically with no wasted space.
 
 ## 7.7.1

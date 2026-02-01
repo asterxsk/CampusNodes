@@ -281,7 +281,7 @@ const Connections = () => {
 
                 {/* Section 3: Discover (Suggestions) */}
                 <section>
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                         <div className="flex items-center gap-3">
                             <Search className="text-purple-400" size={24} />
                             <h2 className="text-2xl font-bold text-white">Discover People</h2>
