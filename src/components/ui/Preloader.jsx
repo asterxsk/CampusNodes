@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PixelGrid from '../hero/PixelGrid';
 
 const messages = [
     "Finishing the prompt...",
@@ -70,19 +71,26 @@ const Preloader = () => {
 
     return (
         <div className={`fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="text-white text-3xl md:text-4xl font-display font-bold mb-4 tracking-widest animate-pulse text-center px-4">
-                CAMPUS NODES
-            </div>
-            <div className="text-zinc-400 font-mono text-xs md:text-sm h-6 text-center px-4">
-                {shuffledMessages.length > 0 ? shuffledMessages[messageIndex] : "Loading..."}
+            {/* Preload the Pixel Grid behind the loader */}
+            <div className="absolute inset-0 opacity-30">
+                <PixelGrid />
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-48 md:w-64 h-1 bg-zinc-800 mt-8 rounded-full overflow-hidden">
-                <div
-                    className="h-full bg-white transition-all duration-300 ease-out"
-                    style={{ width: `${Math.min(progress, 100)}%` }}
-                />
+            <div className="relative z-10 flex flex-col items-center">
+                <div className="text-white text-3xl md:text-4xl font-display font-bold mb-4 tracking-widest animate-pulse text-center px-4">
+                    CAMPUS NODES
+                </div>
+                <div className="text-zinc-400 font-mono text-xs md:text-sm h-6 text-center px-4">
+                    {shuffledMessages.length > 0 ? shuffledMessages[messageIndex] : "Loading..."}
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-48 md:w-64 h-1 bg-zinc-800 mt-8 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-white transition-all duration-300 ease-out"
+                        style={{ width: `${Math.min(progress, 100)}%` }}
+                    />
+                </div>
             </div>
         </div>
     );

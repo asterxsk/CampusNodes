@@ -3,17 +3,25 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.6.2';
+const CURRENT_VERSION = '7.7.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
-        title: "Mobile Nav Redesign",
-        description: "Profile now centered in bottom bar, Connections added. Floating home button in top-left."
+        title: "Performance Boost",
+        description: "Optimized background animation - smoother, faster, and preloaded during loading screen."
     },
     {
-        title: "Sidebar Redesign",
-        description: "Menu items left-aligned with logo and span full width when expanded."
+        title: "Monochrome Nodes",
+        description: "LED grid now uses clean white/gray aesthetic with faster node transitions."
+    },
+    {
+        title: "Themed Notifications",
+        description: "Signup alerts now use styled toast popups matching the app theme."
+    },
+    {
+        title: "Mobile Nav Redesign",
+        description: "Profile centered in bottom bar, Connections added, floating home button."
     },
     {
         title: "Pixel LED Background",

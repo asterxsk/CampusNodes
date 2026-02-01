@@ -1,6 +1,10 @@
 # Changelog
 
-## 7.6.2 (Current)
+## 7.7.0 (Current)
+-   **PERF**: Optimized PixelGrid - monochrome nodes, faster transitions, preloaded during loading.
+-   **UI**: Themed toast notifications for signup instead of browser alerts.
+
+## 7.6.2
 -   **UI**: Mobile nav redesigned - Profile centered, Connections added, floating home button in top-left.
 
 ## 7.6.1

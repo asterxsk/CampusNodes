@@ -1,16 +1,17 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 
 const PixelGrid = () => {
     const canvasRef = useRef(null);
     const animationRef = useRef(null);
     const nodesRef = useRef([]);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const dimensionsRef = useRef({ width: 0, height: 0 });
 
-    const NODE_SIZE = 4; // Size of each LED pixel
-    const GRID_GAP = 20; // Gap between nodes
-    const CONNECTION_DISTANCE = 80; // Distance for nodes to connect
-    const ACTIVE_COUNT = 25; // Number of active (lit) nodes at any time
-    const PULSE_SPEED = 0.03; // Speed of pulsing animation
+    const NODE_SIZE = 2; // Smaller pixels for performance
+    const GRID_GAP = 25; // Slightly larger gap = fewer nodes
+    const CONNECTION_DISTANCE = 100; // Larger connection distance
+    const ACTIVE_COUNT = 35; // More active nodes
+    const PULSE_SPEED = 0.08; // Faster transitions
+    const SWAP_COUNT = 4; // More swaps per interval
 
     // Initialize nodes on the grid
     const initNodes = useCallback((width, height) => {
@@ -25,9 +26,7 @@ const PixelGrid = () => {
                     y: row * GRID_GAP + GRID_GAP / 2,
                     brightness: 0,
                     targetBrightness: 0,
-                    pulsePhase: Math.random() * Math.PI * 2,
-                    isActive: false,
-                    color: getRandomColor()
+                    pulsePhase: Math.random() * Math.PI * 2
                 });
             }
         }
@@ -35,129 +34,113 @@ const PixelGrid = () => {
         // Activate random nodes
         const shuffled = [...Array(nodes.length).keys()].sort(() => Math.random() - 0.5);
         for (let i = 0; i < Math.min(ACTIVE_COUNT, nodes.length); i++) {
-            nodes[shuffled[i]].isActive = true;
             nodes[shuffled[i]].targetBrightness = 1;
         }
 
         return nodes;
     }, []);
 
-    const getRandomColor = () => {
-        const colors = [
-            { r: 34, g: 211, b: 238 },   // Accent cyan
-            { r: 59, g: 130, b: 246 },   // Blue
-            { r: 139, g: 92, b: 246 },   // Purple
-            { r: 236, g: 72, b: 153 },   // Pink
-            { r: 255, g: 255, b: 255 },  // White
-        ];
-        return colors[Math.floor(Math.random() * colors.length)];
-    };
-
     // Randomly swap active nodes
     const swapActiveNodes = useCallback(() => {
         const nodes = nodesRef.current;
         if (nodes.length === 0) return;
 
-        // Find current active and inactive nodes
         const activeIndices = [];
         const inactiveIndices = [];
 
         nodes.forEach((node, i) => {
-            if (node.isActive) activeIndices.push(i);
+            if (node.targetBrightness > 0.5) activeIndices.push(i);
             else inactiveIndices.push(i);
         });
 
-        // Swap 1-2 random active with inactive
-        const swapCount = Math.min(2, activeIndices.length, inactiveIndices.length);
+        // Swap multiple nodes at once
+        const swapCount = Math.min(SWAP_COUNT, activeIndices.length, inactiveIndices.length);
         for (let i = 0; i < swapCount; i++) {
-            const activeIdx = activeIndices[Math.floor(Math.random() * activeIndices.length)];
-            const inactiveIdx = inactiveIndices[Math.floor(Math.random() * inactiveIndices.length)];
+            if (activeIndices.length === 0 || inactiveIndices.length === 0) break;
 
-            nodes[activeIdx].isActive = false;
+            const activeIdx = activeIndices.splice(Math.floor(Math.random() * activeIndices.length), 1)[0];
+            const inactiveIdx = inactiveIndices.splice(Math.floor(Math.random() * inactiveIndices.length), 1)[0];
+
             nodes[activeIdx].targetBrightness = 0;
-
-            nodes[inactiveIdx].isActive = true;
             nodes[inactiveIdx].targetBrightness = 1;
-            nodes[inactiveIdx].color = getRandomColor();
-
-            // Remove swapped indices
-            activeIndices.splice(activeIndices.indexOf(activeIdx), 1);
-            inactiveIndices.splice(inactiveIndices.indexOf(inactiveIdx), 1);
         }
     }, []);
 
-    // Animation loop
-    const animate = useCallback((ctx, width, height) => {
+    // Animation loop - optimized
+    const animate = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const { width, height } = dimensionsRef.current;
+
         ctx.clearRect(0, 0, width, height);
 
         const nodes = nodesRef.current;
-        const time = Date.now() * 0.001;
+        const time = Date.now() * 0.002;
 
-        // Update node brightness with smooth transitions
-        nodes.forEach(node => {
-            const pulseFactor = Math.sin(time * 2 + node.pulsePhase) * 0.3 + 0.7;
+        // Batch update brightness
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            const pulseFactor = Math.sin(time + node.pulsePhase) * 0.3 + 0.7;
             const target = node.targetBrightness * pulseFactor;
             node.brightness += (target - node.brightness) * PULSE_SPEED;
-        });
+        }
 
-        // Draw connections between active nodes in proximity
+        // Draw connections - only between bright nodes
         ctx.lineWidth = 1;
-        const activeNodes = nodes.filter(n => n.brightness > 0.1);
+        const brightNodes = [];
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].brightness > 0.15) brightNodes.push(nodes[i]);
+        }
 
-        for (let i = 0; i < activeNodes.length; i++) {
-            for (let j = i + 1; j < activeNodes.length; j++) {
-                const n1 = activeNodes[i];
-                const n2 = activeNodes[j];
+        ctx.beginPath();
+        for (let i = 0; i < brightNodes.length; i++) {
+            for (let j = i + 1; j < brightNodes.length; j++) {
+                const n1 = brightNodes[i];
+                const n2 = brightNodes[j];
                 const dx = n2.x - n1.x;
                 const dy = n2.y - n1.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
+                const distSq = dx * dx + dy * dy;
 
-                if (dist < CONNECTION_DISTANCE) {
-                    const opacity = (1 - dist / CONNECTION_DISTANCE) * Math.min(n1.brightness, n2.brightness) * 0.5;
+                if (distSq < CONNECTION_DISTANCE * CONNECTION_DISTANCE) {
+                    const opacity = (1 - Math.sqrt(distSq) / CONNECTION_DISTANCE) * Math.min(n1.brightness, n2.brightness) * 0.4;
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
                     ctx.beginPath();
                     ctx.moveTo(n1.x, n1.y);
                     ctx.lineTo(n2.x, n2.y);
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
                     ctx.stroke();
                 }
             }
         }
 
-        // Draw nodes (pixels)
-        nodes.forEach(node => {
-            if (node.brightness > 0.01) {
-                const { r, g, b } = node.color;
+        // Draw nodes - monochrome white/gray
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            if (node.brightness > 0.05) {
                 const alpha = node.brightness;
 
-                // Glow effect
-                const gradient = ctx.createRadialGradient(
-                    node.x, node.y, 0,
-                    node.x, node.y, NODE_SIZE * 3
-                );
-                gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.8})`);
-                gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${alpha * 0.2})`);
-                gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-
+                // Simple glow - no gradient for performance
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, NODE_SIZE * 3, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
+                ctx.arc(node.x, node.y, NODE_SIZE * 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.15})`;
                 ctx.fill();
 
                 // Core pixel
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, NODE_SIZE / 2, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                ctx.arc(node.x, node.y, NODE_SIZE, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
                 ctx.fill();
             } else {
                 // Dim inactive pixel
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, NODE_SIZE / 3, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.arc(node.x, node.y, NODE_SIZE * 0.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
                 ctx.fill();
             }
-        });
+        }
 
-        animationRef.current = requestAnimationFrame(() => animate(ctx, width, height));
+        animationRef.current = requestAnimationFrame(animate);
     }, []);
 
     // Handle resize
@@ -166,7 +149,7 @@ const PixelGrid = () => {
             if (canvasRef.current) {
                 const width = window.innerWidth;
                 const height = window.innerHeight;
-                setDimensions({ width, height });
+                dimensionsRef.current = { width, height };
                 canvasRef.current.width = width;
                 canvasRef.current.height = height;
                 nodesRef.current = initNodes(width, height);
@@ -180,20 +163,16 @@ const PixelGrid = () => {
 
     // Start animation
     useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+        animate();
 
-        const ctx = canvas.getContext('2d');
-        animate(ctx, dimensions.width, dimensions.height);
-
-        // Swap active nodes periodically
-        const swapInterval = setInterval(swapActiveNodes, 800);
+        // Swap active nodes frequently
+        const swapInterval = setInterval(swapActiveNodes, 300); // Much faster swapping
 
         return () => {
             if (animationRef.current) cancelAnimationFrame(animationRef.current);
             clearInterval(swapInterval);
         };
-    }, [dimensions, animate, swapActiveNodes]);
+    }, [animate, swapActiveNodes]);
 
     return (
         <canvas

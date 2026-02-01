@@ -4,14 +4,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import Toast, { useToast, ToastContainer } from '../components/ui/Toast';
 
 const Signup = () => {
     const formRef = useRef(null);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [verificationStep, setVerificationStep] = useState(false); // New state for OTP step
+    const [verificationStep, setVerificationStep] = useState(false);
     const [otp, setOtp] = useState('');
+    const { toasts, addToast, removeToast } = useToast();
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -99,14 +101,11 @@ const Signup = () => {
             });
 
             if (profileError) {
-                // If it fails (e.g. they already exist from a previous attempt or trigger), 
-                // we should probably just log it and proceed, or handle it.
-                // If the trigger still exists, this might error with duplicate key.
                 console.warn("Profile creation note:", profileError);
             }
 
-            alert('Verification successful! Account created.');
-            navigate('/'); // Go to Dashboard/Home
+            addToast('Verification successful! Account created.', 'success');
+            setTimeout(() => navigate('/'), 1500);
 
         } catch (error) {
             setError(error.message || 'Invalid code. Please try again.');
@@ -125,7 +124,7 @@ const Signup = () => {
                 // options: { emailRedirectTo: '...' } // Not needed if using code
             });
             if (error) throw error;
-            alert('Verification code resent! Please check your inbox (and spam).');
+            addToast('Verification code resent! Check your inbox.', 'success');
         } catch (error) {
             setError(error.message);
         } finally {
@@ -135,6 +134,9 @@ const Signup = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden px-4 py-20">
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
+
             {/* Background Decoration */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
 
