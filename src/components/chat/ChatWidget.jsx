@@ -255,8 +255,8 @@ const ChatWidget = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed z-[9999] bg-zinc-900 border border-white/20 shadow-2xl overflow-hidden
-                                   inset-0 md:inset-auto md:bottom-6 md:right-6 md:w-96 md:h-[500px] md:rounded-2xl flex flex-col"
+                        className="fixed z-[49] bg-zinc-900 border-b border-white/20 shadow-2xl overflow-hidden
+                                   inset-x-0 top-0 bottom-[88px] md:z-[9999] md:border md:inset-auto md:bottom-6 md:right-6 md:w-96 md:h-[500px] md:rounded-2xl flex flex-col"
                     >
                         {/* Header */}
                         <div className="h-16 bg-black/50 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-4 shrink-0">
@@ -297,7 +297,7 @@ const ChatWidget = () => {
                                         <Trash2 size={18} />
                                     </button>
                                 )}
-                                <button onClick={closeChat} className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white">
+                                <button onClick={closeChat} className="hidden md:block p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white">
                                     <X size={20} />
                                 </button>
                             </div>

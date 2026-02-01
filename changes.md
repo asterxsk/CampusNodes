@@ -1,6 +1,11 @@
 # Changelog
 
-## 7.4.5 (Current)
+## 7.4.7 (Current)
+-   **UX**: Improved Mobile Chat (Overlay covers content but leaves Bottom Bar visible).
+-   **UX**: Removed Chat Close button on mobile (use Bottom Bar toggle).
+-   **FIX**: Fixed sidebar alignment issue.
+
+## 7.4.5
 -   **UI**: Redesigned mobile bottom bar (Services, Market, Home, Chat, Profile).
 
 ## 7.4.4

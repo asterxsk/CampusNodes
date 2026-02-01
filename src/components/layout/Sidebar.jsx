@@ -81,7 +81,7 @@ const Sidebar = () => {
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
-                                <Link to={item.path} key={item.name}>
+                                <Link to={item.path} key={item.name} className="block">
                                     <Magnetic>
                                         <div
                                             className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
