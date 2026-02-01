@@ -5,31 +5,31 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const CURRENT_VERSION = '7.5.0';
 
-// Mock Patch Notes Data
+// Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
-        title: "Global Chat System",
-        description: "Connect with everyone! New global chat feature allows real-time communication across the platform."
+        title: "End-to-End Encrypted Chat",
+        description: "Your messages are now encrypted client-side. Only you and your friend can read them."
     },
     {
-        title: "Friend Activity Badges",
-        description: "Stay updated. New notification badges show unread messages from friends instantly."
+        title: "Profile Sync Fix",
+        description: "Profile edits now properly sync to Connections page. Everyone sees your updated name and bio."
     },
     {
-        title: "Mobile Optimization",
-        description: "Smoother experience on the go. Fixed navigation layout and touch responsiveness for mobile devices."
+        title: "Storage Optimization",
+        description: "Removing a friend now clears chat history to save database space on our free plan."
     },
     {
-        title: "Networking Hub",
-        description: "Find your peers. Enhanced filtering and search capabilities in the CampusNodes directory."
+        title: "Mobile Bottom Bar",
+        description: "New 5-icon navigation bar for mobile: Services, Market, Home, Chat, and Profile."
     },
     {
-        title: "UI Visual Overhaul",
-        description: "Fresh look. Updated color palettes, glassmorphism effects, and smoother animations throughout the app."
+        title: "Fullscreen Mobile Chat",
+        description: "Chat overlay now covers the full screen on mobile for a cleaner experience."
     },
     {
-        title: "Performance Boost",
-        description: "Faster load times. Optimized asset loading and reduced bundle size for snappier interactions."
+        title: "Sidebar Layout Fix",
+        description: "Improved logo and menu alignment in the desktop sidebar."
     }
 ];
 
