@@ -1,6 +1,22 @@
 # Changelog
 
-## 7.8.5 (Current)
+## 7.9.2 (Current)
+-   **UI**: **Sidebar Polish**: Desktop sidebar is now vertically centered when collapsed for a cleaner look.
+-   **UI**: **Fluidity**: Enhaced sidebar open/close animations physics.
+-   **UI**: Optimized ChatWidget visibility handling.
+
+## 7.9.1
+-   **UI**: **Sidebar Refactor**: Minimized sidebar now displays centered icons for all navigation items (Market, Services, Connections, Chat).
+-   **UI**: **Cleanup**: Removed the global floating chat button (FAB) in favor of the sidebar "Chat" link.
+-   **FIX**: Navbar logic now properly handles collapsed state visibility.
+
+## 7.9.0
+-   **FIX**: ChatWidget crash resolved by adding missing `openAuthModal` import.
+-   **DEBUG**: Comprehensive debug logging added for OTP verification flow.
+-   **DEPLOY**: Switched to Vercel as primary deployment platform (from GitHub Pages).
+-   **DOC**: Updated `publish.md` with Vercel deployment instructions.
+
+## 7.8.5
 -   **UI**: Unified Sidebar alignment (Logo/Items/Toggle aligned to px-5).
 -   **UI**: Added "Messages" link directly to the desktop sidebar.
 -   **UI**: Chat floating button is now visible for all users (prompts login on click).

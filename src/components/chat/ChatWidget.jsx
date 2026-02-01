@@ -232,20 +232,7 @@ const ChatWidget = () => {
 
     return (
         <>
-            {/* Launcher Fab (Desktop Only - Mobile uses Bottom Bar) */}
-            {!isChatOpen && (
-                <button
-                    onClick={() => user ? openChat() : openAuthModal()}
-                    className="fixed z-[9990] bottom-20 right-4 md:bottom-6 md:right-6 w-14 h-14 bg-accent text-black rounded-full shadow-[0_0_20px_rgba(34,211,238,0.4)] md:flex items-center justify-center hover:scale-110 transition-transform hover:shadow-[0_0_30px_rgba(34,211,238,0.6)]"
-                >
-                    <MessageSquare size={24} />
-                    {unreadSenders.size > 0 && (
-                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center border-2 border-black z-50">
-                            <span className="text-[10px] font-bold text-white">{unreadSenders.size}</span>
-                        </div>
-                    )}
-                </button>
-            )}
+            {/* Launcher Fab Removed - Now in Sidebar */}
 
             {/* Chat Window */}
             <AnimatePresence>

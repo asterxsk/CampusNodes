@@ -3,29 +3,29 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.8.5';
+const CURRENT_VERSION = '7.9.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
-        title: "Performance Boost",
-        description: "Optimized background animation - smoother, faster, and preloaded during loading screen."
+        title: "OTP Verification Fix",
+        description: "Fixed critical email verification error that prevented users from completing signup."
     },
     {
-        title: "Monochrome Nodes",
-        description: "LED grid now uses clean white/gray aesthetic with faster node transitions."
+        title: "Enhanced Error Handling",
+        description: "Added detailed debug logging and better error messages for troubleshooting verification issues."
     },
     {
-        title: "Themed Notifications",
-        description: "Signup alerts now use styled toast popups matching the app theme."
+        title: "Chat Crash Fix",
+        description: "Resolved ChatWidget crash that occurred when non-logged-in users tried to open chat."
     },
     {
-        title: "Mobile Nav Redesign",
-        description: "Profile centered in bottom bar, Connections added, floating home button."
+        title: "Vercel Deployment",
+        description: "Migrated to Vercel for faster builds, better performance, and preview deployments."
     },
     {
-        title: "Pixel LED Background",
-        description: "Animated background with glowing LED nodes that light up randomly and connect when close."
+        title: "Publishing Workflow Update",
+        description: "Added changelog documentation to publishing process for better release tracking."
     },
     {
         title: "Lighter & Faster",
