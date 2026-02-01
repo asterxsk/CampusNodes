@@ -1,11 +1,10 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Wrench, Users, User, ArrowLeftCircle, ChevronRight, UserCheck, Home, Menu as MenuIcon, X, MessageSquare } from 'lucide-react';
+import { ShoppingBag, Wrench, Users, User, ChevronRight, MessageSquare } from 'lucide-react';
 import Logo from '../ui/Logo';
-import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
-import { useUI } from '../../context/UIContext'; // Import UI
+import { useUI } from '../../context/UIContext';
 import Magnetic from '../ui/Magnetic';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,23 +16,10 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user } = useAuth();
-    const { openAuthModal, toggleChat, isChatOpen, unreadCount, isSidebarCollapsed: isCollapsed, setIsSidebarCollapsed: setIsCollapsed } = useUI();
+    const { openAuthModal, unreadCount, isSidebarCollapsed: isCollapsed, setIsSidebarCollapsed: setIsCollapsed } = useUI();
     const location = useLocation();
     const navigate = useNavigate();
-    const [requestCount, setRequestCount] = useState(0);
-
-    // Fetch pending requests count
-    React.useEffect(() => {
-        if (!user) return;
-        const fetchRequests = async () => {
-            // ... existing
-        };
-        // ...
-    }, [user]);
-
-    // ...
 
     // Navigation handler for User icon
     const handleUserClick = () => {
@@ -48,112 +34,129 @@ const Sidebar = () => {
         <>
             {/* ==================== DESKTOP SIDEBAR ==================== */}
             <motion.div
+                layout
                 initial={false}
                 animate={{
-                    width: isCollapsed ? 'auto' : '260px',
-                    transition: { duration: 0.4, type: "spring", stiffness: 200, damping: 25, mass: 0.8 }
+                    width: isCollapsed ? '72px' : '260px',
+                    height: isCollapsed ? 'auto' : '100vh',
+                    top: isCollapsed ? '50%' : '0%',
+                    y: isCollapsed ? '-50%' : '0%',
+                    left: isCollapsed ? '12px' : '0px',
+                    borderRadius: isCollapsed ? '24px' : '0px',
                 }}
-                className={`hidden md:flex flex-col fixed left-0 z-50 bg-black/80 backdrop-blur-xl border border-white/10 ${isCollapsed
-                    ? 'top-1/2 -translate-y-1/2 left-3 rounded-2xl h-auto w-fit shadow-2xl'
-                    : 'top-0 h-screen border-r rounded-none'}`}
+                transition={{
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 25,
+                    mass: 0.8
+                }}
+                className={`hidden md:flex flex-col fixed z-50 bg-black/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl`}
             >
                 {/* Header / Logo */}
-                <div className={`flex items-center w-full ${isCollapsed ? 'py-3 justify-center px-0' : 'h-16 px-5 border-b border-white/5'}`}>
-                    {!isCollapsed ? (
-                        <Link to="/" className="flex items-center gap-3 overflow-hidden w-full">
-                            <div className="shrink-0 scale-75">
-                                <Logo />
-                            </div>
-                            <motion.span
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -10 }}
-                                className="font-display font-bold text-lg text-white whitespace-nowrap"
-                            >
-                                <span className="text-accent">Campus</span>Nodes
-                            </motion.span>
-                        </Link>
-                    ) : (
-                        <Link to="/" className="flex items-center justify-center">
-                            <div className="shrink-0 scale-75">
-                                <Logo />
-                            </div>
-                        </Link>
-                    )}
+                <div className={`flex items-center w-full shrink-0 ${isCollapsed ? 'py-4 justify-center' : 'h-20 px-6'}`}>
+                    <Link to="/" className="flex items-center gap-3 overflow-hidden">
+                        <div className="shrink-0 scale-90">
+                            <Logo />
+                        </div>
+                        <AnimatePresence>
+                            {!isCollapsed && (
+                                <motion.span
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    className="font-display font-bold text-xl text-white whitespace-nowrap"
+                                >
+                                    <span className="text-accent">Campus</span>Nodes
+                                </motion.span>
+                            )}
+                        </AnimatePresence>
+                    </Link>
                 </div>
 
-                {/* Navigation - Always visible now */}
-                <div className={`flex-1 overflow-y-auto custom-scrollbar ${isCollapsed ? 'py-2 px-2' : 'py-4 px-3'}`}>
-                    <div className="space-y-1 w-full flex flex-col items-center">
-                        {menuItems.map((item, index) => {
-                            const isActive = location.pathname === item.path;
-                            return (
-                                <Link to={item.path} key={item.name} className="block w-full">
-                                    <Magnetic>
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: index * 0.05 }}
-                                            className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-1' : 'px-5'}`}
-                                        >
-                                            <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'} ${isCollapsed ? 'flex items-center justify-center' : ''}`}>
-                                                {item.icon}
-                                                {item.isMessages && unreadCount > 0 && isCollapsed && (
-                                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                                )}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <div className="flex-1 flex items-center justify-between z-10 relative">
-                                                    <span className="font-semibold whitespace-nowrap text-base">
-                                                        {item.name}
+                {/* Navigation Items */}
+                <div className={`flex-1 flex flex-col w-full py-2 ${isCollapsed ? 'px-2 gap-2' : 'px-4 gap-1'}`}>
+                    {menuItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                            <Link to={item.path} key={item.name} className="block w-full">
+                                <Magnetic>
+                                    <div
+                                        className={`flex items-center relative group transition-all duration-300 rounded-xl
+                                            ${isCollapsed ? 'justify-center p-3' : 'px-4 py-3.5 gap-4'}
+                                            ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                        `}
+                                    >
+                                        {/* Active Background Glow */}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeSidebar"
+                                                className="absolute inset-0 bg-accent/10 rounded-xl border border-accent/20"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+
+                                        {/* Icon */}
+                                        <div className={`relative z-10 transition-colors duration-300 ${isActive ? 'text-accent' : 'group-hover:text-white'}`}>
+                                            {item.icon}
+                                            {/* Unread Badge (Collapsed) */}
+                                            {item.isMessages && unreadCount > 0 && isCollapsed && (
+                                                <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 rounded-full border border-black" />
+                                            )}
+                                        </div>
+
+                                        {/* Text Label & Badge (Expanded) */}
+                                        {!isCollapsed && (
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -10 }}
+                                                className="flex-1 flex items-center justify-between z-10 overflow-hidden"
+                                            >
+                                                <span className="font-semibold whitespace-nowrap text-[15px]">
+                                                    {item.name}
+                                                </span>
+                                                {/* Unread Badge (Expanded) */}
+                                                {item.isMessages && unreadCount > 0 && (
+                                                    <span className="bg-red-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                                                        {unreadCount}
                                                     </span>
-                                                    {item.isMessages && unreadCount > 0 && (
-                                                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                                            {unreadCount}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {isActive && (
-                                                <motion.div
-                                                    layoutId="activeTab"
-                                                    className="absolute inset-0 bg-accent/10 rounded-xl border border-accent/20"
-                                                />
-                                            )}
-                                        </motion.div>
-                                    </Magnetic>
-                                </Link>
-                            );
-                        })}
-                    </div>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </Magnetic>
+                            </Link>
+                        );
+                    })}
                 </div>
 
-                {/* Toggle Button - Always at bottom now */}
-                <div className={`border-t ${isCollapsed ? 'border-white/10 py-2 px-2' : 'border-white/5 py-2 px-3'}`}>
+                {/* Toggle Button */}
+                <div className={`w-full shrink-0 ${isCollapsed ? 'p-2 py-4 flex justify-center' : 'p-4'}`}>
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full text-gray-400 hover:text-white hover:bg-white/5 ${isCollapsed ? 'justify-center px-1' : 'px-5'}`}
+                        className={`flex items-center transition-all bg-transparent hover:bg-white/5 rounded-xl text-gray-400 hover:text-white
+                            ${isCollapsed ? 'justify-center p-3' : 'px-4 py-3.5 gap-4 w-full'}
+                        `}
                     >
-                        <div className="relative z-10 transition-all group-hover:text-white">
-                            <div className="w-6 h-6 flex items-center justify-center">
-                                <ChevronRight size={20} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
-                            </div>
+                        <div className="w-5 h-5 flex items-center justify-center">
+                            <ChevronRight size={20} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
                         </div>
                         {!isCollapsed && (
-                            <span className="font-semibold whitespace-nowrap z-10 relative text-base">
-                                Minimize
-                            </span>
+                            <span className="font-semibold text-[15px]">Minimize</span>
                         )}
                     </button>
                 </div>
 
-                {/* Footer / User */}
-                <div className={`border-t ${isCollapsed ? 'border-white/10 p-2' : 'border-white/5 p-3'} w-full`}>
+                {/* User Profile Footer */}
+                <div className={`w-full shrink-0 border-t border-white/10 ${isCollapsed ? 'p-2 py-4' : 'p-4'}`}>
                     <button
                         onClick={handleUserClick}
-                        className={`flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all ${isCollapsed ? 'justify-center' : ''}`}
+                        className={`flex items-center transition-all hover:bg-white/5 rounded-xl
+                            ${isCollapsed ? 'justify-center p-0' : 'p-2 gap-3 w-full'}
+                        `}
                     >
-                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 shrink-0">
+                        {/* Avatar */}
+                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 shrink-0 relative">
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -162,83 +165,80 @@ const Sidebar = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* User Info (Expanded) */}
                         {!isCollapsed && (
-                            <div className="text-left overflow-hidden">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-left overflow-hidden flex-1"
+                            >
                                 {user ? (
                                     <>
-                                        <p className="text-sm font-bold text-white truncate">{user.user_metadata?.first_name || 'User'}</p>
+                                        <p className="text-sm font-bold text-white truncate">{user.user_metadata?.first_name}</p>
                                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                     </>
                                 ) : (
                                     <p className="text-sm font-medium text-gray-400">Sign In</p>
                                 )}
-                            </div>
+                            </motion.div>
                         )}
                     </button>
                 </div>
-            </motion.div >
+            </motion.div>
+
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            < div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom" >
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom pb-safe">
                 <div className="flex items-center justify-around py-2 px-2">
-
-                    {/* 1. Services */}
-                    <Link to="/services" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/services' ? 'text-accent' : 'text-white/50'}`}>
+                    {/* Services */}
+                    <Link to="/services" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/services' ? 'text-accent' : 'text-white/50'}`}>
                         <Wrench size={22} />
                         <span className="text-[10px] font-medium">Services</span>
                     </Link>
 
-                    {/* 2. Market */}
-                    <Link to="/market" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/market' ? 'text-accent' : 'text-white/50'}`}>
+                    {/* Market */}
+                    <Link to="/market" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/market' ? 'text-accent' : 'text-white/50'}`}>
                         <ShoppingBag size={22} />
                         <span className="text-[10px] font-medium">Market</span>
                     </Link>
 
-                    {/* 3. Profile (Center) */}
+                    {/* Profile (Center) */}
                     <button
                         onClick={handleUserClick}
-                        className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all relative ${location.pathname === '/profile' ? 'text-accent' : 'text-white/50'}`}
+                        className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl relative ${location.pathname === '/profile' ? 'text-accent' : 'text-white/50'}`}
                     >
-                        <div className={`w-10 h-10 rounded-full overflow-hidden border-2 ${location.pathname === '/profile' ? 'border-accent' : 'border-white/20'}`}>
-                            {user ? (
-                                user.user_metadata?.avatar_url ? (
-                                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full bg-gray-700 flex items-center justify-center text-sm font-bold text-white">
-                                        {user.user_metadata?.first_name ? user.user_metadata.first_name[0] : 'U'}
-                                    </div>
-                                )
+                        <div className={`w-9 h-9 rounded-full overflow-hidden border-2 transition-all ${location.pathname === '/profile' ? 'border-accent scale-110' : 'border-white/20'}`}>
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                                    <User size={18} className="text-white/60" />
+                                <div className="w-full h-full bg-gray-700 flex items-center justify-center text-xs text-white">
+                                    <User size={14} />
                                 </div>
                             )}
                         </div>
-                        {requestCount > 0 && (
-                            <div className="absolute top-0 right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                                <span className="text-[9px] font-bold text-white">{requestCount}</span>
-                            </div>
-                        )}
                     </button>
 
-                    {/* 4. Messages (Link to Page) */}
-                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
-                        <MessageSquare size={22} />
+                    {/* Chat */}
+                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
+                        <div className="relative">
+                            <MessageSquare size={22} />
+                            {unreadCount > 0 && (
+                                <div className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
+                                    <span className="text-[8px] font-bold text-white">{unreadCount}</span>
+                                </div>
+                            )}
+                        </div>
                         <span className="text-[10px] font-medium">Chat</span>
-                        {unreadCount > 0 && (
-                            <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                                <span className="text-[9px] font-bold text-white">{unreadCount}</span>
-                            </div>
-                        )}
                     </Link>
 
-                    {/* 5. Connections */}
-                    <Link to="/connections" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-white/50'}`}>
+                    {/* Connections */}
+                    <Link to="/connections" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-white/50'}`}>
                         <Users size={22} />
-                        <span className="text-[10px] font-medium">Connections</span>
+                        <span className="text-[10px] font-medium">Social</span>
                     </Link>
                 </div>
-            </div >
+            </div>
         </>
     );
 };
