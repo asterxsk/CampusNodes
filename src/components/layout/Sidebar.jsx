@@ -167,73 +167,66 @@ const Sidebar = () => {
                 )}
             </motion.div>
 
-            {/* ==================== MOBILE FLOATING HOME BUTTON ==================== */}
-            {location.pathname !== '/' && (
-                <Link
-                    to="/"
-                    className="md:hidden fixed top-4 left-4 w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-center shadow-xl text-white/80 hover:text-white transition-all"
-                >
-                    <Home size={18} />
-                </Link>
-            )}
-
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-around px-4 shadow-2xl safe-area-bottom">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom">
+                <div className="flex items-center justify-around py-2 px-2">
 
-                {/* 1. Services */}
-                <Link to="/services" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/services' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
-                    <Wrench size={20} />
-                </Link>
+                    {/* 1. Home */}
+                    <Link to="/" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/' ? 'text-accent' : 'text-white/50'}`}>
+                        <Home size={22} />
+                        <span className="text-[10px] font-medium">Home</span>
+                    </Link>
 
-                {/* 2. Market */}
-                <Link to="/market" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/market' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
-                    <ShoppingBag size={20} />
-                </Link>
+                    {/* 2. Market */}
+                    <Link to="/market" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/market' ? 'text-accent' : 'text-white/50'}`}>
+                        <ShoppingBag size={22} />
+                        <span className="text-[10px] font-medium">Market</span>
+                    </Link>
 
-                {/* 3. Profile (Center) */}
-                <button
-                    onClick={handleUserClick}
-                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all overflow-hidden relative border-2 ${location.pathname === '/profile' ? 'border-accent' : 'border-white/20'}`}
-                >
-                    {user ? (
-                        <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden relative">
-                            {user.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    {/* 3. Profile (Center) */}
+                    <button
+                        onClick={handleUserClick}
+                        className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all relative ${location.pathname === '/profile' ? 'text-accent' : 'text-white/50'}`}
+                    >
+                        <div className={`w-10 h-10 rounded-full overflow-hidden border-2 ${location.pathname === '/profile' ? 'border-accent' : 'border-white/20'}`}>
+                            {user ? (
+                                user.user_metadata?.avatar_url ? (
+                                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-700 flex items-center justify-center text-sm font-bold text-white">
+                                        {user.user_metadata?.first_name ? user.user_metadata.first_name[0] : 'U'}
+                                    </div>
+                                )
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white">
-                                    {user.user_metadata?.first_name ? user.user_metadata.first_name[0] : 'U'}
+                                <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+                                    <User size={18} className="text-white/60" />
                                 </div>
                             )}
                         </div>
-                    ) : (
-                        <div className="w-full h-full rounded-full bg-gray-700 flex items-center justify-center">
-                            <User size={20} className="text-white/60" />
-                        </div>
-                    )}
-                    {requestCount > 0 && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                            <span className="text-[9px] font-bold text-white">{requestCount}</span>
-                        </div>
-                    )}
-                </button>
+                        {requestCount > 0 && (
+                            <div className="absolute top-0 right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
+                                <span className="text-[9px] font-bold text-white">{requestCount}</span>
+                            </div>
+                        )}
+                    </button>
 
-                {/* 4. Chat Toggle */}
-                <button
-                    onClick={toggleChat}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${isChatOpen ? 'bg-accent text-black' : 'text-white/60 hover:text-white'}`}
-                >
-                    <MessageSquare size={20} />
-                    {unreadCount > 0 && !isChatOpen && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                            <span className="text-[8px] font-bold text-white">{unreadCount}</span>
-                        </div>
-                    )}
-                </button>
+                    {/* 4. Messages (Link to Page) */}
+                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
+                        <MessageSquare size={22} />
+                        <span className="text-[10px] font-medium">Chat</span>
+                        {unreadCount > 0 && (
+                            <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
+                                <span className="text-[9px] font-bold text-white">{unreadCount}</span>
+                            </div>
+                        )}
+                    </Link>
 
-                {/* 5. Connections */}
-                <Link to="/connections" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${location.pathname === '/connections' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
-                    <Users size={20} />
-                </Link>
+                    {/* 5. Connections */}
+                    <Link to="/connections" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-white/50'}`}>
+                        <Users size={22} />
+                        <span className="text-[10px] font-medium">Connect</span>
+                    </Link>
+                </div>
             </div>
         </>
     );

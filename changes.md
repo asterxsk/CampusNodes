@@ -1,6 +1,11 @@
 # Changelog
 
-## 7.7.5 (Current)
+## 7.8.0 (Current)
+-   **FEATURE**: Dedicated Messages page for mobile.
+-   **UI**: Mobile nav now taller with text labels under icons.
+-   **UI**: Home button integrated into bottom bar (removed floating button).
+
+## 7.7.5
 -   **UI**: Collapsed sidebar now shows logo and has better center alignment.
 
 ## 7.7.4
