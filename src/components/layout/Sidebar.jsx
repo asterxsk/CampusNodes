@@ -58,13 +58,13 @@ const Sidebar = () => {
                     : 'top-0 h-screen border-r rounded-none'}`}
                 style={isCollapsed ? { transform: 'translateY(-50%)' } : {}}
             >
-                {/* Header / Logo - Only show when expanded */}
-                {!isCollapsed && (
-                    <div className="h-16 flex items-center px-5 w-full border-b border-white/5">
-                        <Link to="/" className="flex items-center gap-3 overflow-hidden w-full">
-                            <div className="shrink-0 scale-75">
-                                <Logo />
-                            </div>
+                {/* Header / Logo */}
+                <div className={`flex items-center justify-center w-full ${isCollapsed ? 'py-3' : 'h-16 px-5 border-b border-white/5'}`}>
+                    <Link to="/" className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : 'w-full'}`}>
+                        <div className={`shrink-0 ${isCollapsed ? 'scale-65' : 'scale-75'}`}>
+                            <Logo />
+                        </div>
+                        {!isCollapsed && (
                             <motion.span
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -73,13 +73,13 @@ const Sidebar = () => {
                             >
                                 <span className="text-accent">Campus</span>Nodes
                             </motion.span>
-                        </Link>
-                    </div>
-                )}
+                        )}
+                    </Link>
+                </div>
 
                 {/* Navigation */}
-                <div className={`w-full ${isCollapsed ? 'py-3 px-2' : 'flex-1 py-4 px-3 overflow-y-auto custom-scrollbar'}`}>
-                    <div className={`space-y-1`}>
+                <div className={`w-full flex flex-col items-center ${isCollapsed ? 'py-2 px-2' : 'flex-1 py-4 px-3 overflow-y-auto custom-scrollbar'}`}>
+                    <div className={`space-y-1 ${isCollapsed ? 'w-full' : 'w-full'}`}>
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (

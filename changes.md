@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.7.4 (Current)
+## 7.7.5 (Current)
+-   **UI**: Collapsed sidebar now shows logo and has better center alignment.
+
+## 7.7.4
 -   **UI**: Sidebar menu items now span full width when expanded.
 -   **UI**: Page content now responds dynamically to sidebar state.
 
