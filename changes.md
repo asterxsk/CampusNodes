@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.8.1 (Current)
+## 7.8.2 (Current)
+-   **UI**: Mobile nav now shows Services instead of Home.
+
+## 7.8.1
 -   **UI**: Sidebar toggle button moved below logo and above navigation.
 -   **UI**: Improved sidebar icon alignment when collapsed.
 

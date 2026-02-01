@@ -173,10 +173,10 @@ const Sidebar = () => {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom">
                 <div className="flex items-center justify-around py-2 px-2">
 
-                    {/* 1. Home */}
-                    <Link to="/" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/' ? 'text-accent' : 'text-white/50'}`}>
-                        <Home size={22} />
-                        <span className="text-[10px] font-medium">Home</span>
+                    {/* 1. Services */}
+                    <Link to="/services" className={`flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all ${location.pathname === '/services' ? 'text-accent' : 'text-white/50'}`}>
+                        <Wrench size={22} />
+                        <span className="text-[10px] font-medium">Services</span>
                     </Link>
 
                     {/* 2. Market */}
