@@ -158,7 +158,25 @@ const Connections = () => {
     const confirmRemove = async () => {
         if (!removeId) return;
         try {
+            // Find the friend's ID from the friendship before deleting
+            const friendToRemove = friends.find(f => f.friendship_id === removeId);
+            const friendId = friendToRemove?.id;
+
+            // Delete the friendship
             await supabase.from('friendships').delete().eq('id', removeId);
+
+            // Delete all chat messages between the two users (storage optimization)
+            if (friendId && user) {
+                // Messages sent by me to them
+                await supabase.from('messages').delete()
+                    .eq('sender_id', user.id)
+                    .eq('receiver_id', friendId);
+                // Messages sent by them to me
+                await supabase.from('messages').delete()
+                    .eq('sender_id', friendId)
+                    .eq('receiver_id', user.id);
+            }
+
             setRemoveId(null);
             fetchData();
         } catch (e) { console.error(e); }

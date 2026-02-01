@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.4.8 (Current)
+## 7.4.9 (Current)
+-   **OPT**: Removing a friend now deletes all chat messages with them (storage optimization).
+
+## 7.4.8
 -   **FIX**: Signup Email Verification now has "Resend Code" and properly creates profiles after verification.
 -   **FIX**: Profile edits now sync correctly to Connections page.
 -   **UX**: Mobile Chat is now fullscreen with Bottom Bar visibility retained (Z-Index fix).
