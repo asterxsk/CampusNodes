@@ -17,18 +17,15 @@ const colors = {
     info: 'bg-accent/20 border-accent/50 text-accent'
 };
 
-const Toast = ({ message, type = 'info', onClose, duration = 4000 }) => {
+const Toast = ({ message, type = 'info', onClose, duration = 4000, isInsideContainer = false }) => {
     useEffect(() => {
         const timer = setTimeout(onClose, duration);
         return () => clearTimeout(timer);
     }, [onClose, duration]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className={`fixed top-6 left-1/2 -translate-x-1/2 z-[10001] px-5 py-3 rounded-xl border backdrop-blur-xl shadow-2xl flex items-center gap-3 ${colors[type]}`}
+        <div
+            className={`${!isInsideContainer ? 'fixed top-6 left-1/2 -translate-x-1/2 z-[10001]' : ''} px-5 py-3 rounded-xl border backdrop-blur-xl shadow-2xl flex items-center gap-3 ${colors[type]}`}
         >
             <div className="shrink-0">{icons[type]}</div>
             <span className="text-sm font-medium text-white">{message}</span>
@@ -38,24 +35,34 @@ const Toast = ({ message, type = 'info', onClose, duration = 4000 }) => {
             >
                 <X size={14} />
             </button>
-        </motion.div>
+        </div>
     );
 };
 
 // Toast Container - manages multiple toasts
 export const ToastContainer = ({ toasts, removeToast }) => {
     return (
-        <AnimatePresence>
-            {toasts.map((toast, index) => (
-                <Toast
-                    key={toast.id}
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => removeToast(toast.id)}
-                    duration={toast.duration}
-                />
-            ))}
-        </AnimatePresence>
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[10001] pointer-events-none flex flex-col items-center gap-3">
+            <AnimatePresence>
+                {toasts.map((toast) => (
+                    <motion.div
+                        key={toast.id}
+                        initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        className="pointer-events-auto"
+                    >
+                        <Toast
+                            message={toast.message}
+                            type={toast.type}
+                            onClose={() => removeToast(toast.id)}
+                            duration={toast.duration}
+                            isInsideContainer={true}
+                        />
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </div>
     );
 };
 

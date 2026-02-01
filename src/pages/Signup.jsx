@@ -3,7 +3,7 @@ import anime from 'animejs/lib/anime.es.js';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import { supabase } from '../lib/supabaseClient';
-import { Mail, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import Toast, { useToast, ToastContainer } from '../components/ui/Toast';
 
 const Signup = () => {
@@ -12,6 +12,7 @@ const Signup = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [verificationStep, setVerificationStep] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
     const [otp, setOtp] = useState('');
     const { toasts, addToast, removeToast } = useToast();
 
@@ -105,7 +106,8 @@ const Signup = () => {
             }
 
             addToast('Verification successful! Account created.', 'success');
-            setTimeout(() => navigate('/'), 1500);
+            setIsVerified(true);
+            setTimeout(() => navigate('/'), 2000);
 
         } catch (error) {
             setError(error.message || 'Invalid code. Please try again.');
@@ -142,7 +144,22 @@ const Signup = () => {
 
             <div ref={formRef} className="w-full max-w-md bg-surface/50 backdrop-blur-md border border-white/10 p-8 md:p-12 relative z-10 opacity-0 rounded-sm shadow-2xl">
 
-                {!verificationStep ? (
+                {isVerified ? (
+                    // STEP 3: SUCCESS STATE
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1, rotate: 360 }}
+                            transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                            className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500 border border-green-500/30"
+                        >
+                            <Check size={40} />
+                        </motion.div>
+                        <h2 className="text-3xl font-display font-bold text-white mb-2">Success!</h2>
+                        <p className="text-gray-400">Your account has been verified.</p>
+                        <p className="text-gray-500 text-sm mt-1">Redirecting to campus nodes...</p>
+                    </div>
+                ) : !verificationStep ? (
                     // STEP 1: SIGNUP FORM
                     <>
                         <div className="mb-8 text-center">

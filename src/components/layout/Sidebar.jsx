@@ -78,12 +78,21 @@ const Sidebar = () => {
                 </div>
 
                 {/* Toggle Button - Below Logo */}
-                <div className={`w-full flex justify-center ${isCollapsed ? 'py-3 border-b border-white/10' : 'py-3 px-3 border-b border-white/5'}`}>
+                <div className={`w-full ${isCollapsed ? 'py-2 px-2.5 border-b border-white/10' : 'py-2 px-3 border-b border-white/5'}`}>
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                        className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full text-gray-400 hover:text-white hover:bg-white/5 ${isCollapsed ? 'justify-center px-2.5' : 'px-5'}`}
                     >
-                        <ChevronRight size={16} className={`transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+                        <div className="relative z-10 transition-all group-hover:text-white">
+                            <div className="w-6 h-6 flex items-center justify-center">
+                                <ChevronRight size={20} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
+                            </div>
+                        </div>
+                        {!isCollapsed && (
+                            <span className="font-semibold whitespace-nowrap z-10 relative text-base">
+                                Minimize
+                            </span>
+                        )}
                     </button>
                 </div>
 

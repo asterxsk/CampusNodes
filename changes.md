@@ -1,6 +1,12 @@
 # Changelog
 
-## 7.8.2 (Current)
+## 7.8.3 (Current)
+-   **UI**: Sidebar minimize button refined to match menu items.
+-   **UI**: Toast notifications now stack and are perfectly centered.
+-   **UI**: Added dedicated success state after signup verification.
+-   **BUGFIX**: Discover People now sorts by newest users first.
+
+## 7.8.2
 -   **UI**: Mobile nav now shows Services instead of Home.
 
 ## 7.8.1

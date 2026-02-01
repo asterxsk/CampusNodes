@@ -43,6 +43,7 @@ const Connections = () => {
             const { data: allProfiles, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
+                .order('created_at', { ascending: false })
                 .limit(50);
 
             if (profileError) throw profileError;
