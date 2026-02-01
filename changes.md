@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.7.1 (Current)
+## 7.7.2 (Current)
+-   **UI**: Collapsed sidebar is now a floating pill, centered vertically with no wasted space.
+
+## 7.7.1
 -   **UI**: Fixed sidebar spacing and alignment when collapsed.
 -   **UI**: Version banner icons now turn white with glowing background on hover.
 

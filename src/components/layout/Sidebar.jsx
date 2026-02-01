@@ -51,53 +51,56 @@ const Sidebar = () => {
             <motion.div
                 initial={false}
                 animate={{
-                    width: isCollapsed ? '80px' : '280px',
+                    width: isCollapsed ? '72px' : '260px',
                     transition: { duration: 0.3, type: "spring", stiffness: 100, damping: 15 }
                 }}
-                className={`hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 bg-black/60 backdrop-blur-xl border-r border-white/10`}
+                className={`hidden md:flex flex-col fixed left-0 z-50 bg-black/80 backdrop-blur-xl border border-white/10 ${isCollapsed
+                    ? 'top-1/2 -translate-y-1/2 left-3 rounded-2xl h-auto'
+                    : 'top-0 h-screen border-r rounded-none'}`}
+                style={isCollapsed ? { transform: 'translateY(-50%)' } : {}}
             >
-                {/* Header / Logo */}
-                <div className="h-20 flex items-center justify-center w-full border-b border-white/5">
-                    <Link to="/" className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : 'px-5 w-full'}`}>
-                        <div className="shrink-0 scale-75">
-                            <Logo />
-                        </div>
-                        {!isCollapsed && (
+                {/* Header / Logo - Only show when expanded */}
+                {!isCollapsed && (
+                    <div className="h-16 flex items-center px-5 w-full border-b border-white/5">
+                        <Link to="/" className="flex items-center gap-3 overflow-hidden w-full">
+                            <div className="shrink-0 scale-75">
+                                <Logo />
+                            </div>
                             <motion.span
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
-                                className="font-display font-bold text-xl text-white whitespace-nowrap"
+                                className="font-display font-bold text-lg text-white whitespace-nowrap"
                             >
                                 <span className="text-accent">Campus</span>Nodes
                             </motion.span>
-                        )}
-                    </Link>
-                </div>
+                        </Link>
+                    </div>
+                )}
 
                 {/* Navigation */}
-                <div className="flex-1 py-6 w-full overflow-y-auto custom-scrollbar">
-                    <div className={`space-y-1 ${isCollapsed ? 'px-3' : 'px-4'}`}>
+                <div className={`w-full ${isCollapsed ? 'py-3 px-2' : 'flex-1 py-4 px-3 overflow-y-auto custom-scrollbar'}`}>
+                    <div className={`space-y-1`}>
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <Link to={item.path} key={item.name} className="block">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-4 py-3 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-accent/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-3' : 'px-4'}`}
+                                            className={`flex items-center gap-3 py-2.5 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-3'}`}
                                         >
                                             <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'}`}>
                                                 {item.icon}
                                             </div>
                                             {!isCollapsed && (
-                                                <span className="font-medium whitespace-nowrap z-10 relative">
+                                                <span className="font-medium whitespace-nowrap z-10 relative text-sm">
                                                     {item.name}
                                                 </span>
                                             )}
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="activeTab"
-                                                    className="absolute inset-0 bg-accent/5 rounded-xl border border-accent/20"
+                                                    className="absolute inset-0 bg-accent/10 rounded-xl border border-accent/20"
                                                 />
                                             )}
                                         </div>
@@ -108,23 +111,22 @@ const Sidebar = () => {
                     </div>
                 </div>
 
-                {/* Footer / User */}
-                <div className="p-4 border-t border-white/5 w-full bg-black/20">
-                    <button
-                        onClick={handleUserClick}
-                        className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden border border-white/20 shrink-0">
-                            {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
-                                    {user?.user_metadata?.first_name ? user.user_metadata.first_name[0] : <User size={18} />}
-                                </div>
-                            )}
-                        </div>
-
-                        {!isCollapsed && (
+                {/* Footer / User - Only show when expanded */}
+                {!isCollapsed && (
+                    <div className="p-3 border-t border-white/5 w-full">
+                        <button
+                            onClick={handleUserClick}
+                            className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all"
+                        >
+                            <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 shrink-0">
+                                {user?.user_metadata?.avatar_url ? (
+                                    <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
+                                        {user?.user_metadata?.first_name ? user.user_metadata.first_name[0] : <User size={16} />}
+                                    </div>
+                                )}
+                            </div>
                             <div className="text-left overflow-hidden">
                                 {user ? (
                                     <>
@@ -135,17 +137,35 @@ const Sidebar = () => {
                                     <p className="text-sm font-medium text-gray-400">Sign In</p>
                                 )}
                             </div>
-                        )}
-                    </button>
+                        </button>
+                    </div>
+                )}
 
-                    {/* Toggle Button */}
+                {/* Toggle Button */}
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className={`absolute w-6 h-6 bg-zinc-900 border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white shadow-lg z-50 ${isCollapsed ? '-right-3 top-1/2 -translate-y-1/2' : '-right-3 top-1/2 -translate-y-1/2'}`}
+                >
+                    <ChevronRight size={14} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
+                </button>
+
+                {/* User Avatar when collapsed */}
+                {isCollapsed && (
                     <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-zinc-900 border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white shadow-lg z-50"
+                        onClick={handleUserClick}
+                        className="p-2 flex justify-center border-t border-white/5"
                     >
-                        <ChevronRight size={14} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
+                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20">
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
+                                    {user?.user_metadata?.first_name ? user.user_metadata.first_name[0] : <User size={16} />}
+                                </div>
+                            )}
+                        </div>
                     </button>
-                </div>
+                )}
             </motion.div>
 
             {/* ==================== MOBILE FLOATING HOME BUTTON ==================== */}
