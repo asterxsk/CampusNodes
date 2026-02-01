@@ -1,40 +1,78 @@
-# Campus Nodes by asterxsk
+# Campus Nodes 🎓
 
-> The ultimate campus marketplace and community platform.
-> Built for students, by students.
+<div align="center">
 
-This is the official GitHub repository for the **CampusNodes** project. An immersive e-commerce and social platform designed to connect students for buying, selling, services, and networking.
+  ![CampusNodes Banner](https://raw.githubusercontent.com/asterxsk/CampusNodes/main/public/banner.png)
 
-## 🌐 Socials:
-[![Discord](https://img.shields.io/badge/Discord-%237289DA.svg?logo=discord&logoColor=white)](https://discord.gg/pTrdZ3vN) [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white)](https://youtube.com/@asterxsk) [![email](https://img.shields.io/badge/Email-D14836?logo=gmail&logoColor=white)](mailto:itslace100@gmail.com) 
+  ### The Ultimate Campus Marketplace & Social Platform
+  *Built for students, by students.*
+
+  [![GitHub release (latest by date)](https://img.shields.io/github/v/release/asterxsk/CampusNodes?style=for-the-badge&color=blue)](https://github.com/asterxsk/CampusNodes/releases)
+  [![GitHub License](https://img.shields.io/github/license/asterxsk/CampusNodes?style=for-the-badge&color=orange)](https://github.com/asterxsk/CampusNodes/blob/main/LICENSE)
+  [![Website](https://img.shields.io/website?url=https%3A%2F%2Fasterxsk.github.io%2FCampusNodes%2F&style=for-the-badge&label=Live%20Demo&logo=vercel)](https://asterxsk.github.io/CampusNodes/)
+  
+  [**Explore Live Site**](https://asterxsk.github.io/CampusNodes/) • [**Join Discord**](https://discord.gg/pTrdZ3vN) • [**Report Bug**](https://github.com/asterxsk/CampusNodes/issues)
+
+</div>
 
 ---
-[![](https://visitcount.itsvg.in/api?id=asterxsk&icon=0&color=0)](https://visitcount.itsvg.in)
 
-### Visit the live site: [asterxsk.github.io/CampusNodes](https://asterxsk.github.io/CampusNodes/)
+## 🚀 Overview
 
-### Features
+**CampusNodes** is a next-generation immersive platform designed to revolutionize how students connect, trade, and collaborate on campus. Combining a robust **marketplace** with a real-time **social network**, it bridges the gap between digital convenience and campus life.
 
-*   **🛒 Campus Marketplace:** A dedicated platform for students to buy and sell textbooks, tech, and essentials.
-*   **🛠️ Service Hub:** Find verified peer tutors, local printing services, and tech repairs.
-*   **🤝 Connections & Trust:** Unique "Trust Score" system for verified students and safe trading.
-*   **🎨 Immersive UI:**
-    *   **3D Hero Scene:** Interactive 3D background with physics-based floating elements.
-    *   **Custom Cursor:** Physics-driven cursor with lag, reactive scaling, and particle trails.
-    *   **Exploding Buttons:** Dynamic interactions with massive doodle explosions on click.
-*   **🔐 Secure Auth:** Full authentication system via Supabase using specific college domains.
-*   **⚡ Blazing Fast:** Built on Vite + React for instant load times and interactions.
+Featuring a **stunning 3D interface**, **physics-based interactions**, and a **secure authentication system**, CampusNodes provides a premium, verified environment for students.
 
-### Tech Stack
+## ✨ Key Features
 
-*   **Frontend Library:** [React](https://reactjs.org/) (v19)
-*   **Build Tool:** [Vite](https://vitejs.dev/)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-*   **Backend / Auth:** [Supabase](https://supabase.com/)
-*   **3D Graphics:** [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) / [Drei](https://github.com/pmndrs/drei)
-*   **Animations:** [Anime.js](https://animejs.com/)
+### 🛒 Campus Marketplace
+*   **Buy & Sell:** Secure platform for textbooks, electronics, and dorm essentials.
+*   **Services Hub:** Connect with peer tutors, tech repairs, and creative freelancers.
+*   **Trust Score:** Verified student trading system to ensure safety.
 
-### How to Build from Source
+### 💬 Global Social Network **(New!)**
+*   **Global Chat:** Real-time public chat room for the entire campus community.
+*   **Direct Messaging:** Private, instant messaging with friends.
+*   **Live Activities:** Real-time typing indicators, read receipts, and online status.
+*   **Friend System:** Send requests, detailed profiles, and activity badges.
+
+### 🎨 Immersive Experience
+*   **3D Environment:** Interactive background scenes powered by Three.js.
+*   **Dynamic UI:** Glassmorphism design, fluid animations, and custom cursors.
+*   **Responsive:** optimized experiences for both desktop and mobile devices.
+
+### 🛡️ Security & Privacy
+*   **Student Verification:** Email-based verification ensures only real students join.
+*   **Encrypted Data:** Secure backend infrastructure powered by Supabase.
+
+---
+
+## 🛠️ Technology Stack
+
+Built with cutting-edge modern web technologies for performance and scale.
+
+| Category | Technology |
+|----------|------------|
+| **Frontend** | [React 19](https://react.dev/), [Vite](https://vitejs.dev/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Animation** | [Framer Motion](https://www.framer.com/motion/), [Anime.js](https://animejs.com/) |
+| **3D Graphics** | [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) |
+| **Backend & Auth** | [Supabase](https://supabase.com/) |
+| **State Management** | React Context API |
+| **Deployment** | GitHub Pages |
+
+---
+
+## ⚡ Getting Started
+
+Follow these steps to set up the project locally on your machine.
+
+### Prerequisites
+*   Node.js (v18 or higher)
+*   npm or yarn
+*   Git
+
+### Installation
 
 1.  **Clone the Repository**
     ```bash
@@ -47,20 +85,47 @@ This is the official GitHub repository for the **CampusNodes** project. An immer
     npm install
     ```
 
-3.  **Configure Environment**
+3.  **Environment Setup**
     Create a `.env` file in the root directory and add your Supabase credentials:
     ```env
-    VITE_SUPABASE_URL=your_supabase_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    VITE_SUPABASE_URL=your_project_url
+    VITE_SUPABASE_ANON_KEY=your_anon_key
     ```
 
 4.  **Run Development Server**
     ```bash
     npm run dev
     ```
-    The site will be available at `http://localhost:5173`.
+    Visit `http://localhost:5173` to view the app.
 
 5.  **Build for Production**
     ```bash
     npm run build
     ```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Open source is at the heart of CampusNodes.
+
+1.  **Fork** the repository.
+2.  Create a new **Branch** (`git checkout -b feature/AmazingFeature`).
+3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a **Pull Request**.
+
+Please ensure your code follows the project's styling and linting guidelines.
+
+---
+
+## 📜 License
+
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by <a href="https://github.com/asterxsk">Asterxsk</a></p>
+  <p><i>Star this repo if you find it useful!</i> ⭐</p>
+</div>
