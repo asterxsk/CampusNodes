@@ -77,9 +77,19 @@ const Sidebar = () => {
                     </Link>
                 </div>
 
+                {/* Toggle Button - Below Logo */}
+                <div className={`w-full flex justify-center ${isCollapsed ? 'py-3 border-b border-white/10' : 'py-3 px-3 border-b border-white/5'}`}>
+                    <button
+                        onClick={() => setIsCollapsed(!isCollapsed)}
+                        className="w-8 h-8 bg-white/5 hover:bg-white/10 border border-white/20 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all"
+                    >
+                        <ChevronRight size={16} className={`transition-transform duration-300 ${isCollapsed ? 'rotate-180' : ''}`} />
+                    </button>
+                </div>
+
                 {/* Navigation */}
-                <div className={`w-full flex flex-col items-center ${isCollapsed ? 'py-2 px-2' : 'flex-1 py-4 px-3 overflow-y-auto custom-scrollbar'}`}>
-                    <div className={`space-y-1 ${isCollapsed ? 'w-full' : 'w-full'}`}>
+                <div className={`w-full flex flex-col items-center ${isCollapsed ? 'py-2 px-2.5' : 'flex-1 py-4 px-3 overflow-y-auto custom-scrollbar'}`}>
+                    <div className="space-y-1 w-full">
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
@@ -139,14 +149,6 @@ const Sidebar = () => {
                         </button>
                     </div>
                 )}
-
-                {/* Toggle Button */}
-                <button
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    className={`absolute w-6 h-6 bg-zinc-900 border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white shadow-lg z-50 ${isCollapsed ? '-right-3 top-1/2 -translate-y-1/2' : '-right-3 top-1/2 -translate-y-1/2'}`}
-                >
-                    <ChevronRight size={14} className={`transition-transform duration-300 ${isCollapsed ? '' : 'rotate-180'}`} />
-                </button>
 
                 {/* User Avatar when collapsed */}
                 {isCollapsed && (

@@ -1,6 +1,10 @@
 # Changelog
 
-## 7.8.0 (Current)
+## 7.8.1 (Current)
+-   **UI**: Sidebar toggle button moved below logo and above navigation.
+-   **UI**: Improved sidebar icon alignment when collapsed.
+
+## 7.8.0
 -   **FEATURE**: Dedicated Messages page for mobile.
 -   **UI**: Mobile nav now taller with text labels under icons.
 -   **UI**: Home button integrated into bottom bar (removed floating button).
