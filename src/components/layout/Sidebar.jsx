@@ -57,8 +57,8 @@ const Sidebar = () => {
                 className={`hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 bg-black/60 backdrop-blur-xl border-r border-white/10`}
             >
                 {/* Header / Logo */}
-                <div className="h-20 flex items-center relative w-full border-b border-white/5">
-                    <Link to="/" className="flex items-center gap-3 overflow-hidden w-full px-4">
+                <div className="h-20 flex items-center justify-center w-full border-b border-white/5">
+                    <Link to="/" className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : 'px-5 w-full'}`}>
                         <div className="shrink-0 scale-75">
                             <Logo />
                         </div>
@@ -76,17 +76,17 @@ const Sidebar = () => {
                 </div>
 
                 {/* Navigation */}
-                <div className="flex-1 py-8 w-full overflow-y-auto custom-scrollbar">
-                    <div className="space-y-2 px-3">
+                <div className="flex-1 py-6 w-full overflow-y-auto custom-scrollbar">
+                    <div className={`space-y-1 ${isCollapsed ? 'px-3' : 'px-4'}`}>
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <Link to={item.path} key={item.name} className="block">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                                            className={`flex items-center gap-4 py-3 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-accent/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-3' : 'px-4'}`}
                                         >
-                                            <div className={`relative z-10 ${isActive ? 'text-accent' : ''}`}>
+                                            <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'}`}>
                                                 {item.icon}
                                             </div>
                                             {!isCollapsed && (
@@ -97,7 +97,7 @@ const Sidebar = () => {
                                             {isActive && (
                                                 <motion.div
                                                     layoutId="activeTab"
-                                                    className="absolute inset-0 bg-white/5 rounded-xl border border-white/5"
+                                                    className="absolute inset-0 bg-accent/5 rounded-xl border border-accent/20"
                                                 />
                                             )}
                                         </div>

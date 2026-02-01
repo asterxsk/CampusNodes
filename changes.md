@@ -1,6 +1,10 @@
 # Changelog
 
-## 7.7.0 (Current)
+## 7.7.1 (Current)
+-   **UI**: Fixed sidebar spacing and alignment when collapsed.
+-   **UI**: Version banner icons now turn white with glowing background on hover.
+
+## 7.7.0
 -   **PERF**: Optimized PixelGrid - monochrome nodes, faster transitions, preloaded during loading.
 -   **UI**: Themed toast notifications for signup instead of browser alerts.
 

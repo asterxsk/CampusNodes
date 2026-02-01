@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.7.0';
+const CURRENT_VERSION = '7.7.1';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
@@ -120,8 +120,8 @@ const VersionBanner = () => {
                                             }}
                                             className="flex items-center gap-2 overflow-hidden h-full rounded-full"
                                         >
-                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] group-hover:border group-hover:border-blue-500/50 transition-all duration-300">
-                                                <FileText size={14} className="text-blue-400 group-hover:text-blue-300" />
+                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-blue-500/0 hover:bg-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all duration-300 group/btn">
+                                                <FileText size={14} className="text-blue-400 group-hover/btn:text-white transition-colors" />
                                             </span>
                                             {!isMobile && (
                                                 <motion.span
@@ -155,8 +155,8 @@ const VersionBanner = () => {
                                             }}
                                             className="flex items-center gap-2 overflow-hidden h-full rounded-full"
                                         >
-                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 group-hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] group-hover:border group-hover:border-red-500/50 transition-all duration-300">
-                                                <X size={14} className="text-red-400 group-hover:text-red-300" />
+                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-red-500/0 hover:bg-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.6)] transition-all duration-300 group/btn">
+                                                <X size={14} className="text-red-400 group-hover/btn:text-white transition-colors" />
                                             </span>
                                             {!isMobile && (
                                                 <motion.span
