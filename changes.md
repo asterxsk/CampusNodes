@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.6.1 (Current)
+## 7.6.2 (Current)
+-   **UI**: Mobile nav redesigned - Profile centered, Connections added, floating home button in top-left.
+
+## 7.6.1
 -   **UI**: Sidebar items now left-aligned with logo and span full width when expanded.
 
 ## 7.6.0

@@ -148,8 +148,18 @@ const Sidebar = () => {
                 </div>
             </motion.div>
 
+            {/* ==================== MOBILE FLOATING HOME BUTTON ==================== */}
+            {location.pathname !== '/' && (
+                <Link
+                    to="/"
+                    className="md:hidden fixed top-4 left-4 w-10 h-10 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-center shadow-xl text-white/80 hover:text-white transition-all"
+                >
+                    <Home size={18} />
+                </Link>
+            )}
+
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-between px-6 shadow-2xl safe-area-bottom">
+            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-around px-4 shadow-2xl safe-area-bottom">
 
                 {/* 1. Services */}
                 <Link to="/services" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/services' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
@@ -161,10 +171,32 @@ const Sidebar = () => {
                     <ShoppingBag size={20} />
                 </Link>
 
-                {/* 3. Home (Center) */}
-                <Link to="/" className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${location.pathname === '/' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
-                    <Home size={24} />
-                </Link>
+                {/* 3. Profile (Center) */}
+                <button
+                    onClick={handleUserClick}
+                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all overflow-hidden relative border-2 ${location.pathname === '/profile' ? 'border-accent' : 'border-white/20'}`}
+                >
+                    {user ? (
+                        <div className="w-full h-full rounded-full bg-gray-700 overflow-hidden relative">
+                            {user.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white">
+                                    {user.user_metadata?.first_name ? user.user_metadata.first_name[0] : 'U'}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="w-full h-full rounded-full bg-gray-700 flex items-center justify-center">
+                            <User size={20} className="text-white/60" />
+                        </div>
+                    )}
+                    {requestCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
+                            <span className="text-[9px] font-bold text-white">{requestCount}</span>
+                        </div>
+                    )}
+                </button>
 
                 {/* 4. Chat Toggle */}
                 <button
@@ -179,31 +211,10 @@ const Sidebar = () => {
                     )}
                 </button>
 
-                {/* 5. User Profile */}
-                <button
-                    onClick={handleUserClick}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all overflow-hidden relative ${location.pathname === '/profile' ? 'bg-white text-black p-0.5' : 'text-white/60 hover:text-white'}`}
-                >
-                    {user ? (
-                        <div className="w-full h-full rounded-full bg-gray-700 border border-white/20 overflow-hidden relative">
-                            {user.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
-                                    {user.user_metadata?.first_name ? user.user_metadata.first_name[0] : 'U'}
-                                </div>
-                            )}
-                        </div>
-                    ) : (
-                        <User size={20} />
-                    )}
-                    {/* Show request count on profile since Menu is gone */}
-                    {requestCount > 0 && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                            <span className="text-[8px] font-bold text-white">{requestCount}</span>
-                        </div>
-                    )}
-                </button>
+                {/* 5. Connections */}
+                <Link to="/connections" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${location.pathname === '/connections' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
+                    <Users size={20} />
+                </Link>
             </div>
         </>
     );

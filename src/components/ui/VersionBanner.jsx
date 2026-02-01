@@ -3,13 +3,17 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.6.1';
+const CURRENT_VERSION = '7.6.2';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
+        title: "Mobile Nav Redesign",
+        description: "Profile now centered in bottom bar, Connections added. Floating home button in top-left."
+    },
+    {
         title: "Sidebar Redesign",
-        description: "Menu items now left-aligned with logo and span full width when expanded for cleaner look."
+        description: "Menu items left-aligned with logo and span full width when expanded."
     },
     {
         title: "Pixel LED Background",
