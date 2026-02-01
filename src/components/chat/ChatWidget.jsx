@@ -8,7 +8,7 @@ import { useUI } from '../../context/UIContext';
 
 const ChatWidget = () => {
     const { user } = useAuth();
-    const { isChatOpen, openChat, closeChat, addUnreadSender, removeUnreadSender, unreadSenders } = useUI();
+    const { isChatOpen, openChat, closeChat, addUnreadSender, removeUnreadSender, unreadSenders, openAuthModal } = useUI();
     const [activeChat, setActiveChat] = useState(null); // The friend user object
     const [friends, setFriends] = useState([]);
     const [messages, setMessages] = useState([]);

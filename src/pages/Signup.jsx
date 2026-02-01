@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock, User, ArrowRight, CheckCircle, Check } from 'lucide-react';
@@ -42,8 +43,10 @@ const Signup = () => {
         setLoading(true);
         setError(null);
 
+        console.log('Starting signup process');
+        console.log('Email:', formData.email);
+
         // Email Validation: name.name@nmims.edu.in
-        const emailRegex = /^[a-zA-Z0-9]+\.[a-zA-Z0-9]+@nmims\.edu\.in$/;
         const isValidFormat = formData.email.includes('.') && (formData.email.endsWith('@nmims.edu.in') || formData.email.endsWith('@nmims.in'));
 
         if (!isValidFormat) {
@@ -64,13 +67,17 @@ const Signup = () => {
                 }
             });
 
+            console.log('Signup response:', { data, error });
+
             if (error) throw error;
 
             // Instead of redirecting, move to verification step
             setVerificationStep(true);
             setLoading(false);
+            console.log('Signup successful, OTP sent');
 
         } catch (error) {
+            console.error('Signup error:', error);
             setError(error.message);
             setLoading(false);
         }
@@ -81,6 +88,12 @@ const Signup = () => {
         setLoading(true);
         setError(null);
 
+        // Debug logging
+        console.log('Starting OTP verification');
+        console.log('Email:', formData.email);
+        console.log('OTP token:', otp);
+        console.log('OTP length:', otp.length);
+
         try {
             const { data, error } = await supabase.auth.verifyOtp({
                 email: formData.email,
@@ -88,7 +101,21 @@ const Signup = () => {
                 type: 'signup'
             });
 
-            if (error) throw error;
+            console.log('Supabase response:', { data, error });
+
+            if (error) {
+                console.error('OTP verification failed:', error);
+
+                // Provide more specific error messages
+                if (error.message.includes('Invalid')) {
+                    setError('Invalid verification code. Please check the code and try again.');
+                } else if (error.message.includes('expired')) {
+                    setError('Verification code has expired. Please request a new code.');
+                } else {
+                    setError(error.message || 'Verification failed. Please try again.');
+                }
+                throw error;
+            }
 
             // Success
 
@@ -110,7 +137,8 @@ const Signup = () => {
             setTimeout(() => navigate('/'), 2000);
 
         } catch (error) {
-            setError(error.message || 'Invalid code. Please try again.');
+            console.error('Full error object:', error);
+            setError(error.message || 'Invalid verification code. Please check the code and try again.');
         } finally {
             setLoading(false);
         }
@@ -119,15 +147,21 @@ const Signup = () => {
     const handleResendCode = async () => {
         setLoading(true);
         setError(null);
+        console.log('Resending OTP to:', formData.email);
         try {
-            const { error } = await supabase.auth.resend({
+            const { data, error } = await supabase.auth.resend({
                 type: 'signup',
                 email: formData.email,
                 // options: { emailRedirectTo: '...' } // Not needed if using code
             });
-            if (error) throw error;
+            console.log('Resend response:', { data, error });
+            if (error) {
+                console.error('Resend error:', error);
+                throw error;
+            }
             addToast('Verification code resent! Check your inbox.', 'success');
         } catch (error) {
+            console.error('Resend error:', error);
             setError(error.message);
         } finally {
             setLoading(false);
