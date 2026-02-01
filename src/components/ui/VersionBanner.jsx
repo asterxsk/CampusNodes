@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.4.2';
+const CURRENT_VERSION = '7.4.3';
 
 // Mock Patch Notes Data
 const PATCH_NOTES = [
@@ -35,6 +35,7 @@ const PATCH_NOTES = [
 
 const VersionBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const [showPatchNotes, setShowPatchNotes] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
 
