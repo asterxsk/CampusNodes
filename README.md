@@ -2,13 +2,13 @@
 
 <div align="center">
 
-  ![CampusNodes Banner](https://raw.githubusercontent.com/asterxsk/CampusNodes/main/public/banner.png)
+  ![CampusNodes Banner](public/banner.png)
 
   ### The Ultimate Campus Marketplace & Social Platform
   *Built for students, by students.*
 
   [![GitHub release (latest by date)](https://img.shields.io/github/v/release/asterxsk/CampusNodes?style=for-the-badge&color=blue)](https://github.com/asterxsk/CampusNodes/releases)
-  [![GitHub License](https://img.shields.io/github/license/asterxsk/CampusNodes?style=for-the-badge&color=orange)](https://github.com/asterxsk/CampusNodes/blob/main/LICENSE)
+  [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/asterxsk/CampusNodes/blob/main/LICENSE)
   [![Website](https://img.shields.io/website?url=https%3A%2F%2Fasterxsk.github.io%2FCampusNodes%2F&style=for-the-badge&label=Live%20Demo&logo=vercel)](https://asterxsk.github.io/CampusNodes/)
   
   [**Explore Live Site**](https://asterxsk.github.io/CampusNodes/) • [**Join Discord**](https://discord.gg/pTrdZ3vN) • [**Report Bug**](https://github.com/asterxsk/CampusNodes/issues)
