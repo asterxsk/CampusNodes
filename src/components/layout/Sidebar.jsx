@@ -150,7 +150,7 @@ const Sidebar = () => {
             </motion.div>
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-50 flex items-center justify-between px-6 shadow-2xl safe-area-bottom">
+            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-[70] flex items-center justify-between px-6 shadow-2xl safe-area-bottom">
 
                 {/* 1. Services */}
                 <Link to="/services" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/services' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>

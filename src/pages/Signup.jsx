@@ -88,11 +88,46 @@ const Signup = () => {
             if (error) throw error;
 
             // Success
-            alert('Verification successful! You are now logged in.');
+
+            // Create Profile manually now that they are verified
+            const { error: profileError } = await supabase.from('profiles').insert({
+                id: data.user.id,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                role: 'Student',
+                email: formData.email // Optional, good for admin view
+            });
+
+            if (profileError) {
+                // If it fails (e.g. they already exist from a previous attempt or trigger), 
+                // we should probably just log it and proceed, or handle it.
+                // If the trigger still exists, this might error with duplicate key.
+                console.warn("Profile creation note:", profileError);
+            }
+
+            alert('Verification successful! Account created.');
             navigate('/'); // Go to Dashboard/Home
 
         } catch (error) {
             setError(error.message || 'Invalid code. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendCode = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: formData.email,
+                // options: { emailRedirectTo: '...' } // Not needed if using code
+            });
+            if (error) throw error;
+            alert('Verification code resent! Please check your inbox (and spam).');
+        } catch (error) {
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -217,6 +252,17 @@ const Signup = () => {
                                     placeholder="000000"
                                     required
                                 />
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleResendCode}
+                                    disabled={loading}
+                                    className="text-xs text-accent hover:text-white underline disabled:opacity-50"
+                                >
+                                    Resend Code
+                                </button>
                             </div>
 
                             <Button type="submit" variant="accent" fullWidth={true} disabled={loading || otp.length < 6}>

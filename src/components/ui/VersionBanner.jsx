@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.4.7';
+const CURRENT_VERSION = '7.4.8';
 
 // Mock Patch Notes Data
 const PATCH_NOTES = [
@@ -69,7 +69,7 @@ const VersionBanner = () => {
                         exit={{ y: -50, x: "-50%", opacity: 0 }}
                         // Added 'group' for hover effects on children based on parent hover
                         // Added hover glow effect to the main container
-                        className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto min-w-[320px] md:min-w-[500px] z-[100] group"
+                        className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] md:w-auto min-w-[320px] md:min-w-[500px] z-[40] group"
                     >
                         <div className="relative overflow-hidden rounded-full bg-black/80 backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:border-blue-500/50">
                             <div className="px-4 py-2 flex items-center justify-between gap-4 text-xs md:text-sm">

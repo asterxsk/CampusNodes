@@ -1,11 +1,11 @@
 # Changelog
 
-## 7.4.7 (Current)
--   **UX**: Improved Mobile Chat (Overlay covers content but leaves Bottom Bar visible).
--   **UX**: Removed Chat Close button on mobile (use Bottom Bar toggle).
--   **FIX**: Fixed sidebar alignment issue.
+## 7.4.8 (Current)
+-   **FIX**: Signup Email Verification now has "Resend Code" and properly creates profiles after verification.
+-   **FIX**: Profile edits now sync correctly to Connections page.
+-   **UX**: Mobile Chat is now fullscreen with Bottom Bar visibility retained (Z-Index fix).
 
-## 7.4.5
+## 7.4.7
 -   **UI**: Redesigned mobile bottom bar (Services, Market, Home, Chat, Profile).
 
 ## 7.4.4

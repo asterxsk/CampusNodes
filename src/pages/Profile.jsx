@@ -61,8 +61,17 @@ const Profile = () => {
                 bio: formData.bio
             }
         });
+
+        // ALSO Update Public Profile Table
+        const { error: profileError } = await supabase.from('profiles').update({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            bio: formData.bio
+        }).eq('id', user.id);
+
         setLoading(false);
-        if (!error) setIsEditing(false);
+        if (profileError) console.error("Profile update failed:", profileError);
+        if (!error && !profileError) setIsEditing(false);
     };
 
     const handleAvatarUpload = async (e) => {
@@ -92,6 +101,11 @@ const Profile = () => {
                 data: { avatar_url: publicUrl }
             });
 
+            // 4. Update Public Profile Table
+            await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+
+            if (updateError) throw updateError;
+
             if (updateError) throw updateError;
 
         } catch (error) {
@@ -108,6 +122,7 @@ const Profile = () => {
             const { error } = await supabase.auth.updateUser({
                 data: { avatar_url: null }
             });
+            await supabase.from('profiles').update({ avatar_url: null }).eq('id', user.id); // Sync with public table
             if (error) throw error;
         } catch (error) {
             console.error('Error removing avatar:', error.message);

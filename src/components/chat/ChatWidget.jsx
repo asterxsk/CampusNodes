@@ -255,7 +255,7 @@ const ChatWidget = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed z-[49] bg-zinc-900 border-b border-white/20 shadow-2xl overflow-hidden
+                        className="fixed z-[60] bg-black border-b border-white/20 shadow-2xl overflow-hidden
                                    inset-x-0 top-0 bottom-[88px] md:z-[9999] md:border md:inset-auto md:bottom-6 md:right-6 md:w-96 md:h-[500px] md:rounded-2xl flex flex-col"
                     >
                         {/* Header */}
