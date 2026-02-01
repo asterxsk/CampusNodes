@@ -3,33 +3,33 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.5.0';
+const CURRENT_VERSION = '7.6.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
-        title: "End-to-End Encrypted Chat",
-        description: "Your messages are now encrypted client-side. Only you and your friend can read them."
+        title: "Pixel LED Background",
+        description: "New animated background with glowing LED nodes that light up randomly and connect when close."
     },
     {
-        title: "Profile Sync Fix",
-        description: "Profile edits now properly sync to Connections page. Everyone sees your updated name and bio."
+        title: "Lighter & Faster",
+        description: "Removed heavy 3D rendering. The app now loads faster and uses less resources."
+    },
+    {
+        title: "Mobile Text Fix",
+        description: "Loading screen text now wraps properly on smaller screens."
+    },
+    {
+        title: "End-to-End Encrypted Chat",
+        description: "Your messages are encrypted client-side. Only you and your friend can read them."
     },
     {
         title: "Storage Optimization",
-        description: "Removing a friend now clears chat history to save database space on our free plan."
+        description: "Removing a friend clears chat history to save database space."
     },
     {
         title: "Mobile Bottom Bar",
-        description: "New 5-icon navigation bar for mobile: Services, Market, Home, Chat, and Profile."
-    },
-    {
-        title: "Fullscreen Mobile Chat",
-        description: "Chat overlay now covers the full screen on mobile for a cleaner experience."
-    },
-    {
-        title: "Sidebar Layout Fix",
-        description: "Improved logo and menu alignment in the desktop sidebar."
+        description: "New 5-icon navigation bar: Services, Market, Home, Chat, and Profile."
     }
 ];
 

@@ -7,7 +7,7 @@ import Sidebar from './components/layout/Sidebar';
 import CustomCursor from './components/ui/CustomCursor';
 import Preloader from './components/ui/Preloader';
 import Hero from './components/hero/Hero';
-import Scene3D from './components/hero/Scene3D';
+import PixelGrid from './components/hero/PixelGrid';
 
 import Marketplace from './pages/Marketplace';
 import Services from './pages/Services';
@@ -40,7 +40,7 @@ const GlobalBackground = () => {
     <div
       className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isHome ? 'opacity-100 pointer-events-auto' : 'opacity-10 pointer-events-none'}`}
     >
-      <Scene3D />
+      <PixelGrid />
     </div>
   );
 };
