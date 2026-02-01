@@ -13,6 +13,7 @@ const Connections = () => {
 
     // State
     const [friends, setFriends] = useState([]);
+    const [pendingRequests, setPendingRequests] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -68,13 +69,16 @@ const Connections = () => {
             const pendingSent = friendships.filter(f => f.status === 'pending' && f.user1_id === user.id).map(f => f.user2_id);
             const pendingReceived = friendships.filter(f => f.status === 'pending' && f.user2_id === user.id).map(f => f.user1_id);
 
+            const myPendingRequests = allProfiles.filter(p => pendingReceived.includes(p.id));
+            setPendingRequests(myPendingRequests);
+
             const discoverList = allProfiles.filter(p =>
                 p.id !== user.id &&
-                !friendIds.includes(p.id)
+                !friendIds.includes(p.id) &&
+                !pendingReceived.includes(p.id) // Don't show pending requests in suggestions
             ).map(p => {
                 let status = 'none';
                 if (pendingSent.includes(p.id)) status = 'sent';
-                if (pendingReceived.includes(p.id)) status = 'received';
                 return { ...p, status };
             });
 
@@ -99,16 +103,37 @@ const Connections = () => {
         if (!user) return openAuthModal();
         setProcessing(targetId);
         try {
-            const targetUser = suggestions.find(u => u.id === targetId);
-            if (targetUser?.status === 'received') {
-                const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('user1_id', targetId).eq('user2_id', user.id);
-                if (error) throw error;
-            } else {
-                const { error } = await supabase.from('friendships').insert({ user1_id: user.id, user2_id: targetId, status: 'pending' });
-                if (error) throw error;
-            }
+            const { error } = await supabase.from('friendships').insert({ user1_id: user.id, user2_id: targetId, status: 'pending' });
+            if (error) throw error;
             fetchData();
         } catch (e) { console.error(e); alert("Action failed"); }
+        finally { setProcessing(null); }
+    };
+
+    const handleAccept = async (targetId) => {
+        setProcessing(targetId);
+        try {
+            // We need to find the specific friendship ID or use query
+            const { error } = await supabase.from('friendships')
+                .update({ status: 'accepted' })
+                .eq('user1_id', targetId) // They sent it to me
+                .eq('user2_id', user.id);
+            if (error) throw error;
+            fetchData();
+        } catch (e) { console.error(e); }
+        finally { setProcessing(null); }
+    };
+
+    const handleDecline = async (targetId) => {
+        setProcessing(targetId);
+        try {
+            const { error } = await supabase.from('friendships')
+                .delete()
+                .eq('user1_id', targetId)
+                .eq('user2_id', user.id); // They sent it to me
+            if (error) throw error;
+            fetchData();
+        } catch (e) { console.error(e); }
         finally { setProcessing(null); }
     };
 
@@ -177,7 +202,7 @@ const Connections = () => {
                                         </div>
                                         <button
                                             onClick={(e) => handleRemoveClick(friend.friendship_id, e)}
-                                            className="p-2 bg-white/5 text-gray-400 rounded-full hover:bg-red-600 hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                            className="p-2 bg-white/5 text-gray-400 rounded-full hover:bg-red-600 hover:text-white transition-all opacity-100"
                                             title="Remove Connection"
                                         >
                                             <UserMinus size={20} />
@@ -193,7 +218,50 @@ const Connections = () => {
                     </section>
                 )}
 
-                {/* Section 2: Discover (Suggestions) */}
+                {/* Section 2: Pending Requests */}
+                {user && pendingRequests.length > 0 && (
+                    <section className="mb-16 animate-fade-in-up">
+                        <div className="flex items-center gap-3 mb-6">
+                            <UserCheck className="text-yellow-400" size={24} />
+                            <h2 className="text-2xl font-bold text-white">Pending Requests ({pendingRequests.length})</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {pendingRequests.map(request => (
+                                <div key={request.id} className="bg-white/5 border border-yellow-500/20 p-5 rounded-xl flex items-center justify-between group hover:bg-white/10 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-gray-800 rounded-full border border-white/20 overflow-hidden">
+                                            {request.avatar_url ? <img src={request.avatar_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-white font-bold">{request.first_name?.[0]}</div>}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white font-bold text-lg">{request.first_name} {request.last_name}</h3>
+                                            <p className="text-yellow-400 text-xs font-semibold uppercase tracking-wider">Wants to join</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleAccept(request.id)}
+                                            className="p-2 bg-green-500/20 text-green-400 rounded-full hover:bg-green-500 hover:text-black transition-colors"
+                                            title="Accept"
+                                            disabled={processing === request.id}
+                                        >
+                                            <Check size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDecline(request.id)}
+                                            className="p-2 bg-red-500/20 text-red-400 rounded-full hover:bg-red-500 hover:text-white transition-colors"
+                                            title="Decline"
+                                            disabled={processing === request.id}
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Section 3: Discover (Suggestions) */}
                 <section>
                     <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
                         <div className="flex items-center gap-3">
