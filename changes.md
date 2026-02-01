@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.6.0 (Current)
+## 7.6.1 (Current)
+-   **UI**: Sidebar items now left-aligned with logo and span full width when expanded.
+
+## 7.6.0
 -   **UI**: New Pixel LED grid background replaces heavy 3D icosahedrons.
 -   **PERF**: Removed Three.js 3D scene for faster loading and lower resource usage.
 -   **FIX**: Preloader text now wraps correctly on smaller screens.

@@ -3,13 +3,17 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.6.0';
+const CURRENT_VERSION = '7.6.1';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
     {
+        title: "Sidebar Redesign",
+        description: "Menu items now left-aligned with logo and span full width when expanded for cleaner look."
+    },
+    {
         title: "Pixel LED Background",
-        description: "New animated background with glowing LED nodes that light up randomly and connect when close."
+        description: "Animated background with glowing LED nodes that light up randomly and connect when close."
     },
     {
         title: "Lighter & Faster",

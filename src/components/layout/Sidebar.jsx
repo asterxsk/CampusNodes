@@ -54,11 +54,11 @@ const Sidebar = () => {
                     width: isCollapsed ? '80px' : '280px',
                     transition: { duration: 0.3, type: "spring", stiffness: 100, damping: 15 }
                 }}
-                className={`hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 bg-black/60 backdrop-blur-xl border-r border-white/10 ${isCollapsed ? 'items-center' : ''}`}
+                className={`hidden md:flex flex-col h-screen fixed left-0 top-0 z-50 bg-black/60 backdrop-blur-xl border-r border-white/10`}
             >
                 {/* Header / Logo */}
-                <div className="h-20 flex items-center justify-center relative w-full border-b border-white/5">
-                    <Link to="/" className={`flex items-center gap-3 overflow-hidden w-full ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+                <div className="h-20 flex items-center relative w-full border-b border-white/5">
+                    <Link to="/" className="flex items-center gap-3 overflow-hidden w-full px-4">
                         <div className="shrink-0 scale-75">
                             <Logo />
                         </div>
@@ -84,8 +84,7 @@ const Sidebar = () => {
                                 <Link to={item.path} key={item.name} className="block">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-4 py-3 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                } ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
+                                            className={`flex items-center gap-4 py-3 px-4 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                                         >
                                             <div className={`relative z-10 ${isActive ? 'text-accent' : ''}`}>
                                                 {item.icon}
@@ -113,7 +112,7 @@ const Sidebar = () => {
                 <div className="p-4 border-t border-white/5 w-full bg-black/20">
                     <button
                         onClick={handleUserClick}
-                        className={`flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all ${isCollapsed ? 'justify-center' : ''}`}
+                        className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-all"
                     >
                         <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden border border-white/20 shrink-0">
                             {user?.user_metadata?.avatar_url ? (
