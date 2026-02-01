@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.4.1';
+const CURRENT_VERSION = '7.4.2';
 
 // Mock Patch Notes Data
 const PATCH_NOTES = [
@@ -35,8 +35,15 @@ const PATCH_NOTES = [
 
 const VersionBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
-    const [showPatchNotes, setShowPatchNotes] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
@@ -82,58 +89,70 @@ const VersionBanner = () => {
                                     {/* Patch Notes Button */}
                                     <motion.button
                                         onClick={() => setShowPatchNotes(true)}
-                                        initial={false}
+                                        initial="idle"
                                         whileHover="hover"
+                                        animate="idle"
                                         className="relative flex items-center justify-center h-8 rounded-full transition-all duration-300 border border-transparent"
                                     >
                                         <motion.div
                                             variants={{
-                                                initial: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(59, 130, 246, 0)" },
-                                                hover: { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(37, 99, 235, 1)" }
+                                                idle: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(59, 130, 246, 0)" },
+                                                hover: isMobile
+                                                    ? { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(59, 130, 246, 0)" }
+                                                    : { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(37, 99, 235, 1)" }
                                             }}
                                             className="flex items-center gap-2 overflow-hidden h-full rounded-full"
                                         >
                                             <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 group-hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] group-hover:border group-hover:border-blue-500/50 transition-all duration-300">
                                                 <FileText size={14} className="text-blue-400 group-hover:text-blue-300" />
                                             </span>
-                                            <motion.span
-                                                variants={{
-                                                    initial: { width: 0, opacity: 0, display: "none" },
-                                                    hover: { width: "auto", opacity: 1, display: "block" }
-                                                }}
-                                                className="whitespace-nowrap font-medium text-white"
-                                            >
-                                                Patch Notes
-                                            </motion.span>
+                                            {!isMobile && (
+                                                <motion.span
+                                                    variants={{
+                                                        idle: { width: 0, opacity: 0, display: "none" },
+                                                        hover: { width: "auto", opacity: 1, display: "block" }
+                                                    }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="whitespace-nowrap font-medium text-white"
+                                                >
+                                                    Patch Notes
+                                                </motion.span>
+                                            )}
                                         </motion.div>
                                     </motion.button>
 
                                     {/* Dismiss Button */}
                                     <motion.button
                                         onClick={handleDismiss}
-                                        initial={false}
+                                        initial="idle"
                                         whileHover="hover"
+                                        animate="idle"
                                         className="relative flex items-center justify-center h-8 rounded-full transition-all duration-300 border border-transparent"
                                     >
                                         <motion.div
                                             variants={{
-                                                initial: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(239, 68, 68, 0)" },
-                                                hover: { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(220, 38, 38, 1)" }
+                                                idle: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(239, 68, 68, 0)" },
+                                                hover: isMobile
+                                                    ? { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(239, 68, 68, 0)" }
+                                                    : { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(220, 38, 38, 1)" }
                                             }}
                                             className="flex items-center gap-2 overflow-hidden h-full rounded-full"
                                         >
                                             <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 group-hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] group-hover:border group-hover:border-red-500/50 transition-all duration-300">
                                                 <X size={14} className="text-red-400 group-hover:text-red-300" />
                                             </span>
-                                            <motion.span
-                                                variants={{
-                                                    initial: { width: 0, opacity: 0, display: "none" },
-                                                    hover: { width: "auto", opacity: 1, display: "block" }
-                                                }}
-                                                className="whitespace-nowrap font-medium text-white"
-                                            >
-                                                Close
-                                            </motion.span>
+                                            {!isMobile && (
+                                                <motion.span
+                                                    variants={{
+                                                        idle: { width: 0, opacity: 0, display: "none" },
+                                                        hover: { width: "auto", opacity: 1, display: "block" }
+                                                    }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="whitespace-nowrap font-medium text-white"
+                                                >
+                                                    Close
+                                                </motion.span>
+                                            )}
                                         </motion.div>
                                     </motion.button>
                                 </div>
@@ -152,7 +171,7 @@ const VersionBanner = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setShowPatchNotes(false)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/80"
                         />
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}

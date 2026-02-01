@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, User, ChevronLeft, Minimize2, Maximize2, Trash2, Clock } from 'lucide-react';
+import { MessageSquare, X, Send, User, ChevronLeft, Minimize2, Maximize2, Trash2, Clock, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+import { encryptMessage, decryptMessage } from '../../lib/encryption';
 import { useUI } from '../../context/UIContext';
 
 const ChatWidget = () => {
@@ -68,7 +69,9 @@ const ChatWidget = () => {
                     filter: `sender_id=eq.${activeChat.id}` // Listen for messages FROM them
                 }, (payload) => {
                     if (payload.new.receiver_id === user.id) {
-                        setMessages(prev => [...prev, payload.new]);
+                        const decryptedContent = decryptMessage(payload.new.content, payload.new.sender_id, payload.new.receiver_id);
+                        const msgWithDecrypted = { ...payload.new, content: decryptedContent };
+                        setMessages(prev => [...prev, msgWithDecrypted]);
                         scrollToBottom();
                         // If we are viewing this chat, don't mark unread.
                         // But global listener might have fired? 
@@ -82,9 +85,11 @@ const ChatWidget = () => {
                     filter: `sender_id=eq.${user.id}` // Listen for my own messages (if sent from another device)
                 }, (payload) => {
                     if (payload.new.receiver_id === activeChat.id) {
+                        const decryptedContent = decryptMessage(payload.new.content, payload.new.sender_id, payload.new.receiver_id);
+                        const msgWithDecrypted = { ...payload.new, content: decryptedContent };
                         setMessages(prev => {
                             if (prev.find(m => m.id === payload.new.id)) return prev;
-                            return [...prev, payload.new];
+                            return [...prev, msgWithDecrypted];
                         });
                         scrollToBottom();
                     }
@@ -135,12 +140,15 @@ const ChatWidget = () => {
 
             if (error) throw error;
 
-            // Filter deleted messages
+            // Filter deleted messages and Decrypt
             const visibleMessages = data.filter(msg => {
                 if (msg.sender_id === user.id && msg.deleted_by_sender) return false;
                 if (msg.receiver_id === user.id && msg.deleted_by_receiver) return false;
                 return true;
-            });
+            }).map(msg => ({
+                ...msg,
+                content: decryptMessage(msg.content, msg.sender_id, msg.receiver_id)
+            }));
 
             setMessages(visibleMessages || []);
             setTimeout(scrollToBottom, 100);
@@ -180,7 +188,7 @@ const ChatWidget = () => {
         const content = newMessage.trim();
         setNewMessage(''); // optimistic clear
 
-        // Optimistic Update
+        // Optimistic Update (Show plain text)
         const tempMsg = {
             id: Date.now(),
             sender_id: user.id,
@@ -193,16 +201,26 @@ const ChatWidget = () => {
         scrollToBottom();
 
         try {
+            const encryptedContent = encryptMessage(content, user.id, activeChat.id);
             const { error, data } = await supabase.from('messages').insert({
                 sender_id: user.id,
                 receiver_id: activeChat.id,
-                content: content
+                content: encryptedContent // Send Encrypted
             }).select();
 
             if (error) throw error;
 
-            // Replace temp with real
-            setMessages(prev => prev.map(m => m.id === tempMsg.id ? data[0] : m));
+            // Replace temp with real (and decrypt the response just in case, though we know what we sent)
+            // The server returns the encrypted content, so we need to decrypt it for the state if we were to use it directly
+            // But since we did an optimistic update with the Real content, we simply swap the ID and keep the content
+            // OR to be safe, we decrypt the return value to ensure consistency
+            const returnedMsg = data[0];
+            const decryptedReturnedMsg = {
+                ...returnedMsg,
+                content: decryptMessage(returnedMsg.content, returnedMsg.sender_id, returnedMsg.receiver_id)
+            };
+
+            setMessages(prev => prev.map(m => m.id === tempMsg.id ? decryptedReturnedMsg : m));
 
         } catch (err) {
             console.error("Failed to send", err);
@@ -269,7 +287,7 @@ const ChatWidget = () => {
                                 ) : (
                                     <h3 className="font-bold text-white text-lg flex items-center gap-2">
                                         <MessageSquare size={20} className="text-accent" />
-                                        Messages
+                                        Messages <Lock size={12} className="text-green-500/50 ml-1" title="End-to-End Encrypted" />
                                     </h3>
                                 )}
                             </div>
