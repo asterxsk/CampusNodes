@@ -150,32 +150,29 @@ const Sidebar = () => {
             </motion.div>
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-50 flex items-center justify-between px-8 shadow-2xl safe-area-bottom">
+            <div className="md:hidden fixed bottom-5 left-4 right-4 h-16 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full z-50 flex items-center justify-between px-6 shadow-2xl safe-area-bottom">
 
-                {/* Left: Home */}
+                {/* 1. Services */}
+                <Link to="/services" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/services' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
+                    <Wrench size={20} />
+                </Link>
+
+                {/* 2. Market */}
+                <Link to="/market" className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${location.pathname === '/market' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
+                    <ShoppingBag size={20} />
+                </Link>
+
+                {/* 3. Home (Center) */}
                 <Link to="/" className={`w-12 h-12 flex items-center justify-center rounded-full transition-all ${location.pathname === '/' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}>
                     <Home size={24} />
                 </Link>
 
-                {/* Center: Menu Toggle */}
-                <button
-                    onClick={() => setIsMobileMenuOpen(true)}
-                    className="w-12 h-12 bg-white/10 text-white border border-white/10 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform relative"
-                >
-                    <MenuIcon size={24} />
-                    {requestCount > 0 && (
-                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
-                            <span className="text-[8px] font-bold text-white">{requestCount}</span>
-                        </div>
-                    )}
-                </button>
-
-                {/* Chat Toggle */}
+                {/* 4. Chat Toggle */}
                 <button
                     onClick={toggleChat}
-                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all relative ${isChatOpen ? 'bg-accent text-black' : 'text-white/60 hover:text-white'}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all relative ${isChatOpen ? 'bg-accent text-black' : 'text-white/60 hover:text-white'}`}
                 >
-                    <MessageSquare size={24} />
+                    <MessageSquare size={20} />
                     {unreadCount > 0 && !isChatOpen && (
                         <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
                             <span className="text-[8px] font-bold text-white">{unreadCount}</span>
@@ -183,13 +180,13 @@ const Sidebar = () => {
                     )}
                 </button>
 
-                {/* Right: User */}
+                {/* 5. User Profile */}
                 <button
                     onClick={handleUserClick}
-                    className={`w-12 h-12 flex items-center justify-center rounded-full transition-all overflow-hidden ${location.pathname === '/profile' ? 'bg-white text-black p-1' : 'text-white/60 hover:text-white'}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all overflow-hidden relative ${location.pathname === '/profile' ? 'bg-white text-black p-0.5' : 'text-white/60 hover:text-white'}`}
                 >
                     {user ? (
-                        <div className="w-full h-full rounded-full bg-gray-700 border border-white/20 overflow-hidden">
+                        <div className="w-full h-full rounded-full bg-gray-700 border border-white/20 overflow-hidden relative">
                             {user.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
@@ -199,69 +196,16 @@ const Sidebar = () => {
                             )}
                         </div>
                     ) : (
-                        <User size={24} />
+                        <User size={20} />
+                    )}
+                    {/* Show request count on profile since Menu is gone */}
+                    {requestCount > 0 && (
+                        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full flex items-center justify-center border border-black z-50">
+                            <span className="text-[8px] font-bold text-white">{requestCount}</span>
+                        </div>
                     )}
                 </button>
             </div>
-
-            {/* ==================== MOBILE FULL SCREEN MENU OVERLAY ==================== */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: '100%' }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: '100%' }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-[60] bg-black flex flex-col p-6 md:hidden"
-                    >
-                        <div className="flex justify-end mb-8">
-                            <button
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-2 border border-white/20 rounded-full hover:bg-white/10 text-white"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col gap-6 items-center justify-center flex-1">
-                            {menuItems.map((item, index) => (
-                                <Link
-                                    key={item.name}
-                                    to={item.path}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-4xl font-display font-bold text-white hover:text-accent transition-colors"
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
-                            {user && (
-                                <Link
-                                    to="/profile"
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="text-4xl font-display font-bold text-white hover:text-accent transition-colors"
-                                >
-                                    Profile
-                                </Link>
-                            )}
-                            {!user && (
-                                <button
-                                    onClick={(e) => {
-                                        setIsMobileMenuOpen(false);
-                                        openAuthModal();
-                                    }}
-                                    className="text-2xl font-bold text-gray-400 mt-8"
-                                >
-                                    Sign In
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="text-center text-gray-600 text-sm mt-8">
-                            Campus Nodes &copy; 2026
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
         </>
     );
 };

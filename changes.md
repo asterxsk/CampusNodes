@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.4.4 (Current)
+## 7.4.5 (Current)
+-   **UI**: Redesigned mobile bottom bar (Services, Market, Home, Chat, Profile).
+
+## 7.4.4
 -   **FEAT**: Added "Pending Requests" management in Connections.
 -   **UX**: "Remove Friend" button is now always visible.
 
