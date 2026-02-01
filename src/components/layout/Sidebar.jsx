@@ -41,16 +41,16 @@ const Sidebar = () => {
                     height: isCollapsed ? 'auto' : '100vh',
                     top: isCollapsed ? '50%' : '0%',
                     y: isCollapsed ? '-50%' : '0%',
-                    left: isCollapsed ? '12px' : '0px',
+                    left: isCollapsed ? '24px' : '0px',
                     borderRadius: isCollapsed ? '24px' : '0px',
                 }}
                 transition={{
                     type: "spring",
-                    stiffness: 200,
-                    damping: 25,
-                    mass: 0.8
+                    stiffness: 120,
+                    damping: 20,
+                    mass: 0.6
                 }}
-                className={`hidden md:flex flex-col fixed z-50 bg-black/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl`}
+                className={`hidden md:flex flex-col fixed z-50 bg-black/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-2xl origin-left`}
             >
                 {/* Header / Logo */}
                 <div className={`flex items-center w-full shrink-0 ${isCollapsed ? 'py-4 justify-center' : 'h-20 px-6'}`}>
@@ -82,7 +82,7 @@ const Sidebar = () => {
                                 <Magnetic>
                                     <div
                                         className={`flex items-center relative group transition-all duration-300 rounded-xl
-                                            ${isCollapsed ? 'justify-center p-3' : 'px-4 py-3.5 gap-4'}
+                                            ${isCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3.5 gap-4 mx-2'}
                                             ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}
                                         `}
                                     >

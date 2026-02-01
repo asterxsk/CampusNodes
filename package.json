@@ -1,7 +1,7 @@
 {
   "name": "foe",
   "private": true,
-  "version": "7.9.0",
+  "version": "7.9.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
