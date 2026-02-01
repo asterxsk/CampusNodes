@@ -96,13 +96,13 @@ const Sidebar = () => {
                                 <Link to={item.path} key={item.name} className="block w-full">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-3 py-2.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-4'}`}
+                                            className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-5'}`}
                                         >
                                             <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'}`}>
                                                 {item.icon}
                                             </div>
                                             {!isCollapsed && (
-                                                <span className="font-medium whitespace-nowrap z-10 relative text-sm">
+                                                <span className="font-semibold whitespace-nowrap z-10 relative text-base">
                                                     {item.name}
                                                 </span>
                                             )}
