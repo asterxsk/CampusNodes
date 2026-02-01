@@ -6,6 +6,7 @@ export const UIProvider = ({ children }) => {
     const [unreadSenders, setUnreadSenders] = useState(new Set());
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
     const openAuthModal = () => setIsAuthModalOpen(true);
     const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -37,7 +38,8 @@ export const UIProvider = ({ children }) => {
             unreadCount: unreadSenders.size,
             unreadSenders,
             addUnreadSender,
-            removeUnreadSender
+            removeUnreadSender,
+            isSidebarCollapsed, setIsSidebarCollapsed
         }}>
             {children}
         </UIContext.Provider>

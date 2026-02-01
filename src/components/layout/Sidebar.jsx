@@ -17,10 +17,9 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
-    const [isCollapsed, setIsCollapsed] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user } = useAuth();
-    const { openAuthModal, toggleChat, isChatOpen, unreadCount } = useUI(); // UI Hook
+    const { openAuthModal, toggleChat, isChatOpen, unreadCount, isSidebarCollapsed: isCollapsed, setIsSidebarCollapsed: setIsCollapsed } = useUI();
     const location = useLocation();
     const navigate = useNavigate();
     const [requestCount, setRequestCount] = useState(0);
@@ -84,10 +83,10 @@ const Sidebar = () => {
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
-                                <Link to={item.path} key={item.name} className="block">
+                                <Link to={item.path} key={item.name} className="block w-full">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-3 py-2.5 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-3'}`}
+                                            className={`flex items-center gap-3 py-2.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-4'}`}
                                         >
                                             <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'}`}>
                                                 {item.icon}

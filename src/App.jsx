@@ -47,10 +47,11 @@ const GlobalBackground = () => {
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
+  const { isSidebarCollapsed } = useUI();
   const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
 
   return (
-    <div className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white pl-0 md:pl-20 cursor-none relative z-10 transition-colors duration-500 ${isHome ? 'bg-transparent' : 'bg-background'}`}>
+    <div className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white cursor-none relative z-10 transition-all duration-300 ${isHome ? 'bg-transparent' : 'bg-background'} ${isSidebarCollapsed ? 'md:pl-0' : 'md:pl-[260px]'}`}>
       {children}
     </div>
   );

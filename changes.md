@@ -1,6 +1,10 @@
 # Changelog
 
-## 7.7.3 (Current)
+## 7.7.4 (Current)
+-   **UI**: Sidebar menu items now span full width when expanded.
+-   **UI**: Page content now responds dynamically to sidebar state.
+
+## 7.7.3
 -   **FIX**: Mobile chat overlay now extends to bottom of screen.
 -   **UI**: Discover People section now left-aligned on mobile.
 
