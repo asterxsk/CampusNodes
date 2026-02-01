@@ -1,10 +1,11 @@
 # Changelog
 
-## 7.8.3 (Current)
--   **UI**: Sidebar minimize button refined to match menu items.
--   **UI**: Toast notifications now stack and are perfectly centered.
--   **UI**: Added dedicated success state after signup verification.
--   **BUGFIX**: Discover People now sorts by newest users first.
+## 7.8.4 (Current)
+-   **FIX**: Robust profile creation for new users via SQL triggers and frontend fallbacks.
+-   **UI**: Improved Discover People reliability and data syncing.
+-   **DB**: Consolidated connection and profile schema logic.
+
+## 7.8.3
 
 ## 7.8.2
 -   **UI**: Mobile nav now shows Services instead of Home.
