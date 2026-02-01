@@ -74,23 +74,40 @@ const Sidebar = () => {
                 </div>
 
                 {/* Navigation Items */}
-                <div className={`flex-1 flex flex-col w-full py-2 ${isCollapsed ? 'px-2 gap-2' : 'px-4 gap-1'}`}>
+                <div className={`flex-1 flex flex-col w-full py-2 ${isCollapsed ? 'px-2 gap-2' : 'gap-0.5'}`}>
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.path;
                         return (
                             <Link to={item.path} key={item.name} className="block w-full">
                                 <Magnetic>
                                     <div
-                                        className={`flex items-center relative group transition-all duration-300 rounded-xl
-                                            ${isCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3.5 gap-4 mx-2'}
-                                            ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                        className={`flex items-center relative group transition-all duration-300
+                                            ${isCollapsed
+                                                ? 'justify-center p-3 w-12 h-12 mx-auto rounded-xl'
+                                                : 'px-6 py-3.5 gap-4'
+                                            }
+                                            ${isActive
+                                                ? 'bg-accent/10 text-accent border-r-2 border-accent'
+                                                : isCollapsed
+                                                    ? 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }
                                         `}
                                     >
-                                        {/* Active Background Glow */}
-                                        {isActive && (
+                                        {/* Active Background Glow (Expanded Only) */}
+                                        {isActive && !isCollapsed && (
                                             <motion.div
                                                 layoutId="activeSidebar"
-                                                className="absolute inset-0 bg-accent/10 rounded-xl border border-accent/20"
+                                                className="absolute inset-0 bg-accent/10 border-r-2 border-accent"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+
+                                        {/* Active Background Glow (Collapsed Only) */}
+                                        {isActive && isCollapsed && (
+                                            <motion.div
+                                                layoutId="activeSidebarCollapsed"
+                                                className="absolute inset-0 bg-accent/15 rounded-xl border border-accent/20"
                                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                             />
                                         )}
