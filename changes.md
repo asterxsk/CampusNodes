@@ -1,9 +1,12 @@
 # Changelog
 
-## 7.8.4 (Current)
--   **FIX**: Robust profile creation for new users via SQL triggers and frontend fallbacks.
--   **UI**: Improved Discover People reliability and data syncing.
--   **DB**: Consolidated connection and profile schema logic.
+## 7.8.5 (Current)
+-   **UI**: Unified Sidebar alignment (Logo/Items/Toggle aligned to px-5).
+-   **UI**: Added "Messages" link directly to the desktop sidebar.
+-   **UI**: Chat floating button is now visible for all users (prompts login on click).
+-   **DOC**: Updated `publish.md` and `README.md` with new release rules and features.
+
+## 7.8.4
 
 ## 7.8.3
 

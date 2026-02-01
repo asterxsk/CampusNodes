@@ -4,6 +4,7 @@
 
 1. **Push changes as packages with site version number (should be matching)**
    - Update `package.json` version to match the site version (e.g., in `VersionBanner.jsx`).
+   - Update `README.md` to reflect the latest version number and document any significant new features.
    - Create a git tag for the release (e.g., `git tag v7.4.2`).
    - Push code and tags: `git push origin main` and `git push origin v7.4.2`.
 

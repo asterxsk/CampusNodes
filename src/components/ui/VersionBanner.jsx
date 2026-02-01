@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.8.4';
+const CURRENT_VERSION = '7.8.5';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [

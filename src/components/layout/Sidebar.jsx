@@ -14,6 +14,7 @@ const menuItems = [
     { name: 'Market', path: '/market', icon: <ShoppingBag size={20} /> },
     { name: 'Services', path: '/services', icon: <Wrench size={20} /> },
     { name: 'Connect', path: '/connections', icon: <Users size={20} /> },
+    { name: 'Chat', path: '/messages', icon: <MessageSquare size={20} />, isMessages: true },
 ];
 
 const Sidebar = () => {
@@ -59,7 +60,7 @@ const Sidebar = () => {
                 style={isCollapsed ? { transform: 'translateY(-50%)' } : {}}
             >
                 {/* Header / Logo */}
-                <div className={`flex items-center justify-center w-full ${isCollapsed ? 'py-3' : 'h-16 px-5 border-b border-white/5'}`}>
+                <div className={`flex items-center w-full ${isCollapsed ? 'py-4 justify-center px-0' : 'h-16 px-5 border-b border-white/5'}`}>
                     <Link to="/" className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center' : 'w-full'}`}>
                         <div className={`shrink-0 ${isCollapsed ? 'scale-65' : 'scale-75'}`}>
                             <Logo />
@@ -78,10 +79,10 @@ const Sidebar = () => {
                 </div>
 
                 {/* Toggle Button - Below Logo */}
-                <div className={`w-full ${isCollapsed ? 'py-2 px-2.5 border-b border-white/10' : 'py-2 px-3 border-b border-white/5'}`}>
+                <div className={`w-full ${isCollapsed ? 'py-2 px-2 border-b border-white/10' : 'py-2 px-3 border-b border-white/5'}`}>
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full text-gray-400 hover:text-white hover:bg-white/5 ${isCollapsed ? 'justify-center px-2.5' : 'px-5'}`}
+                        className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full text-gray-400 hover:text-white hover:bg-white/5 ${isCollapsed ? 'justify-center px-1' : 'px-5'}`}
                     >
                         <div className="relative z-10 transition-all group-hover:text-white">
                             <div className="w-6 h-6 flex items-center justify-center">
@@ -105,15 +106,25 @@ const Sidebar = () => {
                                 <Link to={item.path} key={item.name} className="block w-full">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-2.5' : 'px-5'}`}
+                                            className={`flex items-center gap-4 py-3.5 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-accent/15 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'} ${isCollapsed ? 'justify-center px-1' : 'px-5'}`}
                                         >
-                                            <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'}`}>
+                                            <div className={`relative z-10 transition-all ${isActive ? 'text-accent drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'group-hover:text-white'} ${isCollapsed ? 'w-6 h-6 flex items-center justify-center' : ''}`}>
                                                 {item.icon}
+                                                {item.isMessages && unreadCount > 0 && isCollapsed && (
+                                                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
+                                                )}
                                             </div>
                                             {!isCollapsed && (
-                                                <span className="font-semibold whitespace-nowrap z-10 relative text-base">
-                                                    {item.name}
-                                                </span>
+                                                <div className="flex-1 flex items-center justify-between z-10 relative">
+                                                    <span className="font-semibold whitespace-nowrap text-base">
+                                                        {item.name}
+                                                    </span>
+                                                    {item.isMessages && unreadCount > 0 && (
+                                                        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                                            {unreadCount}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             )}
                                             {isActive && (
                                                 <motion.div
@@ -176,10 +187,10 @@ const Sidebar = () => {
                         </div>
                     </button>
                 )}
-            </motion.div>
+            </motion.div >
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom">
+            < div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom" >
                 <div className="flex items-center justify-around py-2 px-2">
 
                     {/* 1. Services */}
@@ -238,7 +249,7 @@ const Sidebar = () => {
                         <span className="text-[10px] font-medium">Connect</span>
                     </Link>
                 </div>
-            </div>
+            </div >
         </>
     );
 };
