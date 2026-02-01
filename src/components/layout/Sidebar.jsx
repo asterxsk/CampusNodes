@@ -58,7 +58,7 @@ const Sidebar = () => {
             >
                 {/* Header / Logo */}
                 <div className="h-20 flex items-center justify-center relative w-full border-b border-white/5">
-                    <Link to="/" className="flex items-center gap-3 overflow-hidden px-4">
+                    <Link to="/" className={`flex items-center gap-3 overflow-hidden w-full ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
                         <div className="shrink-0 scale-75">
                             <Logo />
                         </div>
@@ -84,8 +84,8 @@ const Sidebar = () => {
                                 <Link to={item.path} key={item.name} className="block">
                                     <Magnetic>
                                         <div
-                                            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all group relative overflow-hidden ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                } ${isCollapsed ? 'justify-center' : ''}`}
+                                            className={`flex items-center gap-4 py-3 rounded-xl transition-all group relative overflow-hidden w-full ${isActive ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                } ${isCollapsed ? 'justify-center px-0' : 'px-3'}`}
                                         >
                                             <div className={`relative z-10 ${isActive ? 'text-accent' : ''}`}>
                                                 {item.icon}

@@ -1,6 +1,9 @@
 # Changelog
 
-## 7.4.9 (Current)
+## 7.5.0 (Current)
+-   **UI**: Fixed sidebar layout and logo alignment with menu items.
+
+## 7.4.9
 -   **OPT**: Removing a friend now deletes all chat messages with them (storage optimization).
 
 ## 7.4.8
