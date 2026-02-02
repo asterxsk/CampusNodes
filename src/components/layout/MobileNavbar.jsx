@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, User, MessageSquare, LayoutGrid, ShoppingBag, MessageCircle, Wrench, X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,7 +49,8 @@ const MobileNavbar = () => {
         </button>
     );
 
-    return (
+    // Use portal to render at body level (fixes fixed positioning with parent transforms)
+    return createPortal(
         <>
             {/* Dark Overlay for Menu */}
             <AnimatePresence>
@@ -170,7 +172,8 @@ const MobileNavbar = () => {
                     </Link>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 };
 

@@ -1,10 +1,10 @@
 # Changelog
 
-## 8.5.1 (Current)
--   **FIX**: **Desktop Nav**: Fixed resizing bug by using explicit width (520px when expanded).
--   **FIX**: **Mobile Bottom Bar**: Removed backdrop-blur for better scroll performance.
--   **FIX**: **Chat Input**: Added keyboard awareness with visualViewport API for proper positioning.
--   **UI**: **Product Details**: Replaced "C" logo with Campus Nodes logo in fallback placeholders.
+## 8.5.2 (Current)
+-   **FIX**: **Mobile Bottom Bar**: Now renders via React Portal to document.body (fixes scroll issue with parent transforms).
+-   **FIX**: **Forum Comment Input**: Send button no longer overflows on mobile (added shrink-0 and min-w-0).
+
+## 8.5.1
 
 ## 8.5.0
 

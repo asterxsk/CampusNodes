@@ -365,12 +365,12 @@ const Forum = () => {
                                                                     value={newComment}
                                                                     onChange={(e) => setNewComment(e.target.value)}
                                                                     placeholder="Write a comment..."
-                                                                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm text-white focus:outline-none focus:border-accent/50"
+                                                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-sm text-white focus:outline-none focus:border-accent/50"
                                                                 />
                                                                 <button
                                                                     type="submit"
                                                                     disabled={!newComment.trim()}
-                                                                    className="p-1.5 bg-accent text-black rounded-full disabled:opacity-50"
+                                                                    className="shrink-0 p-1.5 bg-accent text-black rounded-full disabled:opacity-50"
                                                                 >
                                                                     <Send size={14} />
                                                                 </button>
