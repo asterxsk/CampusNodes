@@ -40,6 +40,7 @@ const Connections = () => {
             }
 
             // 2. Fetch Profiles for Suggestions (Limit 50 for now)
+
             // 2. Fetch Profiles for Suggestions (Limit 50 for now)
             let query = supabase
                 .from('profiles')
@@ -53,11 +54,16 @@ const Connections = () => {
 
             const { data: allProfiles, error: profileError } = await query;
 
-            if (profileError) throw profileError;
+            if (profileError) {
+                console.error("Error fetching profiles:", profileError);
+                throw profileError;
+            }
+
+            const profilesData = allProfiles || [];
 
             if (!user) {
                 // If not logged in, everyone is a "suggestion"
-                setSuggestions(allProfiles);
+                setSuggestions(profilesData);
                 setFriends([]);
                 return;
             }
@@ -66,7 +72,7 @@ const Connections = () => {
             const accepted = friendships.filter(f => f.status === 'accepted');
             const friendIds = accepted.map(f => f.user1_id === user.id ? f.user2_id : f.user1_id);
 
-            const myFriends = allProfiles.filter(p => friendIds.includes(p.id));
+            const myFriends = profilesData.filter(p => friendIds.includes(p.id));
             const myFriendsWithIds = myFriends.map(p => {
                 const f = accepted.find(rel => rel.user1_id === p.id || rel.user2_id === p.id);
                 return { ...p, friendship_id: f?.id };
@@ -77,10 +83,10 @@ const Connections = () => {
             const pendingSent = friendships.filter(f => f.status === 'pending' && f.user1_id === user.id).map(f => f.user2_id);
             const pendingReceived = friendships.filter(f => f.status === 'pending' && f.user2_id === user.id).map(f => f.user1_id);
 
-            const myPendingRequests = allProfiles.filter(p => pendingReceived.includes(p.id));
+            const myPendingRequests = profilesData.filter(p => pendingReceived.includes(p.id));
             setPendingRequests(myPendingRequests);
 
-            const discoverList = allProfiles.filter(p =>
+            const discoverList = profilesData.filter(p =>
                 p.id !== user.id &&
                 !friendIds.includes(p.id) &&
                 !pendingReceived.includes(p.id) // Don't show pending requests in suggestions

@@ -1,9 +1,11 @@
 # Changelog
 
-## 8.3.6 (Current)
--   **FIX**: **Version Banner**: Rewritten ground-up to dynamically sync with `package.json` version.
--   **UI**: **Version Banner**: New glassmorphism design with "What's New" modal.
--   **CLEANUP**: Removed hardcoded path notes logic.
+## 8.3.7 (Current)
+-   **FIX**: **Desktop Nav**: Fixed clipping/spasm glitches on the top bar when hovering.
+-   **UI**: **Mobile Nav**: Renamed "Net" to "Connections"; added "Campus" slide-up menu with Forum, Marketplace, Services.
+-   **FIX**: **Connections**: Improved null handling for Discover People section.
+
+## 8.3.6
 
 ## 8.2.0
 

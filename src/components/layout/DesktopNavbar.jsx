@@ -28,9 +28,10 @@ const DesktopNavbar = () => {
                 className="pointer-events-auto bg-black/90 border border-white/10 rounded-full shadow-2xl overflow-hidden"
                 initial={false}
                 animate={{
-                    width: isHovered ? 'auto' : 140,
+                    width: isHovered ? 'auto' : 180,
                     height: 50,
                 }}
+                style={{ minWidth: 180 }}
                 onHoverStart={() => setIsHovered(true)}
                 onHoverEnd={() => setIsHovered(false)}
                 transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
@@ -42,15 +43,15 @@ const DesktopNavbar = () => {
                     </div>
 
                     <div className="flex items-center overflow-hidden h-full">
-                        <AnimatePresence mode="popLayout" initial={false}>
+                        <AnimatePresence initial={false}>
                             {!isHovered ? (
                                 <motion.div
                                     key="label"
-                                    initial={{ opacity: 0, x: -20, filter: 'blur(4px)' }}
-                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
+                                    initial={{ opacity: 0, x: -20, position: 'absolute' }}
+                                    animate={{ opacity: 1, x: 0, position: 'relative' }}
+                                    exit={{ opacity: 0, x: 20, position: 'absolute' }}
                                     transition={{ duration: 0.2 }}
-                                    className="pr-4 whitespace-nowrap"
+                                    className="px-4 whitespace-nowrap"
                                 >
                                     <span className="font-bold text-sm text-white font-display tracking-wider">CampusNodes</span>
                                 </motion.div>
