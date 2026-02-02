@@ -1,79 +1,106 @@
 import React, { useState } from 'react';
-import { FileText, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, X, GitCommit } from 'lucide-react';
+import pkg from '../../../package.json';
 
 const VersionBanner = () => {
     const [isOpen, setIsOpen] = useState(false);
-
-    // Hardcoded patch notes for now
-    const patchNotes = [
-        { version: "v8.3.4", date: "Feb 2026", changes: ["Refactored Navigation Codebase", "Split PC & Mobile Nav Components", "Cleaned up Sidebar"] },
-        { version: "v8.3.3", date: "Feb 2026", changes: ["Refined Navigation Labels", "Fixed Chat Lag (Removed Blur)", "UI Tweaks"] },
-        { version: "v8.3.2", date: "Feb 2026", changes: ["Brand New Dynamic Island Navigation", "Removed Duplicate Chat Popup", "Fixed Laggy Animations"] },
-        { version: "v8.3.1", date: "Feb 2026", changes: ["Redesigned Mobile Bottom Bar", "Forum Comments & PFPs", "Performance Improvements"] },
-        { version: "v8.3.0", date: "Feb 2026", changes: ["Added Messages Modal for Desktop", "Dynamic Navigation Bar", "Performance & UI Enhancements"] },
-        { version: "v8.2.0", date: "Jan 2026", changes: ["Enhanced Global Chat", "Mobile UI Fixes"] },
-    ];
+    const version = pkg.version;
 
     return (
         <>
-            {/* Minimal Version Button */}
+            {/* Floating Version Pill */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="fixed top-20 left-4 md:top-auto md:bottom-4 md:left-4 z-40 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 border border-white/5 text-gray-500 hover:bg-white hover:text-black transition-all group"
+                className="fixed z-40 flex items-center gap-2 px-4 py-2 rounded-full 
+                           bg-black/40 backdrop-blur-md border border-white/10 
+                           text-white/80 hover:text-white hover:bg-black/60 hover:border-white/20 
+                           transition-all shadow-lg
+                           top-20 left-4 md:top-auto md:bottom-6 md:left-6"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
             >
-                <span className="text-xs font-mono font-bold">v8.3.4</span>
-                <span className="w-0 overflow-hidden group-hover:w-auto group-hover:pl-1 transition-all duration-300 text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100">
-                    Patch Notes
+                <GitCommit size={14} className="text-accent" />
+                <span className="font-mono text-xs font-bold tracking-wider">v{version}</span>
+                <span className="w-px h-3 bg-white/20 mx-1" />
+                <span className="text-[10px] uppercase tracking-widest font-medium opacity-60 group-hover:opacity-100">
+                    Release
                 </span>
             </motion.button>
 
-            {/* Patch Notes Modal */}
+            {/* Modal Overlay */}
             <AnimatePresence>
                 {isOpen && (
-                    <>
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsOpen(false)}
-                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                         />
+
                         <motion.div
-                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 50, scale: 0.9 }}
-                            className="fixed bottom-16 left-4 w-80 md:w-96 bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-xl z-[101] overflow-hidden"
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-md bg-[#0f0f0f] border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
                         >
-                            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
-                                <h3 className="font-bold text-white flex items-center gap-2">
-                                    <FileText size={16} className="text-accent" /> Patch Notes
-                                </h3>
-                                <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-5 border-b border-white/5 bg-gradient-to-r from-accent/5 to-transparent">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-accent/10 text-accent">
+                                        <Sparkles size={16} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-bold text-white leading-none">What's New</h3>
+                                        <p className="text-xs text-white/40 mt-1 font-mono">Current Version: v{version}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="p-2 text-white/40 hover:text-white transition-colors rounded-full hover:bg-white/5"
+                                >
                                     <X size={18} />
                                 </button>
                             </div>
-                            <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                {patchNotes.map((note, index) => (
-                                    <div key={index} className="mb-6 last:mb-0">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-accent font-mono font-bold text-sm">{note.version}</span>
-                                            <span className="text-gray-600 text-xs">{note.date}</span>
+
+                            {/* Content */}
+                            <div className="p-6 max-h-[60vh] overflow-y-auto">
+                                <div className="space-y-6">
+                                    <div className="relative pl-4 border-l-2 border-accent">
+                                        <span className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-accent ring-4 ring-[#0f0f0f]" />
+                                        <div className="mb-1 flex items-center gap-2">
+                                            <span className="text-sm font-bold text-white">Latest Update</span>
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-mono">v{version}</span>
                                         </div>
-                                        <ul className="list-disc list-inside space-y-1">
-                                            {note.changes.map((change, i) => (
-                                                <li key={i} className="text-gray-400 text-xs leading-relaxed">
-                                                    {change}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <p className="text-xs text-white/60 leading-relaxed">
+                                            System enhancements and performance optimizations.
+                                            Check the repository for detailed changelogs.
+                                        </p>
                                     </div>
-                                ))}
+
+                                    {/* Placeholder for older history to make it look populated */}
+                                    <div className="relative pl-4 border-l-2 border-white/10 opacity-50">
+                                        <span className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white/20 ring-4 ring-[#0f0f0f]" />
+                                        <div className="mb-1">
+                                            <span className="text-xs font-bold text-white">Previous Releases</span>
+                                        </div>
+                                        <p className="text-xs text-white/60 leading-relaxed">
+                                            Includes major UI overhauls, navigation restructuring, and core stability fixes.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center">
+                                    <span className="text-[10px] text-white/30">Build: Validated</span>
+                                    <span className="text-[10px] text-accent font-mono tracking-widest">FOE SYSTEM</span>
+                                </div>
                             </div>
                         </motion.div>
-                    </>
+                    </div>
                 )}
             </AnimatePresence>
         </>

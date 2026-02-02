@@ -1,9 +1,11 @@
 # Changelog
 
-## 8.2.0 (Current)
--   **FIX**: **Navigation**: Resolved label overlapping issue on desktop top bar.
--   **SEC**: **Auth**: Restricted signup to `@gmail.com` addresses only for better security.
--   **DEPLOY**: **Vercel**: Fully migrated deployment workflow to Vercel (removed GitHub Pages legacy scripts).
+## 8.3.6 (Current)
+-   **FIX**: **Version Banner**: Rewritten ground-up to dynamically sync with `package.json` version.
+-   **UI**: **Version Banner**: New glassmorphism design with "What's New" modal.
+-   **CLEANUP**: Removed hardcoded path notes logic.
+
+## 8.2.0
 
 ## 8.1.0
 -   **UI**: **Desktop Nav**: Replaced Sidebar with a Floating Top Bar ("Glass Pill" design).
