@@ -189,9 +189,11 @@ const Forum = () => {
 
             if (error) throw error;
             setNewComment('');
-            fetchComments(postId); // Refresh immediately
+            fetchComments(postId);
+            toast.success('Comment posted!');
         } catch (err) {
             console.error("Error posting comment:", err);
+            toast.error('Failed to post comment');
         }
     };
 
