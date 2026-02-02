@@ -251,7 +251,8 @@ const Navigation = () => {
 
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom pb-safe">
+            {/* ==================== MOBILE BOTTOM BAR ==================== */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/10 z-[70] safe-area-bottom pb-safe">
                 <div className="flex items-center justify-around py-2 px-2">
                     {/* 1. Home */}
                     <Link to="/" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/' ? 'text-accent' : 'text-white/50'}`}>
@@ -259,35 +260,13 @@ const Navigation = () => {
                         <span className="text-[10px] font-medium">Home</span>
                     </Link>
 
-                    {/* 2. Services (Popup) */}
-                    <button
-                        onClick={() => setIsServicesSheetOpen(true)}
-                        className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${isServicesSheetOpen ? 'text-accent' : 'text-white/50'}`}
-                    >
+                    {/* 2. Campus (was Services) */}
+                    <Link to="/services" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/services' ? 'text-accent' : 'text-white/50'}`}>
                         <Wrench size={22} />
-                        <span className="text-[10px] font-medium">Services</span>
-                    </button>
-
-                    {/* 3. Market */}
-                    <Link to="/market" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/market' ? 'text-accent' : 'text-white/50'}`}>
-                        <ShoppingBag size={22} />
-                        <span className="text-[10px] font-medium">Market</span>
+                        <span className="text-[10px] font-medium">Campus</span>
                     </Link>
 
-                    {/* 4. Chat */}
-                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
-                        <div className="relative">
-                            <MessageSquare size={22} />
-                            {unreadCount > 0 && (
-                                <div className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
-                                    <span className="text-[8px] font-bold text-white">{unreadCount}</span>
-                                </div>
-                            )}
-                        </div>
-                        <span className="text-[10px] font-medium">Chat</span>
-                    </Link>
-
-                    {/* 5. Profile */}
+                    {/* 3. Profile (Center) */}
                     <button
                         onClick={handleUserClick}
                         className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl relative ${location.pathname === '/profile' ? 'text-accent' : 'text-white/50'}`}
@@ -303,6 +282,25 @@ const Navigation = () => {
                         </div>
                         <span className="text-[10px] font-medium">Profile</span>
                     </button>
+
+                    {/* 4. Chat */}
+                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
+                        <div className="relative">
+                            <MessageSquare size={22} />
+                            {unreadCount > 0 && (
+                                <div className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
+                                    <span className="text-[8px] font-bold text-white">{unreadCount}</span>
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-[10px] font-medium">Chats</span>
+                    </Link>
+
+                    {/* 5. Connections */}
+                    <Link to="/connections" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-white/50'}`}>
+                        <Users size={22} />
+                        <span className="text-[10px] font-medium">Net</span>
+                    </Link>
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Heart, MessageCircle, MoreHorizontal, User, Trash2 } from 'lucide-react';
+import { Send, Heart, MessageCircle, MoreHorizontal, User, Trash2, X } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
@@ -30,6 +30,12 @@ const Forum = () => {
     const [newPostContent, setNewPostContent] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Comments State
+    const [activePostId, setActivePostId] = useState(null);
+    const [comments, setComments] = useState({}); // { postId: [comments] }
+    const [newComment, setNewComment] = useState('');
+    const [loadingComments, setLoadingComments] = useState(false);
+
     // Initial Fetch
     const fetchPosts = async () => {
         try {
@@ -56,6 +62,31 @@ const Forum = () => {
         }
     };
 
+    const fetchComments = async (postId) => {
+        setLoadingComments(true);
+        try {
+            const { data, error } = await supabase
+                .from('post_comments')
+                .select(`
+                    *,
+                    profiles:user_id (
+                        first_name,
+                        last_name,
+                        avatar_url
+                    )
+                `)
+                .eq('post_id', postId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setComments(prev => ({ ...prev, [postId]: data }));
+        } catch (err) {
+            console.error("Error fetching comments:", err);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
     useEffect(() => {
         fetchPosts();
 
@@ -63,14 +94,20 @@ const Forum = () => {
         const channel = supabase
             .channel('public:posts')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-                fetchPosts(); // Refresh on any change for simplicity
+                fetchPosts();
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments' }, payload => {
+                // Refresh comments if the active post is the one that got a new comment
+                if (activePostId && payload.new.post_id === activePostId) {
+                    fetchComments(activePostId);
+                }
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [activePostId]);
 
     const handleCreatePost = async (e) => {
         e.preventDefault();
@@ -101,7 +138,6 @@ const Forum = () => {
         try {
             const { error } = await supabase.from('posts').delete().eq('id', postId);
             if (error) throw error;
-            // State update handled by realtime subscription
         } catch (err) {
             console.error("Error deleting post:", err);
         }
@@ -109,17 +145,42 @@ const Forum = () => {
 
     const handleLike = async (postId) => {
         if (!user) return openAuthModal();
-        // Optimistic UI updates or robust "likes" table handling would go here.
-        // For MVP, we'll implement a simple toggle if a likes table exists, or just increment counter.
-        // Given db_forum.sql has post_likes table, we should use that.
-        // However, simpler approach for now: just trigger a toast "Liked!" to show interaction
-        // as fully implementing like toggle state for list requires joining likes table or checking efficiently.
-        // I will implement a basic "Like" visual feedback for now.
         alert("Likes coming soon!");
     };
 
+    const toggleComments = (postId) => {
+        if (activePostId === postId) {
+            setActivePostId(null);
+        } else {
+            setActivePostId(postId);
+            fetchComments(postId);
+        }
+    };
+
+    const handlePostComment = async (e, postId) => {
+        e.preventDefault();
+        if (!user) return openAuthModal();
+        if (!newComment.trim()) return;
+
+        try {
+            const { error } = await supabase
+                .from('post_comments')
+                .insert({
+                    post_id: postId,
+                    user_id: user.id,
+                    content: newComment.trim()
+                });
+
+            if (error) throw error;
+            setNewComment('');
+            fetchComments(postId); // Refresh immediately
+        } catch (err) {
+            console.error("Error posting comment:", err);
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-background pt-24 pb-24 px-4 md:px-8">
+        <div className="min-h-screen bg-background pt-24 pb-32 px-4 md:px-8">
             <div className="max-w-2xl mx-auto">
                 <header className="mb-8 flex items-center justify-between">
                     <div>
@@ -150,7 +211,6 @@ const Forum = () => {
                             />
                             <div className="flex justify-between items-center mt-2 pt-3 border-t border-white/5">
                                 <div className="text-xs text-gray-500">
-                                    {/* Optional: Add image/media buttons here later */}
                                 </div>
                                 <Button
                                     onClick={handleCreatePost}
@@ -231,13 +291,78 @@ const Forum = () => {
                                                     <span className="text-xs">Like</span>
                                                 </button>
 
-                                                <button className="flex items-center gap-2 text-gray-400 hover:text-blue-400 transition-colors group/comment">
-                                                    <div className="p-1.5 rounded-full group-hover/comment:bg-blue-400/10 transition-colors">
+                                                <button
+                                                    onClick={() => toggleComments(post.id)}
+                                                    className={`flex items-center gap-2 transition-colors ${activePostId === post.id ? 'text-blue-400' : 'text-gray-400 hover:text-blue-400'}`}
+                                                >
+                                                    <div className="p-1.5 rounded-full hover:bg-blue-400/10 transition-colors">
                                                         <MessageCircle size={16} />
                                                     </div>
                                                     <span className="text-xs">Comment</span>
                                                 </button>
                                             </div>
+
+                                            {/* Comments Section */}
+                                            <AnimatePresence>
+                                                {activePostId === post.id && (
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        exit={{ height: 0, opacity: 0 }}
+                                                        className="overflow-hidden"
+                                                    >
+                                                        <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+                                                            {/* Comment List */}
+                                                            {loadingComments ? (
+                                                                <div className="text-center text-xs text-gray-500 py-2">Loading comments...</div>
+                                                            ) : (comments[post.id] || []).length > 0 ? (
+                                                                (comments[post.id] || []).map((comment) => (
+                                                                    <div key={comment.id} className="flex gap-3">
+                                                                        <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
+                                                                            {comment.profiles?.avatar_url ? (
+                                                                                <img src={comment.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                            ) : (
+                                                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
+                                                                                    {comment.profiles?.first_name?.[0]}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <span className="text-xs font-bold text-white">
+                                                                                    {comment.profiles?.first_name} {comment.profiles?.last_name}
+                                                                                </span>
+                                                                                <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                                                                            </div>
+                                                                            <p className="text-sm text-gray-300 mt-1">{comment.content}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <p className="text-xs text-gray-500 italic">No comments yet.</p>
+                                                            )}
+
+                                                            {/* Add Comment Input */}
+                                                            <form onSubmit={(e) => handlePostComment(e, post.id)} className="flex items-center gap-2 mt-2">
+                                                                <input
+                                                                    type="text"
+                                                                    value={newComment}
+                                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                                    placeholder="Write a comment..."
+                                                                    className="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm text-white focus:outline-none focus:border-accent/50"
+                                                                />
+                                                                <button
+                                                                    type="submit"
+                                                                    disabled={!newComment.trim()}
+                                                                    className="p-1.5 bg-accent text-black rounded-full disabled:opacity-50"
+                                                                >
+                                                                    <Send size={14} />
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
                                         </div>
                                     </div>
                                 </motion.div>

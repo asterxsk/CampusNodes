@@ -16,7 +16,7 @@ const VersionBanner = () => {
             {/* Minimal Version Button */}
             <motion.button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-4 left-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm border border-white/5 text-gray-500 hover:bg-white hover:text-black transition-all group"
+                className="fixed top-20 left-4 md:top-auto md:bottom-4 md:left-4 z-40 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 border border-white/5 text-gray-500 hover:bg-white hover:text-black transition-all group"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
