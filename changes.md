@@ -1,9 +1,10 @@
 # Changelog
 
-## 8.5.8 (Current)
--   **UI**: **Desktop Nav**: Moved Chat button back to the central floating pill (at the end) and removed it from the top-right fixed area.
--   **UX**: **Chat Interface**: Moved "Clear Chat" (Trash icon) to the left side of the header to prevent overlap with the Close button.
--   **UI**: **Desktop Nav**: Increased expanded width to 580px to accommodate the extra item comfortably.
+## 8.5.9 (Current)
+-   **UI**: **Desktop Nav**: Increased expanded width to 680px to fix button clipping issues.
+-   **UI**: **Version Banner**: Updated "What's New" text to reflect recent chat and navigation improvements.
+
+## 8.5.8
 
 ## 8.5.7
 
