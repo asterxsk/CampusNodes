@@ -113,56 +113,60 @@ const MobileNavbar = () => {
 
             {/* Bottom Navigation Bar */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/10 z-[100] safe-area-bottom pb-safe backdrop-blur-md">
-                <div className="flex items-center justify-around py-3 px-2">
+                <div className="flex items-center justify-around py-2 px-2">
                     {/* 1. Home */}
-                    <Link to="/" className={`flex flex-col items-center gap-1.5 transition-all ${location.pathname === '/' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
-                        <Home size={24} strokeWidth={location.pathname === '/' ? 2.5 : 2} />
+                    <Link to="/" className={`flex flex-col items-center gap-0.5 transition-all ${location.pathname === '/' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                        <Home size={22} strokeWidth={location.pathname === '/' ? 2.5 : 2} />
+                        <span className="text-[10px]">Home</span>
                     </Link>
 
                     {/* 2. Campus (Menu Trigger) */}
                     <button
                         onClick={toggleMenu}
-                        className={`flex flex-col items-center gap-1.5 transition-all ${isMenuOpen ? 'text-accent' : 'text-gray-500 hover:text-white'}`}
+                        className={`flex flex-col items-center gap-0.5 transition-all ${isMenuOpen ? 'text-accent' : 'text-gray-500 hover:text-white'}`}
                     >
-                        <LayoutGrid size={24} strokeWidth={isMenuOpen ? 2.5 : 2} />
+                        <LayoutGrid size={22} strokeWidth={isMenuOpen ? 2.5 : 2} />
+                        <span className="text-[10px]">Campus</span>
                     </button>
 
                     {/* 3. Profile (Center) */}
                     <button
                         onClick={handleUserClick}
-                        className="relative -mt-8"
+                        className="relative -mt-6 flex flex-col items-center"
                     >
-                        <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 border-black transition-all ${location.pathname === '/profile' ? 'bg-accent text-black scale-105' : 'bg-zinc-800 text-gray-400'}`}>
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-black transition-all ${location.pathname === '/profile' ? 'bg-accent text-black scale-105' : 'bg-zinc-800 text-gray-400'}`}>
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                             ) : (
-                                <User size={24} />
+                                <User size={20} />
                             )}
                         </div>
                     </button>
 
                     {/* 4. Chats */}
-                    <Link to="/messages" className={`flex flex-col items-center gap-1.5 transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                    <Link to="/messages" className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
                         <div className="relative">
-                            <MessageSquare size={24} strokeWidth={location.pathname === '/messages' ? 2.5 : 2} />
+                            <MessageSquare size={22} strokeWidth={location.pathname === '/messages' ? 2.5 : 2} />
                             {unreadCount > 0 && (
                                 <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black shadow-sm">
                                     <span className="text-[9px] font-bold text-white">{unreadCount}</span>
                                 </div>
                             )}
                         </div>
+                        <span className="text-[10px]">Chats</span>
                     </Link>
 
-                    {/* 5. Connections (Renamed from Net) */}
-                    <Link to="/connections" className={`flex flex-col items-center gap-1.5 transition-all relative ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                    {/* 5. Connections */}
+                    <Link to="/connections" className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
                         <div className="relative">
-                            <Users size={24} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
+                            <Users size={22} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
                             {pendingRequestCount > 0 && (
                                 <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-black shadow-sm">
                                     <span className="text-[9px] font-bold text-black">{pendingRequestCount > 9 ? '9+' : pendingRequestCount}</span>
                                 </div>
                             )}
                         </div>
+                        <span className="text-[10px]">Social</span>
                     </Link>
                 </div>
             </div>

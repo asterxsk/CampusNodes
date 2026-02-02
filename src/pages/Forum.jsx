@@ -4,6 +4,8 @@ import { Send, Heart, MessageCircle, MoreHorizontal, User, Trash2, X } from 'luc
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
+import { useToast } from '../context/ToastContext';
+import { useModal } from '../context/ModalContext';
 import Button from '../components/ui/Button';
 
 // Utility for relative time
@@ -25,6 +27,8 @@ const timeAgo = (dateString) => {
 const Forum = () => {
     const { user } = useAuth();
     const { openAuthModal } = useUI();
+    const toast = useToast();
+    const { showConfirm } = useModal();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newPostContent, setNewPostContent] = useState('');
@@ -125,27 +129,39 @@ const Forum = () => {
 
             if (error) throw error;
             setNewPostContent('');
+            toast.success('Post created successfully!');
         } catch (err) {
             console.error("Error creating post:", err);
-            alert("Failed to post. Please try again.");
+            toast.error('Failed to post. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDeletePost = async (postId) => {
-        if (!confirm("Are you sure you want to delete this post?")) return;
+        const confirmed = await showConfirm({
+            title: 'Delete Post',
+            message: 'Are you sure you want to delete this post? This action cannot be undone.',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'danger'
+        });
+
+        if (!confirmed) return;
+
         try {
             const { error } = await supabase.from('posts').delete().eq('id', postId);
             if (error) throw error;
+            toast.success('Post deleted successfully');
         } catch (err) {
             console.error("Error deleting post:", err);
+            toast.error('Failed to delete post');
         }
     };
 
     const handleLike = async (postId) => {
         if (!user) return openAuthModal();
-        alert("Likes coming soon!");
+        toast.info('Likes coming soon!');
     };
 
     const toggleComments = (postId) => {

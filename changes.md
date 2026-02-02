@@ -1,10 +1,12 @@
 # Changelog
 
-## 8.4.1 (Current)
--   **FIX**: **Mobile Nav**: Fixed bottom bar not sticking (removed problematic transform).
--   **FIX**: **Messages**: Page now uses fixed positioning to prevent scrolling issues with bottom bar.
--   **FIX**: **Clear Chat**: Now properly clears only user's sent messages (RLS limitation) and updates UI correctly.
--   **NOTE**: Forum already has real-time updates for new posts.
+## 8.5.0 (Current)
+-   **FEATURE**: **Custom Modals**: Delete confirmations now use site-themed modals (not browser dialogs).
+-   **FEATURE**: **Toast Notifications**: Info/success/error messages now appear as pill notifications at the top.
+-   **UI**: **Mobile Nav**: Added text labels under each icon (Home, Campus, Chats, Social).
+-   **PERF**: Removed backdrop-blur from VersionBanner modal to improve performance.
+
+## 8.4.1
 
 ## 8.4.0
 

@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-import { UIProvider, useUI } from './context/UIContext';
+import { UIProvider } from './context/UIContext';
+import { ToastProvider } from './context/ToastContext';
+import { ModalProvider } from './context/ModalContext';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navigation from './components/layout/Navigation';
 import CustomCursor from './components/ui/CustomCursor';
@@ -67,39 +69,43 @@ const App = () => {
     <AuthProvider>
       <CartProvider>
         <UIProvider>
-          <Router>
-            <Preloader />
-            <ScrollToTop />
-            <VersionBanner />
+          <ToastProvider>
+            <ModalProvider>
+              <Router>
+                <Preloader />
+                <ScrollToTop />
+                <VersionBanner />
 
-            {/* Global Persistent 3D Background */}
-            <GlobalBackground />
+                {/* Global Persistent 3D Background */}
+                <GlobalBackground />
 
-            <Navigation />
+                <Navigation />
 
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<Hero />} />
-                <Route path="/market" element={<Marketplace />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/forum" element={<Forum />} />
-                <Route path="/connections" element={<Connections />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/market/:id" element={<ProductDetails />} />
-              </Routes>
-            </MainLayout>
+                <MainLayout>
+                  <Routes>
+                    <Route path="/" element={<Hero />} />
+                    <Route path="/market" element={<Marketplace />} />
+                    <Route path="/services" element={<Services />} />
+                    <Route path="/forum" element={<Forum />} />
+                    <Route path="/connections" element={<Connections />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/payment" element={<Payment />} />
+                    <Route path="/market/:id" element={<ProductDetails />} />
+                  </Routes>
+                </MainLayout>
 
-            <AuthModal />
-            <MessagesModal />
+                <AuthModal />
+                <MessagesModal />
 
-            <CustomCursor />
-          </Router>
+                <CustomCursor />
+              </Router>
+            </ModalProvider>
+          </ToastProvider>
         </UIProvider>
       </CartProvider>
     </AuthProvider>

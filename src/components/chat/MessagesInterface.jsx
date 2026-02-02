@@ -3,11 +3,15 @@ import { ChevronLeft, Send, Trash2, Lock, MoreVertical, Search } from 'lucide-re
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
+import { useToast } from '../../context/ToastContext';
+import { useModal } from '../../context/ModalContext';
 import { encryptMessage, decryptMessage } from '../../lib/encryption';
 
 const MessagesInterface = ({ onClose, isModal = false }) => {
     const { user } = useAuth();
     const { removeUnreadSender, unreadSenders } = useUI();
+    const toast = useToast();
+    const { showConfirm } = useModal();
 
     const [activeChat, setActiveChat] = useState(null);
     const [friends, setFriends] = useState([]);
@@ -129,7 +133,18 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     };
 
     const clearChat = async () => {
-        if (!activeChat || !window.confirm('Clear your sent messages with this person? (Only messages you sent will be deleted)')) return;
+        if (!activeChat) return;
+
+        const confirmed = await showConfirm({
+            title: 'Clear Messages',
+            message: 'Clear your sent messages with this person? Only messages you sent will be deleted.',
+            confirmText: 'Clear',
+            cancelText: 'Cancel',
+            variant: 'danger'
+        });
+
+        if (!confirmed) return;
+
         try {
             // Due to RLS, we can only delete messages where current user is the sender
             const { error } = await supabase
@@ -142,9 +157,10 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
 
             // Remove only the user's sent messages from local state
             setMessages(prev => prev.filter(msg => msg.sender_id !== user.id));
+            toast.success('Messages cleared');
         } catch (err) {
             console.error("Failed to clear chat", err);
-            alert("Failed to clear messages. Please try again.");
+            toast.error('Failed to clear messages');
         }
     };
 
