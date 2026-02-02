@@ -27,7 +27,7 @@ const Navigation = () => {
             <div className="hidden md:block fixed top-6 right-6 z-50">
                 <button
                     onClick={handleUserClick}
-                    className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/10 pl-1 pr-4 py-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
+                    className="flex items-center gap-3 bg-black/50 border border-white/10 pl-1 pr-4 py-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
                 >
                     <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 relative group-hover:scale-105 transition-transform">
                         {user?.user_metadata?.avatar_url ? (
