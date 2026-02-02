@@ -2,11 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload, LogOut } from 'lucide-react';
+import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload, LogOut, Lock } from 'lucide-react';
 
 const Profile = () => {
     const { user, signOut } = useAuth();
     const [showSignOutModal, setShowSignOutModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [passwordData, setPasswordData] = useState({ newPassword: '', confirmPassword: '' });
+    const [passwordError, setPasswordError] = useState(null);
+    const [passwordSuccess, setPasswordSuccess] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [avatarLoading, setAvatarLoading] = useState(false);
@@ -131,6 +135,45 @@ const Profile = () => {
         }
     };
 
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setPasswordError(null);
+        setPasswordSuccess(null);
+        setLoading(true);
+
+        if (passwordData.newPassword.length < 6) {
+            setPasswordError("Password must be at least 6 characters.");
+            setLoading(false);
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordError("Passwords do not match.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { error } = await supabase.auth.updateUser({
+                password: passwordData.newPassword
+            });
+
+            if (error) throw error;
+
+            setPasswordSuccess("Password updated successfully.");
+            setPasswordData({ newPassword: '', confirmPassword: '' });
+            setTimeout(() => {
+                setShowPasswordModal(false);
+                setPasswordSuccess(null);
+            }, 2000);
+
+        } catch (error) {
+            setPasswordError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12">
             <div className="max-w-4xl mx-auto">
@@ -154,6 +197,13 @@ const Profile = () => {
                                 title="Edit Profile"
                             >
                                 <Edit2 size={20} />
+                            </button>
+                            <button
+                                onClick={() => setShowPasswordModal(true)}
+                                className="p-3 text-gray-400 hover:text-white border border-white/10 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                                title="Change Password"
+                            >
+                                <Lock size={20} />
                             </button>
                         </div>
                     )}
@@ -323,6 +373,77 @@ const Profile = () => {
                                 Sign Out
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Change Password Modal */}
+            {showPasswordModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/80 backdrop-blur-sm">
+                    <div className="relative bg-black border border-white/10 p-6 rounded-xl w-full max-w-md shadow-2xl animate-fade-in">
+                        <button
+                            onClick={() => setShowPasswordModal(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <h3 className="text-xl font-bold text-white mb-2 font-display">Change Password</h3>
+                        <p className="text-gray-400 mb-6 text-sm">Enter your new password below.</p>
+
+                        {passwordError && (
+                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/50 text-red-500 text-xs rounded-sm">
+                                {passwordError}
+                            </div>
+                        )}
+
+                        {passwordSuccess && (
+                            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/50 text-green-400 text-xs rounded-sm">
+                                {passwordSuccess}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleChangePassword} className="space-y-4">
+                            <div>
+                                <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1 font-bold">New Password</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.newPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 p-3 text-white focus:border-accent outline-none rounded"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs uppercase tracking-wider text-gray-500 mb-1 font-bold">Confirm Password</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.confirmPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 p-3 text-white focus:border-accent outline-none rounded"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPasswordModal(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-all rounded"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="px-6 py-2 text-sm font-bold bg-accent text-white rounded transition-all shadow-lg hover:shadow-[0_0_15px_rgba(255,255,255,0.3)] disabled:opacity-50"
+                                >
+                                    {loading ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

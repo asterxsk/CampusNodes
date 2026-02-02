@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Payment from './pages/Payment';
 import ProductDetails from './pages/ProductDetails';
+import ForgotPassword from './pages/ForgotPassword';
 
 import VersionBanner from './components/ui/VersionBanner';
 import AuthModal from './components/ui/AuthModal'; // Import AuthModal
@@ -81,6 +82,7 @@ const App = () => {
                 <Route path="/forum" element={<Forum />} />
                 <Route path="/connections" element={<Connections />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/messages" element={<Messages />} />
