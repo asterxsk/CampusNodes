@@ -158,7 +158,7 @@ const Messages = () => {
     );
 
     return (
-        <div className="flex bg-black h-screen overflow-hidden">
+        <div className="flex bg-black h-screen overflow-hidden md:pt-28">
             {/* ==================== LEFT SIDEBAR (Chat List) ==================== */}
             <div className={`w-full md:w-[400px] border-r border-white/10 flex flex-col bg-background z-20 transition-transform duration-300 absolute md:relative inset-0 ${activeChat ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
                 {/* Header */}
@@ -287,8 +287,8 @@ const Messages = () => {
                                         className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
-                                                ? 'bg-accent text-black rounded-tr-sm'
-                                                : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
+                                            ? 'bg-accent text-black rounded-tr-sm'
+                                            : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
                                             }`}>
                                             <p>{msg.content}</p>
                                             <p className={`text-[9px] mt-1 text-right ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>

@@ -52,14 +52,13 @@ const MainLayout = ({ children }) => {
   const location = useLocation();
   const { isNavHovered } = useUI();
   const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
-  const isMessages = location.pathname === '/messages';
 
   return (
     <div
       className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white cursor-none relative z-10 transition-all duration-300 ease-out ${isHome ? 'bg-transparent' : 'bg-background'}`}
       style={{
-        transform: isNavHovered && !isMessages ? 'translateY(20px)' : 'translateY(0)',
-        paddingTop: isMessages ? '0' : '0'
+        transform: isNavHovered ? 'translateY(20px)' : 'translateY(0)',
+        paddingTop: '0'
       }}
     >
       {children}

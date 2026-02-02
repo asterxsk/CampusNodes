@@ -23,9 +23,6 @@ const Navigation = () => {
     const navigate = useNavigate();
     const [isServicesSheetOpen, setIsServicesSheetOpen] = useState(false);
 
-    // Hide top bar on /messages
-    const isMessagesPage = location.pathname === '/messages';
-
     // Navigation handler for User icon
     const handleUserClick = () => {
         if (user) {
@@ -38,67 +35,38 @@ const Navigation = () => {
     return (
         <>
             {/* ==================== DESKTOP TOP BAR (Floating Pill) ==================== */}
-            {!isMessagesPage && (
-                <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
-                    <motion.div
-                        className="pointer-events-auto bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl overflow-hidden"
-                        initial={{ height: 60, padding: "0px 24px" }}
-                        animate={{
-                            height: isNavHovered ? 80 : 60,
-                            width: isNavHovered ? 'auto' : 'auto' // Allow auto width
-                        }}
-                        onHoverStart={() => setIsNavHovered(true)}
-                        onHoverEnd={() => setIsNavHovered(false)}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    >
-                        <div className="flex items-center gap-2 h-full">
-                            {/* Logo */}
-                            <Link to="/" className="mr-4 flex items-center gap-2">
-                                <div className="scale-75"><Logo /></div>
-                            </Link>
+            <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
+                <motion.div
+                    className="pointer-events-auto bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl overflow-hidden"
+                    initial={{ height: 60, padding: "0px 24px" }}
+                    animate={{
+                        height: isNavHovered ? 80 : 60,
+                        width: isNavHovered ? 'auto' : 'auto' // Allow auto width
+                    }}
+                    onHoverStart={() => setIsNavHovered(true)}
+                    onHoverEnd={() => setIsNavHovered(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                    <div className="flex items-center gap-2 h-full">
+                        {/* Logo */}
+                        <Link to="/" className="mr-4 flex items-center gap-2">
+                            <div className="scale-75"><Logo /></div>
+                        </Link>
 
-                            <div className="h-6 w-[1px] bg-white/10 mx-1" />
+                        <div className="h-6 w-[1px] bg-white/10 mx-1" />
 
-                            {menuItems.map((item) => {
-                                const isActive = location.pathname === item.path;
-                                // Special handling for Services popup
-                                if (item.isPopup) {
-                                    return (
-                                        <button
-                                            key={item.name}
-                                            onClick={() => setIsServicesSheetOpen(true)}
-                                            className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isServicesSheetOpen ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                        >
-                                            <div className="relative z-10 p-2">
-                                                {item.icon}
-                                            </div>
-                                            <AnimatePresence>
-                                                {isNavHovered && (
-                                                    <motion.span
-                                                        initial={{ opacity: 0, height: 0 }}
-                                                        animate={{ opacity: 1, height: 'auto' }}
-                                                        exit={{ opacity: 0, height: 0 }}
-                                                        className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                    >
-                                                        {item.name}
-                                                    </motion.span>
-                                                )}
-                                            </AnimatePresence>
-                                        </button>
-                                    );
-                                }
-
+                        {menuItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            // Special handling for Services popup
+                            if (item.isPopup) {
                                 return (
-                                    <Link
+                                    <button
                                         key={item.name}
-                                        to={item.path}
-                                        className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                                        onClick={() => setIsServicesSheetOpen(true)}
+                                        className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isServicesSheetOpen ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
                                     >
                                         <div className="relative z-10 p-2">
                                             {item.icon}
-                                            {item.isMessages && unreadCount > 0 && (
-                                                <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                            )}
                                         </div>
                                         <AnimatePresence>
                                             {isNavHovered && (
@@ -112,48 +80,73 @@ const Navigation = () => {
                                                 </motion.span>
                                             )}
                                         </AnimatePresence>
-
-                                        {/* Active Dot */}
-                                        {isActive && !isNavHovered && (
-                                            <motion.div
-                                                layoutId="navDot"
-                                                className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
-                                            />
-                                        )}
-                                    </Link>
+                                    </button>
                                 );
-                            })}
-                        </div>
-                    </motion.div>
-                </div>
-            )}
+                            }
+
+                            return (
+                                <Link
+                                    key={item.name}
+                                    to={item.path}
+                                    className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    <div className="relative z-10 p-2">
+                                        {item.icon}
+                                        {item.isMessages && unreadCount > 0 && (
+                                            <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
+                                        )}
+                                    </div>
+                                    <AnimatePresence>
+                                        {isNavHovered && (
+                                            <motion.span
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
+                                            >
+                                                {item.name}
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Active Dot */}
+                                    {isActive && !isNavHovered && (
+                                        <motion.div
+                                            layoutId="navDot"
+                                            className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
+                                        />
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </motion.div>
+            </div>
 
             {/* ==================== DESKTOP PROFILE (Fixed Top Right) ==================== */}
-            {!isMessagesPage && (
-                <div className="hidden md:block fixed top-6 right-6 z-50">
-                    <button
-                        onClick={handleUserClick}
-                        className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/10 pl-1 pr-4 py-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
-                    >
-                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 relative group-hover:scale-105 transition-transform">
-                            {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
-                                    {user?.user_metadata?.first_name ? user.user_metadata.first_name[0] : <User size={16} />}
-                                </div>
-                            )}
-                        </div>
-                        <div className="text-left">
-                            {user ? (
-                                <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">{user.user_metadata?.first_name}</p>
-                            ) : (
-                                <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">Sign In</p>
-                            )}
-                        </div>
-                    </button>
-                </div>
-            )}
+            <div className="hidden md:block fixed top-6 right-6 z-50">
+                <button
+                    onClick={handleUserClick}
+                    className="flex items-center gap-3 bg-black/50 backdrop-blur-md border border-white/10 pl-1 pr-4 py-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
+                >
+                    <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 relative group-hover:scale-105 transition-transform">
+                        {user?.user_metadata?.avatar_url ? (
+                            <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white">
+                                {user?.user_metadata?.first_name ? user.user_metadata.first_name[0] : <User size={16} />}
+                            </div>
+                        )}
+                    </div>
+                    <div className="text-left">
+                        {user ? (
+                            <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">{user.user_metadata?.first_name}</p>
+                        ) : (
+                            <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">Sign In</p>
+                        )}
+                    </div>
+                </button>
+            </div>
 
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
