@@ -19,6 +19,7 @@ const MobileNavbar = () => {
         } else {
             openAuthModal();
         }
+        setIsMenuOpen(false);
     };
 
     const toggleMenu = () => {
@@ -117,7 +118,12 @@ const MobileNavbar = () => {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-[100] safe-area-bottom pb-safe transform translate-z-0 will-change-transform">
                 <div className="flex items-center justify-around py-2 px-2">
                     {/* 1. Home */}
-                    <Link to="/" className={`flex flex-col items-center gap-0.5 transition-all ${location.pathname === '/' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                    {/* 1. Home */}
+                    <Link
+                        to="/"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex flex-col items-center gap-0.5 transition-all ${location.pathname === '/' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}
+                    >
                         <Home size={22} strokeWidth={location.pathname === '/' ? 2.5 : 2} />
                         <span className="text-[10px]">Home</span>
                     </Link>
@@ -146,7 +152,12 @@ const MobileNavbar = () => {
                     </button>
 
                     {/* 4. Chats */}
-                    <Link to="/messages" className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                    {/* 4. Chats */}
+                    <Link
+                        to="/messages"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}
+                    >
                         <div className="relative">
                             <MessageSquare size={22} strokeWidth={location.pathname === '/messages' ? 2.5 : 2} />
                             {unreadCount > 0 && (
@@ -159,7 +170,12 @@ const MobileNavbar = () => {
                     </Link>
 
                     {/* 5. Connections */}
-                    <Link to="/connections" className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                    {/* 5. Connections */}
+                    <Link
+                        to="/connections"
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex flex-col items-center gap-0.5 transition-all relative ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}
+                    >
                         <div className="relative">
                             <Users size={22} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
                             {pendingRequestCount > 0 && (

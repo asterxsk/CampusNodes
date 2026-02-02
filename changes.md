@@ -1,8 +1,9 @@
 # Changelog
 
-## 8.5.9 (Current)
--   **UI**: **Desktop Nav**: Increased expanded width to 680px to fix button clipping issues.
--   **UI**: **Version Banner**: Updated "What's New" text to reflect recent chat and navigation improvements.
+## 8.5.10 (Current)
+-   **UX**: **Mobile Nav**: "Campus" popup (grid menu) now automatically dismisses when clicking a bottom bar navigation item (Home, Profile, Chats, Social).
+
+## 8.5.9
 
 ## 8.5.8
 
