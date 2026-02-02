@@ -3,10 +3,22 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '8.1.0';
+const CURRENT_VERSION = '8.2.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
+    {
+        title: "Gmail-Only Verification",
+        description: "Enhanced security! Signups are now restricted to verified @gmail.com addresses. 🔒"
+    },
+    {
+        title: "Navigation Fix",
+        description: "Fixed layout issue where text labels overlapped icons on the desktop top bar. 🧭"
+    },
+    {
+        title: "Vercel Migration",
+        description: "Fully switched to Vercel for lightning-fast deployments and better stability. ⚡"
+    },
     {
         title: "Desktop Navigation Redesign",
         description: "New floating top bar! Hover to see icons expand. Profile moved to top-right. 🧭"
