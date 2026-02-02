@@ -7,7 +7,7 @@ import { useUI } from '../../context/UIContext';
 
 const MobileNavbar = () => {
     const { user } = useAuth();
-    const { openAuthModal, unreadCount } = useUI();
+    const { openAuthModal, unreadCount, pendingRequestCount } = useUI();
     const location = useLocation();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -154,8 +154,15 @@ const MobileNavbar = () => {
                     </Link>
 
                     {/* 5. Connections (Renamed from Net) */}
-                    <Link to="/connections" className={`flex flex-col items-center gap-1.5 transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
-                        <Users size={24} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
+                    <Link to="/connections" className={`flex flex-col items-center gap-1.5 transition-all relative ${location.pathname === '/connections' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>
+                        <div className="relative">
+                            <Users size={24} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
+                            {pendingRequestCount > 0 && (
+                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-black shadow-sm">
+                                    <span className="text-[9px] font-bold text-black">{pendingRequestCount > 9 ? '9+' : pendingRequestCount}</span>
+                                </div>
+                            )}
+                        </div>
                     </Link>
                 </div>
             </div>

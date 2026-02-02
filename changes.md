@@ -1,8 +1,10 @@
 # Changelog
 
-## 8.3.8 (Current)
--   **FIX**: **Version Banner**: Now only visible on the home page; moved higher on mobile devices.
--   **FIX**: **Connections**: Fixed Discover People query (removed invalid column ordering).
+## 8.3.9 (Current)
+-   **FEATURE**: **Notifications**: Added badges for unread messages (red) and pending friend requests (yellow) on both Desktop and Mobile navigation.
+-   **UI**: Desktop navbar shows a pulsing indicator when collapsed if there are notifications.
+
+## 8.3.8
 
 ## 8.3.7
 

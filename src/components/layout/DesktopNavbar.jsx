@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { Home, ShoppingBag, Wrench, MessageCircle, Users, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from '../ui/Logo';
-import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 
 const menuItems = [
@@ -11,21 +10,24 @@ const menuItems = [
     { name: 'Market', path: '/market', icon: <ShoppingBag size={20} /> },
     { name: 'Services', path: '/services', icon: <Wrench size={20} /> },
     { name: 'Forum', path: '/forum', icon: <MessageCircle size={20} /> },
-    { name: 'Social', path: '/connections', icon: <Users size={20} /> },
+    { name: 'Social', path: '/connections', icon: <Users size={20} />, isSocial: true },
     { name: 'Chat', path: '/messages', icon: <MessageSquare size={20} />, isMessages: true },
 ];
 
 const DesktopNavbar = () => {
-    const { unreadCount, setIsChatOpen } = useUI();
+    const { unreadCount, pendingRequestCount, setIsChatOpen } = useUI();
     const location = useLocation();
     const [isHovered, setIsHovered] = useState(false);
     const [isServicesSheetOpen, setIsServicesSheetOpen] = useState(false);
+
+    // Total notification count for collapsed state indicator
+    const totalNotifications = unreadCount + pendingRequestCount;
 
     return (
         <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
             <motion.div
                 layout
-                className="pointer-events-auto bg-black/90 border border-white/10 rounded-full shadow-2xl overflow-hidden"
+                className="pointer-events-auto bg-black/90 border border-white/10 rounded-full shadow-2xl overflow-hidden relative"
                 initial={false}
                 animate={{
                     width: isHovered ? 'auto' : 180,
@@ -36,6 +38,11 @@ const DesktopNavbar = () => {
                 onHoverEnd={() => setIsHovered(false)}
                 transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
             >
+                {/* Notification indicator when collapsed */}
+                {!isHovered && totalNotifications > 0 && (
+                    <div className="absolute top-2 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border border-black animate-pulse" />
+                )}
+
                 <div className="flex items-center h-full px-2">
                     {/* Brand / Toggle */}
                     <div className="flex items-center justify-center shrink-0 w-[40px] h-full">
@@ -69,16 +76,24 @@ const DesktopNavbar = () => {
 
                                         const ItemContent = () => (
                                             <div className="relative flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors group/item">
-                                                <div className={`transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
+                                                <div className={`relative transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
                                                     {item.icon}
+                                                    {/* Badge for messages */}
+                                                    {item.isMessages && unreadCount > 0 && (
+                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
+                                                            <span className="text-[8px] font-bold text-white">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                                        </div>
+                                                    )}
+                                                    {/* Badge for friend requests */}
+                                                    {item.isSocial && pendingRequestCount > 0 && (
+                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-black">
+                                                            <span className="text-[8px] font-bold text-black">{pendingRequestCount > 9 ? '9+' : pendingRequestCount}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <span className={`text-xs font-medium whitespace-nowrap ${isActive ? 'text-accent' : 'text-gray-300 group-hover/item:text-white'}`}>
                                                     {item.name}
                                                 </span>
-
-                                                {item.isMessages && unreadCount > 0 && (
-                                                    <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black" />
-                                                )}
 
                                                 {isActive && (
                                                     <motion.div layoutId="nav-indicator" className="absolute inset-0 bg-white/5 rounded-full border border-white/5" />
