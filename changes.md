@@ -1,8 +1,14 @@
 # Changelog
 
-## 8.5.2 (Current)
--   **FIX**: **Mobile Bottom Bar**: Now renders via React Portal to document.body (fixes scroll issue with parent transforms).
--   **FIX**: **Forum Comment Input**: Send button no longer overflows on mobile (added shrink-0 and min-w-0).
+## 8.5.4 (Current)
+-   **UI**: **Desktop Nav**: Restored "Chat" button in the top-right fixed container (next to Profile).
+-   **UI**: **Badges**: Updated "Friend Request" badges to use Accent Blue instead of Yellow for better theme consistency.
+
+## 8.5.3
+-   **FIX**: **Forum Comments**: Added toast feedback (success/error) for posting comments.
+-   **DB**: **Schema**: Added SQL script (`fix_forum_comments.sql`) to create missing `post_comments` table and enable RLS/Realtime.
+
+## 8.5.2
 
 ## 8.5.1
 

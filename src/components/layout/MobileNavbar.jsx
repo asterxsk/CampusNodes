@@ -163,7 +163,7 @@ const MobileNavbar = () => {
                         <div className="relative">
                             <Users size={22} strokeWidth={location.pathname === '/connections' ? 2.5 : 2} />
                             {pendingRequestCount > 0 && (
-                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-black shadow-sm">
+                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-accent rounded-full flex items-center justify-center border border-black shadow-sm">
                                     <span className="text-[9px] font-bold text-black">{pendingRequestCount > 9 ? '9+' : pendingRequestCount}</span>
                                 </div>
                             )}

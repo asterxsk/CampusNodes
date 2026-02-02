@@ -88,7 +88,7 @@ const DesktopNavbar = () => {
                                                     )}
                                                     {/* Badge for friend requests */}
                                                     {item.isSocial && pendingRequestCount > 0 && (
-                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-black">
+                                                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center border border-black">
                                                             <span className="text-[8px] font-bold text-black">{pendingRequestCount > 9 ? '9+' : pendingRequestCount}</span>
                                                         </div>
                                                     )}
