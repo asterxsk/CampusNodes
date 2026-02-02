@@ -11,6 +11,7 @@ import PixelGrid from './components/hero/PixelGrid';
 
 import Marketplace from './pages/Marketplace';
 import Services from './pages/Services';
+import Forum from './pages/Forum';
 import Connections from './pages/Connections';
 import Messages from './pages/Messages';
 import Login from './pages/Login';
@@ -78,6 +79,7 @@ const App = () => {
                 <Route path="/" element={<Hero />} />
                 <Route path="/market" element={<Marketplace />} />
                 <Route path="/services" element={<Services />} />
+                <Route path="/forum" element={<Forum />} />
                 <Route path="/connections" element={<Connections />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />

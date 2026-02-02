@@ -1,6 +1,12 @@
 # Changelog
 
-## 7.9.5 (Current)
+## 8.0.0 (Current)
+-   **FEATURE**: **Social Feed (Forum)**: Added a new page for campus-wide posts (`/forum`).
+-   **UI**: **Mobile Nav**: Reordered icons (Home, Services, Market, Chat, Profile).
+-   **UI**: **Services Sheet**: "Services" button now opens a slide-up drawer to select Gigs or Forum.
+-   **DB**: Added `posts` and `post_likes` tables with RLS.
+
+## 7.9.5
 -   **UI**: **Sidebar**: Switched to edge-to-edge selection style in expanded mode (Supabase-like).
 -   **UI**: **Polish**: Refined active states for better visual hierarchy.
 

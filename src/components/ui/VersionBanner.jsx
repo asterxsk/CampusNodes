@@ -3,10 +3,22 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '7.9.5';
+const CURRENT_VERSION = '8.0.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
+    {
+        title: "Social Feed (Forum)",
+        description: "A new Twitter-like feed to share thoughts with the campus! 📢"
+    },
+    {
+        title: "New Mobile Navigation",
+        description: "Reordered for better access: Home is now first! 🏠"
+    },
+    {
+        title: "Services Smart-Menu",
+        description: "Clicking Services now opens a drawer to choose between Marketplace Gigs or the new Forum."
+    },
     {
         title: "OTP Verification Fix",
         description: "Fixed critical email verification error that prevented users from completing signup."
