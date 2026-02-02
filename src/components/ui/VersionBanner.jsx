@@ -129,9 +129,13 @@ const VersionBanner = () => {
                         exit={{ y: -50, x: "-50%", opacity: 0 }}
                         // Added 'group' for hover effects on children based on parent hover
                         // Added hover glow effect to the main container
-                        className="fixed top-32 left-1/2 -translate-x-1/2 w-[95%] md:w-auto min-w-[320px] md:min-w-[500px] z-[40] group"
+                        className={`fixed z-[40] group transition-all duration-300 ${isMobile
+                                ? 'top-4 left-3 right-3 w-auto'
+                                : 'top-32 left-1/2 -translate-x-1/2 w-auto min-w-[500px]'
+                            }`}
                     >
-                        <div className="relative overflow-hidden rounded-full bg-black/80 backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:border-blue-500/50">
+                        <div className={`relative overflow-hidden backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:border-blue-500/50 ${isMobile ? 'rounded-2xl bg-black/95' : 'rounded-full bg-black/80'
+                            }`}>
                             <div className="px-4 py-2 flex items-center justify-between gap-4 text-xs md:text-sm">
                                 {/* Left Side: Tag & Version Info */}
                                 <div className="flex items-center gap-3 text-white shrink-0">

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Wrench, Users, User, ChevronRight, MessageSquare, Home, X, MessageCircle } from 'lucide-react';
+import { ShoppingBag, Wrench, Users, User, ChevronRight, MessageSquare, Home, X, MessageCircle, LayoutGrid } from 'lucide-react';
 import Logo from '../ui/Logo';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
@@ -20,7 +20,7 @@ const Sidebar = () => {
     const { openAuthModal, unreadCount, isSidebarCollapsed: isCollapsed, setIsSidebarCollapsed: setIsCollapsed } = useUI();
     const location = useLocation();
     const navigate = useNavigate();
-    const [isServicesSheetOpen, setIsServicesSheetOpen] = useState(false);
+    const [isCampusSheetOpen, setIsCampusSheetOpen] = useState(false);
 
     // Navigation handler for User icon
     const handleUserClick = () => {
@@ -208,47 +208,28 @@ const Sidebar = () => {
 
             {/* ==================== MOBILE BOTTOM BAR ==================== */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-[70] safe-area-bottom pb-safe">
-                <div className="flex items-center justify-around py-2 px-2">
+                <div className="flex items-center justify-around py-2 px-1">
                     {/* 1. Home */}
-                    <Link to="/" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/' ? 'text-accent' : 'text-white/50'}`}>
+                    <Link to="/" className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${location.pathname === '/' ? 'text-accent' : 'text-white/50'}`}>
                         <Home size={22} />
                         <span className="text-[10px] font-medium">Home</span>
                     </Link>
 
-                    {/* 2. Services (Popup) */}
+                    {/* 2. Campus (Popup) */}
                     <button
-                        onClick={() => setIsServicesSheetOpen(true)}
-                        className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${isServicesSheetOpen ? 'text-accent' : 'text-white/50'}`}
+                        onClick={() => setIsCampusSheetOpen(true)}
+                        className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${isCampusSheetOpen ? 'text-accent' : 'text-white/50'}`}
                     >
-                        <Wrench size={22} />
-                        <span className="text-[10px] font-medium">Services</span>
+                        <LayoutGrid size={22} />
+                        <span className="text-[10px] font-medium">Campus</span>
                     </button>
 
-                    {/* 3. Market */}
-                    <Link to="/market" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${location.pathname === '/market' ? 'text-accent' : 'text-white/50'}`}>
-                        <ShoppingBag size={22} />
-                        <span className="text-[10px] font-medium">Market</span>
-                    </Link>
-
-                    {/* 4. Chat */}
-                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
-                        <div className="relative">
-                            <MessageSquare size={22} />
-                            {unreadCount > 0 && (
-                                <div className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
-                                    <span className="text-[8px] font-bold text-white">{unreadCount}</span>
-                                </div>
-                            )}
-                        </div>
-                        <span className="text-[10px] font-medium">Chat</span>
-                    </Link>
-
-                    {/* 5. Profile */}
+                    {/* 3. Profile */}
                     <button
                         onClick={handleUserClick}
                         className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl relative ${location.pathname === '/profile' ? 'text-accent' : 'text-white/50'}`}
                     >
-                        <div className={`w-8 h-8 rounded-full overflow-hidden border-2 transition-all ${location.pathname === '/profile' ? 'border-accent scale-110' : 'border-white/20'}`}>
+                        <div className={`w-7 h-7 rounded-full overflow-hidden border-2 transition-all ${location.pathname === '/profile' ? 'border-accent scale-110' : 'border-white/20'}`}>
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -259,19 +240,38 @@ const Sidebar = () => {
                         </div>
                         <span className="text-[10px] font-medium">Profile</span>
                     </button>
+
+                    {/* 4. Connections */}
+                    <Link to="/connections" className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all ${location.pathname === '/connections' ? 'text-accent' : 'text-white/50'}`}>
+                        <Users size={22} />
+                        <span className="text-[10px] font-medium">Network</span>
+                    </Link>
+
+                    {/* 5. Chat */}
+                    <Link to="/messages" className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all relative ${location.pathname === '/messages' ? 'text-accent' : 'text-white/50'}`}>
+                        <div className="relative">
+                            <MessageSquare size={22} />
+                            {unreadCount > 0 && (
+                                <div className="absolute -top-1 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-black">
+                                    <span className="text-[8px] font-bold text-white">{unreadCount}</span>
+                                </div>
+                            )}
+                        </div>
+                        <span className="text-[10px] font-medium">Chat</span>
+                    </Link>
                 </div>
             </div>
 
-            {/* ==================== SERVICES SHEET (POPUP) ==================== */}
+            {/* ==================== CAMPUS HUB SHEET (POPUP) ==================== */}
             <AnimatePresence>
-                {isServicesSheetOpen && (
+                {isCampusSheetOpen && (
                     <>
                         {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={() => setIsServicesSheetOpen(false)}
+                            onClick={() => setIsCampusSheetOpen(false)}
                             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[80]"
                         />
 
@@ -281,24 +281,40 @@ const Sidebar = () => {
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed bottom-0 left-0 right-0 z-[90] bg-[#1a1a1a] border-t border-white/10 rounded-t-3xl p-6 pb-safe safe-area-bottom"
+                            className="fixed bottom-0 left-0 right-0 z-[90] bg-[#1a1a1a] border-t border-white/10 rounded-t-3xl p-6 pb-24 safe-area-bottom"
                         >
                             <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
 
-                            <h3 className="text-xl font-bold text-white mb-6 text-center font-display">Where to go?</h3>
+                            <h3 className="text-xl font-bold text-white mb-6 text-center font-display">Campus Hub</h3>
 
                             <div className="grid gap-3">
+                                {/* Market Button */}
+                                <Link
+                                    to="/market"
+                                    onClick={() => setIsCampusSheetOpen(false)}
+                                    className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/5"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
+                                        <ShoppingBag size={24} />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <h4 className="font-bold text-white">Marketplace</h4>
+                                        <p className="text-sm text-gray-400">Buy & Sell on Campus</p>
+                                    </div>
+                                    <ChevronRight className="text-gray-500" />
+                                </Link>
+
                                 {/* Services Button */}
                                 <Link
                                     to="/services"
-                                    onClick={() => setIsServicesSheetOpen(false)}
+                                    onClick={() => setIsCampusSheetOpen(false)}
                                     className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/5"
                                 >
                                     <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
                                         <Wrench size={24} />
                                     </div>
                                     <div className="flex-1 text-left">
-                                        <h4 className="font-bold text-white">Marketplace Services</h4>
+                                        <h4 className="font-bold text-white">Services</h4>
                                         <p className="text-sm text-gray-400">Freelancing & Gigs</p>
                                     </div>
                                     <ChevronRight className="text-gray-500" />
@@ -307,7 +323,7 @@ const Sidebar = () => {
                                 {/* Forum Button */}
                                 <Link
                                     to="/forum"
-                                    onClick={() => setIsServicesSheetOpen(false)}
+                                    onClick={() => setIsCampusSheetOpen(false)}
                                     className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition-all border border-white/5"
                                 >
                                     <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
@@ -322,10 +338,10 @@ const Sidebar = () => {
                             </div>
 
                             <button
-                                onClick={() => setIsServicesSheetOpen(false)}
+                                onClick={() => setIsCampusSheetOpen(false)}
                                 className="mt-6 w-full py-4 text-center text-gray-500 font-medium hover:text-white transition-colors"
                             >
-                                Cancel
+                                Close
                             </button>
                         </motion.div>
                     </>
