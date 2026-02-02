@@ -40,11 +40,18 @@ const Connections = () => {
             }
 
             // 2. Fetch Profiles for Suggestions (Limit 50 for now)
-            const { data: allProfiles, error: profileError } = await supabase
+            // 2. Fetch Profiles for Suggestions (Limit 50 for now)
+            let query = supabase
                 .from('profiles')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(50);
+
+            if (user) {
+                query = query.neq('id', user.id);
+            }
+
+            const { data: allProfiles, error: profileError } = await query;
 
             if (profileError) throw profileError;
 
