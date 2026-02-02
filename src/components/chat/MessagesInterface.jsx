@@ -156,7 +156,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     return (
         <div className="flex bg-black h-full overflow-hidden relative">
             {/* ==================== LEFT SIDEBAR (Chat List) ==================== */}
-            <div className={`w-full md:w-[350px] lg:w-[400px] border-r border-white/10 flex flex-col bg-background/95 backdrop-blur-xl z-20 transition-transform duration-300 absolute md:relative inset-0 ${activeChat ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
+            <div className={`w-full md:w-[350px] lg:w-[400px] border-r border-white/10 flex flex-col bg-background z-20 transition-transform duration-300 absolute md:relative inset-0 ${activeChat ? '-translate-x-full md:translate-x-0' : 'translate-x-0'}`}>
                 {/* Header */}
                 <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
                     <h1 className="text-xl font-bold text-white font-display">Chats</h1>
@@ -228,7 +228,8 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 {activeChat ? (
                     <>
                         {/* Chat Header */}
-                        <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-black/50 backdrop-blur-md shrink-0">
+                        {/* Chat Header */}
+                        <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-black/50 shrink-0">
                             <div className="flex items-center gap-3">
                                 <button onClick={() => setActiveChat(null)} className="md:hidden p-2 -ml-2 hover:bg-white/10 rounded-full text-white">
                                     <ChevronLeft size={24} />

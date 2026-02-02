@@ -26,7 +26,7 @@ const MessagesModal = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={() => setIsChatOpen(false)}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] hidden md:block"
+                        className="fixed inset-0 bg-black/80 z-[90] hidden md:block"
                     />
 
                     {/* Modal Container */}
@@ -44,7 +44,7 @@ const MessagesModal = () => {
                             <div className="absolute top-0 right-0 z-50 p-4">
                                 <button
                                     onClick={() => setIsChatOpen(false)}
-                                    className="bg-black/50 hover:bg-red-500/20 text-white/50 hover:text-red-500 p-2 rounded-full backdrop-blur-md transition-all border border-white/5 hover:border-red-500/50"
+                                    className="bg-black/50 hover:bg-red-500/20 text-white/50 hover:text-red-500 p-2 rounded-full transition-all border border-white/5 hover:border-red-500/50"
                                 >
                                     <X size={20} />
                                 </button>

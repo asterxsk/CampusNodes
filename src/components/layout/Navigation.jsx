@@ -67,7 +67,7 @@ const Navigation = () => {
                                     transition={{ duration: 0.15 }}
                                     className="pr-4 whitespace-nowrap"
                                 >
-                                    <span className="font-bold text-sm text-white font-display tracking-wider">CNODES</span>
+                                    <span className="font-bold text-sm text-white font-display tracking-wider">CampusNodes</span>
                                 </motion.div>
                             ) : (
                                 <motion.div
@@ -83,19 +83,18 @@ const Navigation = () => {
 
                                         // Component for the Item Content
                                         const ItemContent = () => (
-                                            <div className="relative p-2 rounded-full hover:bg-white/10 transition-colors group/item">
+                                            <div className="relative flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors group/item">
                                                 <div className={`transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
                                                     {item.icon}
                                                 </div>
+                                                <span className={`text-xs font-medium whitespace-nowrap ${isActive ? 'text-accent' : 'text-gray-300 group-hover/item:text-white'}`}>
+                                                    {item.name}
+                                                </span>
+
                                                 {item.isMessages && unreadCount > 0 && (
                                                     <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black" />
                                                 )}
-                                                {/* Tooltip */}
-                                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none">
-                                                    <div className="bg-black/90 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap border border-white/10">
-                                                        {item.name}
-                                                    </div>
-                                                </div>
+
                                                 {isActive && (
                                                     <motion.div layoutId="nav-indicator" className="absolute inset-0 bg-white/5 rounded-full border border-white/5" />
                                                 )}
