@@ -1,7 +1,9 @@
 # Changelog
 
-## 8.5.10 (Current)
--   **UX**: **Mobile Nav**: "Campus" popup (grid menu) now automatically dismisses when clicking a bottom bar navigation item (Home, Profile, Chats, Social).
+## 8.5.11 (Current)
+-   **FIX**: **Mobile Chat**: Removed excessive bottom padding that caused a large gap between the chat box and the navigation bar. Input now sits correctly above the navbar.
+
+## 8.5.10
 
 ## 8.5.9
 
