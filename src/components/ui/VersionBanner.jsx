@@ -1,297 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '8.3.0';
-
-// Patch Notes Data - Keep updated with latest features!
-const PATCH_NOTES = [
-    {
-        title: "Password Recovery",
-        description: "Added Forgot Password functionality. You can now reset your password via email if you get locked out. 🔐"
-    },
-    {
-        title: "Profile Security",
-        description: "New Change Password feature added to the Profile page. Keep your account secure! 🛡️"
-    },
-    {
-        title: "Gmail-Only Verification",
-        description: "Enhanced security! Signups are now restricted to verified @gmail.com addresses. 🔒"
-    },
-    {
-        title: "Navigation Fix",
-        description: "Fixed layout issue where text labels overlapped icons on the desktop top bar. 🧭"
-    },
-    {
-        title: "Vercel Migration",
-        description: "Fully switched to Vercel for lightning-fast deployments and better stability. ⚡"
-    },
-    {
-        title: "Desktop Navigation Redesign",
-        description: "New floating top bar! Hover to see icons expand. Profile moved to top-right. 🧭"
-    },
-    {
-        title: "Full-Width Layout",
-        description: "Removed the sidebar padding for a more immersive, edge-to-edge experience on desktop."
-    },
-    {
-        title: "Social Feed (Forum)",
-        description: "A new Twitter-like feed to share thoughts with the campus! 📢"
-    },
-    {
-        title: "New Mobile Navigation",
-        description: "Reordered for better access: Home is now first! 🏠"
-    },
-    {
-        title: "Services Smart-Menu",
-        description: "Clicking Services now opens a drawer to choose between Marketplace Gigs or the new Forum."
-    },
-    {
-        title: "OTP Verification Fix",
-        description: "Fixed critical email verification error that prevented users from completing signup."
-    },
-    {
-        title: "Enhanced Error Handling",
-        description: "Added detailed debug logging and better error messages for troubleshooting verification issues."
-    },
-    {
-        title: "Chat Crash Fix",
-        description: "Resolved ChatWidget crash that occurred when non-logged-in users tried to open chat."
-    },
-    {
-        title: "Vercel Deployment",
-        description: "Migrated to Vercel for faster builds, better performance, and preview deployments."
-    },
-    {
-        title: "Publishing Workflow Update",
-        description: "Added changelog documentation to publishing process for better release tracking."
-    },
-    {
-        title: "Lighter & Faster",
-        description: "Removed heavy 3D rendering. The app now loads faster and uses less resources."
-    },
-    {
-        title: "Mobile Text Fix",
-        description: "Loading screen text now wraps properly on smaller screens."
-    },
-    {
-        title: "End-to-End Encrypted Chat",
-        description: "Your messages are encrypted client-side. Only you and your friend can read them."
-    },
-    {
-        title: "Storage Optimization",
-        description: "Removing a friend clears chat history to save database space."
-    },
-    {
-        title: "New Sidebar Style",
-        description: "Updated sidebar design with edge-to-edge selection indicators (Supabase-style)."
-    },
-    {
-        title: "Jelly Mode Activated",
-        description: "The sidebar now bounces with a fun elastic animation! 🏀"
-    },
-    {
-        title: "Smoother Navigation",
-        description: "The sidebar now glides open and closed with enhanced animation physics."
-    },
-    {
-        title: "Mobile Bottom Bar",
-        description: "New 5-icon navigation bar: Services, Market, Home, Chat, and Profile."
-    }
-];
-
 const VersionBanner = () => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [showPatchNotes, setShowPatchNotes] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-    const location = useLocation();
+    const [isOpen, setIsOpen] = useState(false);
 
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    useEffect(() => {
-        const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
-        if (isHome) {
-            setIsVisible(true);
-        } else {
-            setIsVisible(false);
-        }
-    }, [location]);
-
-    const handleDismiss = () => {
-        setIsVisible(false);
-    };
+    // Hardcoded patch notes for now
+    const patchNotes = [
+        { version: "v8.3.0", date: "Feb 2026", changes: ["Added Messages Modal for Desktop", "Dynamic Navigation Bar", "Performance & UI Enhancements"] },
+        { version: "v8.2.0", date: "Jan 2026", changes: ["Enhanced Global Chat", "Mobile UI Fixes"] },
+    ];
 
     return (
         <>
-            <AnimatePresence>
-                {isVisible && (
-                    <motion.div
-                        initial={{ y: -50, x: "-50%", opacity: 0 }}
-                        animate={{ y: 0, x: "-50%", opacity: 1 }}
-                        exit={{ y: -50, x: "-50%", opacity: 0 }}
-                        // Added 'group' for hover effects on children based on parent hover
-                        // Added hover glow effect to the main container
-                        className={`fixed z-[40] group transition-all duration-300 ${isMobile
-                            ? 'top-4 left-3 right-3 w-auto'
-                            : 'top-32 left-1/2 -translate-x-1/2 w-auto min-w-[500px]'
-                            }`}
-                    >
-                        <div className={`relative overflow-hidden backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:border-blue-500/50 ${isMobile ? 'rounded-2xl bg-black/95' : 'rounded-full bg-black/80'
-                            }`}>
-                            <div className="px-4 py-2 flex items-center justify-between gap-4 text-xs md:text-sm">
-                                {/* Left Side: Tag & Version Info */}
-                                <div className="flex items-center gap-3 text-white shrink-0">
-                                    <span className="bg-blue-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider shadow-[0_0_10px_rgba(37,99,235,0.4)]">
-                                        New
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Sparkles size={12} className="text-blue-400 animate-pulse" />
-                                        <span className="text-gray-200">Updated to</span>
-                                        <span className="font-bold font-mono text-blue-400">{CURRENT_VERSION}</span>
-                                    </span>
-                                </div>
-
-                                {/* Right Side: Buttons Container */}
-                                <div className="flex items-center gap-2">
-                                    {/* Patch Notes Button */}
-                                    <motion.button
-                                        onClick={() => setShowPatchNotes(true)}
-                                        initial="idle"
-                                        whileHover="hover"
-                                        animate="idle"
-                                        className="relative flex items-center justify-center h-8 rounded-full transition-all duration-300 border border-transparent"
-                                    >
-                                        <motion.div
-                                            variants={{
-                                                idle: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(59, 130, 246, 0)" },
-                                                hover: isMobile
-                                                    ? { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(59, 130, 246, 0)" }
-                                                    : { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(37, 99, 235, 1)" }
-                                            }}
-                                            className="flex items-center gap-2 overflow-hidden h-full rounded-full"
-                                        >
-                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-blue-500/0 hover:bg-blue-500 hover:shadow-[0_0_15px_rgba(59,130,246,0.6)] transition-all duration-300 group/btn">
-                                                <FileText size={14} className="text-blue-400 group-hover/btn:text-white transition-colors" />
-                                            </span>
-                                            {!isMobile && (
-                                                <motion.span
-                                                    variants={{
-                                                        idle: { width: 0, opacity: 0, display: "none" },
-                                                        hover: { width: "auto", opacity: 1, display: "block" }
-                                                    }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="whitespace-nowrap font-medium text-white"
-                                                >
-                                                    Patch Notes
-                                                </motion.span>
-                                            )}
-                                        </motion.div>
-                                    </motion.button>
-
-                                    {/* Dismiss Button */}
-                                    <motion.button
-                                        onClick={handleDismiss}
-                                        initial="idle"
-                                        whileHover="hover"
-                                        animate="idle"
-                                        className="relative flex items-center justify-center h-8 rounded-full transition-all duration-300 border border-transparent"
-                                    >
-                                        <motion.div
-                                            variants={{
-                                                idle: { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(239, 68, 68, 0)" },
-                                                hover: isMobile
-                                                    ? { width: "auto", paddingLeft: 0, paddingRight: 0, backgroundColor: "rgba(239, 68, 68, 0)" }
-                                                    : { width: "auto", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(220, 38, 38, 1)" }
-                                            }}
-                                            className="flex items-center gap-2 overflow-hidden h-full rounded-full"
-                                        >
-                                            <span className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-red-500/0 hover:bg-red-500 hover:shadow-[0_0_15px_rgba(239,68,68,0.6)] transition-all duration-300 group/btn">
-                                                <X size={14} className="text-red-400 group-hover/btn:text-white transition-colors" />
-                                            </span>
-                                            {!isMobile && (
-                                                <motion.span
-                                                    variants={{
-                                                        idle: { width: 0, opacity: 0, display: "none" },
-                                                        hover: { width: "auto", opacity: 1, display: "block" }
-                                                    }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className="whitespace-nowrap font-medium text-white"
-                                                >
-                                                    Close
-                                                </motion.span>
-                                            )}
-                                        </motion.div>
-                                    </motion.button>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Minimal Version Button */}
+            <motion.button
+                onClick={() => setIsOpen(true)}
+                className="fixed bottom-4 left-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm border border-white/5 text-gray-500 hover:bg-white hover:text-black transition-all group"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+            >
+                <span className="text-xs font-mono font-bold">v8.3.0</span>
+                <span className="w-0 overflow-hidden group-hover:w-auto group-hover:pl-1 transition-all duration-300 text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100">
+                    Patch Notes
+                </span>
+            </motion.button>
 
             {/* Patch Notes Modal */}
             <AnimatePresence>
-                {showPatchNotes && (
-                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                {isOpen && (
+                    <>
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            onClick={() => setShowPatchNotes(false)}
-                            className="absolute inset-0 bg-black/80"
+                            onClick={() => setIsOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
                         />
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-[#0f1115] border border-blue-500/20 w-full max-w-lg rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.15)] overflow-hidden flex flex-col max-h-[70vh]"
+                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+                            className="fixed bottom-16 left-4 w-80 md:w-96 bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-xl z-[101] overflow-hidden"
                         >
-                            {/* Header */}
-                            <div className="p-6 border-b border-white/5 bg-gradient-to-r from-blue-900/20 to-transparent flex items-center justify-between shrink-0">
-                                <div>
-                                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <Sparkles className="text-blue-400" size={20} />
-                                        Patch Notes
-                                    </h2>
-                                    <p className="text-blue-400/60 text-xs font-mono mt-1">Version {CURRENT_VERSION}</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowPatchNotes(false)}
-                                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
-                                >
-                                    <X size={20} />
+                            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/5">
+                                <h3 className="font-bold text-white flex items-center gap-2">
+                                    <FileText size={16} className="text-accent" /> Patch Notes
+                                </h3>
+                                <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-white">
+                                    <X size={18} />
                                 </button>
                             </div>
-
-                            {/* Scrollable Content */}
-                            <div className="p-6 overflow-y-auto custom-scrollbar">
-                                <div className="space-y-6">
-                                    {PATCH_NOTES.map((note, index) => (
-                                        <div key={index} className="group">
-                                            <h3 className="text-white font-medium mb-1 group-hover:text-blue-400 transition-colors flex items-center gap-2">
-                                                <ChevronRight size={14} className="text-blue-500/50 group-hover:text-blue-500 transition-colors" />
-                                                {note.title}
-                                            </h3>
-                                            <p className="text-gray-400 text-sm leading-relaxed pl-6">
-                                                {note.description}
-                                            </p>
+                            <div className="p-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                {patchNotes.map((note, index) => (
+                                    <div key={index} className="mb-6 last:mb-0">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-accent font-mono font-bold text-sm">{note.version}</span>
+                                            <span className="text-gray-600 text-xs">{note.date}</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="p-4 border-t border-white/5 bg-black/20 shrink-0 text-center">
-                                <p className="text-xs text-gray-500">Thank you for being part of our beta.</p>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {note.changes.map((change, i) => (
+                                                <li key={i} className="text-gray-400 text-xs leading-relaxed">
+                                                    {change}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
                             </div>
                         </motion.div>
-                    </div>
+                    </>
                 )}
             </AnimatePresence>
         </>

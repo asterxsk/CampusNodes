@@ -35,7 +35,7 @@ export const UIProvider = ({ children }) => {
     return (
         <UIContext.Provider value={{
             isAuthModalOpen, openAuthModal, closeAuthModal,
-            isChatOpen, toggleChat, openChat, closeChat,
+            isChatOpen, setIsChatOpen, toggleChat, openChat, closeChat,
             unreadCount: unreadSenders.size,
             unreadSenders,
             addUnreadSender,
