@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Navigation = () => {
     const { user } = useAuth();
-    const { openAuthModal, unreadCount } = useUI();
+    const { openAuthModal, unreadCount, setIsChatOpen } = useUI();
     const navigate = useNavigate();
 
     const handleUserClick = () => {
@@ -28,7 +28,7 @@ const Navigation = () => {
                 <div className="flex items-center gap-3">
                     {/* Chat Button */}
                     <button
-                        onClick={() => navigate('/messages')}
+                        onClick={() => setIsChatOpen(true)}
                         className="relative w-10 h-10 flex items-center justify-center bg-black/50 border border-white/10 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
                     >
                         <div className="relative">

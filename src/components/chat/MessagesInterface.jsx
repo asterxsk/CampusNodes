@@ -24,8 +24,13 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
+    const messagesContainerRef = useRef(null);
+
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (messagesContainerRef.current) {
+            const { scrollHeight, clientHeight } = messagesContainerRef.current;
+            messagesContainerRef.current.scrollTop = scrollHeight - clientHeight;
+        }
     };
 
     // Handle mobile keyboard visibility
@@ -112,7 +117,9 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 content: decryptMessage(msg.content, msg.sender_id, msg.receiver_id)
             }));
             setMessages(decryptedMessages);
-            setTimeout(scrollToBottom, 100);
+            setMessages(decryptedMessages);
+            // Instant scroll on load
+            setTimeout(scrollToBottom, 50);
         } catch (err) {
             console.error("Error fetching messages:", err);
         } finally {
@@ -297,41 +304,45 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                             </div>
                         </div>
 
-                        {/* Messages Area */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar bg-[url('/chat-bg.png')] bg-repeat bg-opacity-5">
-                            {messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-60">
-                                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                                        <Send size={24} className="-ml-1 text-white/50" />
-                                    </div>
-                                    <p className="text-sm">No messages yet.</p>
-                                    <p className="text-xs">Send a message to start chatting!</p>
-                                </div>
-                            ) : (
-                                messages.map((msg) => (
-                                    <div
-                                        key={msg.id}
-                                        className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
-                                    >
-                                        <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
-                                            ? 'bg-accent text-black rounded-tr-sm'
-                                            : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
-                                            }`}>
-                                            <p>{msg.content}</p>
-                                            <p className={`text-[9px] mt-1 text-right ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
-                                                {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </p>
+                        <div
+                            className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[url('/chat-bg.png')] bg-repeat bg-opacity-5 flex flex-col"
+                            ref={messagesContainerRef}
+                        >
+                            <div className="flex-1 min-h-0" /> {/* Spacer to push messages down */}
+                            <div className="space-y-2 flex flex-col justify-end">
+                                {messages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-20 text-gray-500 opacity-60">
+                                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                            <Send size={24} className="-ml-1 text-white/50" />
                                         </div>
+                                        <p className="text-sm">No messages yet.</p>
+                                        <p className="text-xs">Send a message to start chatting!</p>
                                     </div>
-                                ))
-                            )}
-                            <div ref={messagesEndRef} />
+                                ) : (
+                                    messages.map((msg) => (
+                                        <div
+                                            key={msg.id}
+                                            className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
+                                                ? 'bg-accent text-black rounded-tr-sm'
+                                                : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
+                                                }`}>
+                                                <p>{msg.content}</p>
+                                                <p className={`text-[9px] mt-1 text-right ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
+                                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </div>
 
                         {/* Input Area - Keyboard responsive on mobile */}
                         <form
                             onSubmit={sendMessage}
-                            className="p-4 pb-24 md:pb-4 bg-background border-t border-white/10 shrink-0 transition-all"
+                            className={`p-4 ${isModal ? 'pb-4' : 'pb-24 md:pb-4'} bg-background border-t border-white/10 shrink-0 transition-all`}
                             style={{ paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 16}px` : undefined }}
                         >
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">

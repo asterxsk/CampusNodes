@@ -1,8 +1,14 @@
 # Changelog
 
-## 8.5.4 (Current)
--   **UI**: **Desktop Nav**: Restored "Chat" button in the top-right fixed container (next to Profile).
--   **UI**: **Badges**: Updated "Friend Request" badges to use Accent Blue instead of Yellow for better theme consistency.
+## 8.5.6 (Current)
+-   **UX**: **Chat Layout**: Messages now align to the bottom (WhatsApp-style) to fix empty space issues.
+-   **FIX**: **Auto-Scroll**: Improved scroll-to-bottom reliability for new messages.
+-   **UI**: **Desktop Chat**: Removed excessive bottom padding in the popup modal.
+
+## 8.5.5
+-   **UI**: **Navigation**: Chat button in desktop top-right now correctly opens the Chat Popup instead of navigating to page.
+
+## 8.5.4
 
 ## 8.5.3
 -   **FIX**: **Forum Comments**: Added toast feedback (success/error) for posting comments.
