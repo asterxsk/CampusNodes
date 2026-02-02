@@ -1,7 +1,9 @@
 # Changelog
 
-## 8.5.11 (Current)
--   **FIX**: **Mobile Chat**: Removed excessive bottom padding that caused a large gap between the chat box and the navigation bar. Input now sits correctly above the navbar.
+## 8.5.12 (Current)
+-   **UI**: **Desktop Nav**: Fine-tuned the expanded width to 640px to eliminate excess space while preventing clipping.
+
+## 8.5.11
 
 ## 8.5.10
 

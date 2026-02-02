@@ -29,7 +29,7 @@ const DesktopNavbar = () => {
                 className="pointer-events-auto bg-black/90 border border-white/10 rounded-full overflow-hidden relative"
                 initial={false}
                 animate={{
-                    width: isHovered ? 680 : 180,
+                    width: isHovered ? 640 : 180,
                     height: 50,
                     boxShadow: isHovered
                         ? '0 0 30px rgba(255,255,255,0.15), 0 0 60px rgba(255,255,255,0.05)'
