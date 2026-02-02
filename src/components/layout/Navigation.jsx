@@ -72,10 +72,10 @@ const Navigation = () => {
                                         <AnimatePresence>
                                             {isHovered && (
                                                 <motion.span
-                                                    initial={{ opacity: 0, y: -5 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: -5 }}
-                                                    className="text-[10px] font-medium absolute top-8 whitespace-nowrap"
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    exit={{ opacity: 0, height: 0 }}
+                                                    className="text-[10px] font-medium mt-1 whitespace-nowrap"
                                                 >
                                                     {item.name}
                                                 </motion.span>
@@ -100,10 +100,10 @@ const Navigation = () => {
                                     <AnimatePresence>
                                         {isHovered && (
                                             <motion.span
-                                                initial={{ opacity: 0, y: -5 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -5 }}
-                                                className="text-[10px] font-medium absolute top-8 whitespace-nowrap"
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: 'auto' }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
                                             >
                                                 {item.name}
                                             </motion.span>

@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     // 1. Set the limit to 1000kb to stop the warning
-    chunkSizeWarningLimit: 1000, 
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         // 2. Separate node_modules into a vendor chunk for better caching

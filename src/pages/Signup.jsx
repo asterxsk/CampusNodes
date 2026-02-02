@@ -46,11 +46,11 @@ const Signup = () => {
         console.log('Starting signup process');
         console.log('Email:', formData.email);
 
-        // Email Validation: name.name@nmims.edu.in
-        const isValidFormat = formData.email.includes('.') && (formData.email.endsWith('@nmims.edu.in') || formData.email.endsWith('@nmims.in'));
+        // Email Validation: Restricted to @gmail.com
+        const isValidFormat = formData.email.toLowerCase().endsWith('@gmail.com');
 
         if (!isValidFormat) {
-            setError("Email must follow the format: firstname.lastname@nmims.edu.in");
+            setError("Email must be a valid @gmail.com address.");
             setLoading(false);
             return;
         }
@@ -236,17 +236,17 @@ const Signup = () => {
                             </div>
 
                             <div>
-                                <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2 font-bold">Student Email</label>
+                                <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2 font-bold">Email Address</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full bg-black/20 border border-white/10 p-3 text-white focus:outline-none focus:border-accent transition-colors text-sm"
-                                    placeholder="firstname.lastname@nmims.edu"
+                                    placeholder="john.doe@gmail.com"
                                     required
                                 />
-                                <p className="text-[10px] text-gray-500 mt-1">We'll need this to verify your student status later.</p>
+                                <p className="text-[10px] text-gray-500 mt-1">Please use your Gmail address for verification.</p>
                             </div>
 
                             <div>
