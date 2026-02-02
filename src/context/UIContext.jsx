@@ -7,6 +7,7 @@ export const UIProvider = ({ children }) => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+    const [isNavHovered, setIsNavHovered] = useState(false);
 
     const openAuthModal = () => setIsAuthModalOpen(true);
     const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -39,7 +40,8 @@ export const UIProvider = ({ children }) => {
             unreadSenders,
             addUnreadSender,
             removeUnreadSender,
-            isSidebarCollapsed, setIsSidebarCollapsed
+            isSidebarCollapsed, setIsSidebarCollapsed,
+            isNavHovered, setIsNavHovered
         }}>
             {children}
         </UIContext.Provider>
