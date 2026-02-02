@@ -24,7 +24,7 @@ import ForgotPassword from './pages/ForgotPassword';
 
 import VersionBanner from './components/ui/VersionBanner';
 import AuthModal from './components/ui/AuthModal'; // Import AuthModal
-import ChatWidget from './components/chat/ChatWidget';
+
 import MessagesModal from './components/chat/MessagesModal';
 
 const ScrollToTop = () => {
@@ -102,7 +102,7 @@ const App = () => {
 
             <AuthModal />
             <MessagesModal />
-            <ChatWidget />
+
             <CustomCursor />
           </Router>
         </UIProvider>

@@ -23,28 +23,8 @@ const Navigation = () => {
     const navigate = useNavigate();
     const [isServicesSheetOpen, setIsServicesSheetOpen] = useState(false);
 
-    // Proximity Effect
-    useEffect(() => {
-        const handleMouseMove = (e) => {
-            if (window.innerWidth < 768) return; // Disable on mobile
-
-            // Nav is fixed at top center. Approx center coordinates.
-            const navX = window.innerWidth / 2;
-            const navY = 40; // Approx center of pill
-
-            const dist = Math.hypot(e.clientX - navX, e.clientY - navY);
-
-            // Threshold for proximity (e.g., 250px radius)
-            if (dist < 250) {
-                setIsNavHovered(true);
-            } else {
-                setIsNavHovered(false);
-            }
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, [setIsNavHovered]);
+    // Simplified Hover Logic (No expensive mouse tracking)
+    const [isHovered, setIsHovered] = useState(false);
 
     // Navigation handler for User icon
     const handleUserClick = () => {
@@ -57,163 +37,88 @@ const Navigation = () => {
 
     return (
         <>
-            {/* ==================== DESKTOP TOP BAR (Floating Pill) ==================== */}
+            {/* ==================== DESKTOP TOP BAR (Dynamic Island) ==================== */}
             <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
                 <motion.div
                     layout
-                    className="pointer-events-auto bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl overflow-hidden"
-                    initial={{ height: 60, borderRadius: 9999 }}
+                    className="pointer-events-auto bg-black/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
+                    initial={{ width: 140, height: 50, borderRadius: 30 }}
                     animate={{
-                        height: isNavHovered ? 80 : 50,
+                        width: isHovered ? 'auto' : 140,
+                        height: 50,
                     }}
-                    style={{ padding: isNavHovered ? "0px 24px" : "0px 16px" }}
-                    onHoverStart={() => setIsNavHovered(true)}
-                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    onHoverStart={() => setIsHovered(true)}
+                    onHoverEnd={() => setIsHovered(false)}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                    <div className="flex items-center gap-2 h-full relative">
-                        {/* === IDLE STATE (Logo + Text) === */}
+                    <div className="flex items-center h-full px-2">
+                        {/* Brand / Toggle */}
+                        <div className="flex items-center justify-center shrink-0 w-[40px] h-full">
+                            <Logo className="w-6 h-6" />
+                        </div>
+
                         <AnimatePresence mode="wait">
-                            {!isNavHovered && (
+                            {!isHovered ? (
                                 <motion.div
-                                    key="idle-brand"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex items-center gap-3 px-2"
+                                    key="label"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="pr-4 whitespace-nowrap"
                                 >
-                                    <div className="scale-75"><Logo className="w-8 h-8" /></div>
-                                    <span className="font-bold text-white text-sm font-display tracking-wide">CampusNodes</span>
+                                    <span className="font-bold text-sm text-white font-display tracking-wider">CNODES</span>
                                 </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        {/* === HOVER STATE (Full Menu) === */}
-                        <AnimatePresence mode="wait">
-                            {isNavHovered && (
+                            ) : (
                                 <motion.div
-                                    key="hover-menu"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ duration: 0.2, delay: 0.05 }}
-                                    className="flex items-center gap-2"
+                                    key="menu"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.2, delay: 0.1 }}
+                                    className="flex items-center gap-1 pr-2"
                                 >
-                                    {/* Logo */}
-                                    <Link to="/" className="mr-4 flex items-center gap-2">
-                                        <div className="scale-75"><Logo /></div>
-                                    </Link>
-
-                                    <div className="h-6 w-[1px] bg-white/10 mx-1" />
-
                                     {menuItems.map((item) => {
                                         const isActive = location.pathname === item.path;
-                                        // Special handling for Services popup
+
+                                        // Component for the Item Content
+                                        const ItemContent = () => (
+                                            <div className="relative p-2 rounded-full hover:bg-white/10 transition-colors group/item">
+                                                <div className={`transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
+                                                    {item.icon}
+                                                </div>
+                                                {item.isMessages && unreadCount > 0 && (
+                                                    <div className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-black" />
+                                                )}
+                                                {/* Tooltip */}
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover/item:opacity-100 transition-opacity pointer-events-none">
+                                                    <div className="bg-black/90 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap border border-white/10">
+                                                        {item.name}
+                                                    </div>
+                                                </div>
+                                                {isActive && (
+                                                    <motion.div layoutId="nav-indicator" className="absolute inset-0 bg-white/5 rounded-full border border-white/5" />
+                                                )}
+                                            </div>
+                                        );
+
                                         if (item.isPopup) {
                                             return (
-                                                <button
-                                                    key={item.name}
-                                                    onClick={() => setIsServicesSheetOpen(true)}
-                                                    className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isServicesSheetOpen ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                                >
-                                                    <div className="relative z-10 p-2">
-                                                        {item.icon}
-                                                    </div>
-                                                    <AnimatePresence>
-                                                        {isNavHovered && (
-                                                            <motion.span
-                                                                initial={{ opacity: 0, height: 0 }}
-                                                                animate={{ opacity: 1, height: 'auto' }}
-                                                                exit={{ opacity: 0, height: 0 }}
-                                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                            >
-                                                                {item.name}
-                                                            </motion.span>
-                                                        )}
-                                                    </AnimatePresence>
+                                                <button key={item.name} onClick={() => setIsServicesSheetOpen(true)}>
+                                                    <ItemContent />
                                                 </button>
                                             );
                                         }
-
-
-
                                         if (item.isMessages) {
                                             return (
-                                                <div key={item.name} className="relative group flex flex-col items-center justify-center w-16 h-full">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            if (window.innerWidth >= 768) {
-                                                                e.preventDefault();
-                                                                setIsChatOpen(true);
-                                                            } else {
-                                                                navigate(item.path);
-                                                            }
-                                                        }}
-                                                        className={`relative flex flex-col items-center justify-center w-full h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                                    >
-                                                        <div className="relative z-10 p-2">
-                                                            {item.icon}
-                                                            {unreadCount > 0 && (
-                                                                <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                                            )}
-                                                        </div>
-                                                        <AnimatePresence>
-                                                            {isNavHovered && (
-                                                                <motion.span
-                                                                    initial={{ opacity: 0, height: 0 }}
-                                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                                    exit={{ opacity: 0, height: 0 }}
-                                                                    className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                                >
-                                                                    {item.name}
-                                                                </motion.span>
-                                                            )}
-                                                        </AnimatePresence>
-                                                    </button>
-
-                                                    {/* Active Dot */}
-                                                    {isActive && !isNavHovered && (
-                                                        <motion.div
-                                                            layoutId="navDot"
-                                                            className="absolute bottom-2 w-1 h-1 bg-accent rounded-full pointer-events-none"
-                                                        />
-                                                    )}
-                                                </div>
+                                                <button key={item.name} onClick={() => setIsChatOpen(true)}>
+                                                    <ItemContent />
+                                                </button>
                                             );
                                         }
-
                                         return (
-                                            <Link
-                                                key={item.name}
-                                                to={item.path}
-                                                className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                            >
-                                                <div className="relative z-10 p-2">
-                                                    {item.icon}
-                                                    {item.isMessages && unreadCount > 0 && (
-                                                        <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                                    )}
-                                                </div>
-                                                <AnimatePresence>
-                                                    {isNavHovered && (
-                                                        <motion.span
-                                                            initial={{ opacity: 0, height: 0 }}
-                                                            animate={{ opacity: 1, height: 'auto' }}
-                                                            exit={{ opacity: 0, height: 0 }}
-                                                            className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                        >
-                                                            {item.name}
-                                                        </motion.span>
-                                                    )}
-                                                </AnimatePresence>
-
-                                                {/* Active Dot */}
-                                                {isActive && !isNavHovered && (
-                                                    <motion.div
-                                                        layoutId="navDot"
-                                                        className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
-                                                    />
-                                                )}
+                                            <Link key={item.name} to={item.path}>
+                                                <ItemContent />
                                             </Link>
                                         );
                                     })}
