@@ -40,85 +40,117 @@ const Navigation = () => {
                     className="pointer-events-auto bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl overflow-hidden"
                     initial={{ height: 60, padding: "0px 24px" }}
                     animate={{
-                        height: isNavHovered ? 80 : 60,
-                        width: isNavHovered ? 'auto' : 'auto' // Allow auto width
+                        height: isNavHovered ? 80 : 50, // Slightly smaller idle height
+                        width: isNavHovered ? 'auto' : 'auto',
+                        padding: isNavHovered ? "0px 24px" : "0px 16px"
                     }}
                     onHoverStart={() => setIsNavHovered(true)}
                     onHoverEnd={() => setIsNavHovered(false)}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                    <div className="flex items-center gap-2 h-full">
-                        {/* Logo */}
-                        <Link to="/" className="mr-4 flex items-center gap-2">
-                            <div className="scale-75"><Logo /></div>
-                        </Link>
-
-                        <div className="h-6 w-[1px] bg-white/10 mx-1" />
-
-                        {menuItems.map((item) => {
-                            const isActive = location.pathname === item.path;
-                            // Special handling for Services popup
-                            if (item.isPopup) {
-                                return (
-                                    <button
-                                        key={item.name}
-                                        onClick={() => setIsServicesSheetOpen(true)}
-                                        className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isServicesSheetOpen ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                    >
-                                        <div className="relative z-10 p-2">
-                                            {item.icon}
-                                        </div>
-                                        <AnimatePresence>
-                                            {isNavHovered && (
-                                                <motion.span
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                    exit={{ opacity: 0, height: 0 }}
-                                                    className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                >
-                                                    {item.name}
-                                                </motion.span>
-                                            )}
-                                        </AnimatePresence>
-                                    </button>
-                                );
-                            }
-
-                            return (
-                                <Link
-                                    key={item.name}
-                                    to={item.path}
-                                    className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                    <div className="flex items-center gap-2 h-full relative">
+                        {/* === IDLE STATE (Logo + Text) === */}
+                        <AnimatePresence mode="wait">
+                            {!isNavHovered && (
+                                <motion.div
+                                    key="idle-brand"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex items-center gap-3 px-2"
                                 >
-                                    <div className="relative z-10 p-2">
-                                        {item.icon}
-                                        {item.isMessages && unreadCount > 0 && (
-                                            <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                        )}
-                                    </div>
-                                    <AnimatePresence>
-                                        {isNavHovered && (
-                                            <motion.span
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: 'auto' }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                            >
-                                                {item.name}
-                                            </motion.span>
-                                        )}
-                                    </AnimatePresence>
+                                    <div className="scale-75"><Logo className="w-8 h-8" /></div>
+                                    <span className="font-bold text-white text-sm font-display tracking-wide">CampusNodes</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                                    {/* Active Dot */}
-                                    {isActive && !isNavHovered && (
-                                        <motion.div
-                                            layoutId="navDot"
-                                            className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
-                                        />
-                                    )}
-                                </Link>
-                            );
-                        })}
+                        {/* === HOVER STATE (Full Menu) === */}
+                        <AnimatePresence mode="wait">
+                            {isNavHovered && (
+                                <motion.div
+                                    key="hover-menu"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    transition={{ duration: 0.2, delay: 0.05 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    {/* Logo */}
+                                    <Link to="/" className="mr-4 flex items-center gap-2">
+                                        <div className="scale-75"><Logo /></div>
+                                    </Link>
+
+                                    <div className="h-6 w-[1px] bg-white/10 mx-1" />
+
+                                    {menuItems.map((item) => {
+                                        const isActive = location.pathname === item.path;
+                                        // Special handling for Services popup
+                                        if (item.isPopup) {
+                                            return (
+                                                <button
+                                                    key={item.name}
+                                                    onClick={() => setIsServicesSheetOpen(true)}
+                                                    className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isServicesSheetOpen ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                                                >
+                                                    <div className="relative z-10 p-2">
+                                                        {item.icon}
+                                                    </div>
+                                                    <AnimatePresence>
+                                                        {isNavHovered && (
+                                                            <motion.span
+                                                                initial={{ opacity: 0, height: 0 }}
+                                                                animate={{ opacity: 1, height: 'auto' }}
+                                                                exit={{ opacity: 0, height: 0 }}
+                                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
+                                                            >
+                                                                {item.name}
+                                                            </motion.span>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </button>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={item.name}
+                                                to={item.path}
+                                                className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                                            >
+                                                <div className="relative z-10 p-2">
+                                                    {item.icon}
+                                                    {item.isMessages && unreadCount > 0 && (
+                                                        <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
+                                                    )}
+                                                </div>
+                                                <AnimatePresence>
+                                                    {isNavHovered && (
+                                                        <motion.span
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="text-[10px] font-medium mt-1 whitespace-nowrap"
+                                                        >
+                                                            {item.name}
+                                                        </motion.span>
+                                                    )}
+                                                </AnimatePresence>
+
+                                                {/* Active Dot */}
+                                                {isActive && !isNavHovered && (
+                                                    <motion.div
+                                                        layoutId="navDot"
+                                                        className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
+                                                    />
+                                                )}
+                                            </Link>
+                                        );
+                                    })}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </motion.div>
             </div>
