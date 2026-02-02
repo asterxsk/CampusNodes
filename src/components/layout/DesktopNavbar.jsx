@@ -11,6 +11,7 @@ const menuItems = [
     { name: 'Services', path: '/services', icon: <Wrench size={20} /> },
     { name: 'Forum', path: '/forum', icon: <MessageCircle size={20} /> },
     { name: 'Social', path: '/connections', icon: <Users size={20} />, isSocial: true },
+    { name: 'Chat', path: '/messages', icon: <MessageSquare size={20} />, isMessages: true },
 ];
 
 const DesktopNavbar = () => {
@@ -28,7 +29,7 @@ const DesktopNavbar = () => {
                 className="pointer-events-auto bg-black/90 border border-white/10 rounded-full overflow-hidden relative"
                 initial={false}
                 animate={{
-                    width: isHovered ? 520 : 180,
+                    width: isHovered ? 580 : 180,
                     height: 50,
                     boxShadow: isHovered
                         ? '0 0 30px rgba(255,255,255,0.15), 0 0 60px rgba(255,255,255,0.05)'

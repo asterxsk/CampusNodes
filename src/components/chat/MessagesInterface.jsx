@@ -295,13 +295,13 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                         <Lock size={8} /> End-to-end encrypted
                                     </p>
                                 </div>
-                            </div>
-
-                            <div className="flex items-center gap-1 text-gray-400">
-                                <button onClick={clearChat} className="p-2 hover:bg-red-500/10 rounded-full hover:text-red-500 transition-colors" title="Clear Chat">
+                                <button onClick={clearChat} className="p-2 hover:bg-red-500/10 rounded-full hover:text-red-500 transition-colors ml-2" title="Clear Chat">
                                     <Trash2 size={18} />
                                 </button>
                             </div>
+
+                            {/* Right side spacer for close button if needed, but button is moved */}
+                            <div className="w-8"></div>
                         </div>
 
                         <div
