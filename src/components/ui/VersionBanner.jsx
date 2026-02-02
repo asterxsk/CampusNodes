@@ -3,10 +3,18 @@ import { useLocation } from 'react-router-dom';
 import { X, Sparkles, FileText, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CURRENT_VERSION = '8.2.0';
+const CURRENT_VERSION = '8.3.0';
 
 // Patch Notes Data - Keep updated with latest features!
 const PATCH_NOTES = [
+    {
+        title: "Password Recovery",
+        description: "Added Forgot Password functionality. You can now reset your password via email if you get locked out. 🔐"
+    },
+    {
+        title: "Profile Security",
+        description: "New Change Password feature added to the Profile page. Keep your account secure! 🛡️"
+    },
     {
         title: "Gmail-Only Verification",
         description: "Enhanced security! Signups are now restricted to verified @gmail.com addresses. 🔒"
@@ -130,8 +138,8 @@ const VersionBanner = () => {
                         // Added 'group' for hover effects on children based on parent hover
                         // Added hover glow effect to the main container
                         className={`fixed z-[40] group transition-all duration-300 ${isMobile
-                                ? 'top-4 left-3 right-3 w-auto'
-                                : 'top-32 left-1/2 -translate-x-1/2 w-auto min-w-[500px]'
+                            ? 'top-4 left-3 right-3 w-auto'
+                            : 'top-32 left-1/2 -translate-x-1/2 w-auto min-w-[500px]'
                             }`}
                     >
                         <div className={`relative overflow-hidden backdrop-blur-md border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] hover:border-blue-500/50 ${isMobile ? 'rounded-2xl bg-black/95' : 'rounded-full bg-black/80'

@@ -7,7 +7,7 @@
   ### The Ultimate Campus Marketplace & Social Platform
   *Built for students, by students.*
 
-  [![GitHub release (latest by date)](https://img.shields.io/github/v/release/asterxsk/CampusNodes?style=for-the-badge&color=blue&label=v8.2.0)](https://github.com/asterxsk/CampusNodes/releases)
+  [![GitHub release (latest by date)](https://img.shields.io/github/v/release/asterxsk/CampusNodes?style=for-the-badge&color=blue&label=v8.3.0)](https://github.com/asterxsk/CampusNodes/releases)
   [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/asterxsk/CampusNodes/blob/main/LICENSE)
   [![Website](https://img.shields.io/website?url=https%3A%2F%2Fasterxsk.github.io%2FCampusNodes%2F&style=for-the-badge&label=Live%20Demo&logo=vercel)](https://asterxsk.github.io/CampusNodes/)
   
