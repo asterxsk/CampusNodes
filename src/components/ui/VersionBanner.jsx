@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, GitCommit } from 'lucide-react';
 import pkg from '../../../package.json';
@@ -6,6 +7,12 @@ import pkg from '../../../package.json';
 const VersionBanner = () => {
     const [isOpen, setIsOpen] = useState(false);
     const version = pkg.version;
+    const location = useLocation();
+
+    // Only show on the home page
+    const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
+
+    if (!isHome) return null;
 
     return (
         <>
@@ -16,7 +23,7 @@ const VersionBanner = () => {
                            bg-black/40 backdrop-blur-md border border-white/10 
                            text-white/80 hover:text-white hover:bg-black/60 hover:border-white/20 
                            transition-all shadow-lg
-                           top-20 left-4 md:top-auto md:bottom-6 md:left-6"
+                           top-4 left-4 md:top-auto md:bottom-6 md:left-6"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: -20 }}

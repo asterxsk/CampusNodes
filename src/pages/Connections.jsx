@@ -45,7 +45,6 @@ const Connections = () => {
             let query = supabase
                 .from('profiles')
                 .select('*')
-                .order('created_at', { ascending: false })
                 .limit(50);
 
             if (user) {
@@ -60,6 +59,7 @@ const Connections = () => {
             }
 
             const profilesData = allProfiles || [];
+            console.log("Fetched profiles:", profilesData.length, profilesData);
 
             if (!user) {
                 // If not logged in, everyone is a "suggestion"

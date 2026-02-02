@@ -1,9 +1,10 @@
 # Changelog
 
-## 8.3.7 (Current)
--   **FIX**: **Desktop Nav**: Fixed clipping/spasm glitches on the top bar when hovering.
--   **UI**: **Mobile Nav**: Renamed "Net" to "Connections"; added "Campus" slide-up menu with Forum, Marketplace, Services.
--   **FIX**: **Connections**: Improved null handling for Discover People section.
+## 8.3.8 (Current)
+-   **FIX**: **Version Banner**: Now only visible on the home page; moved higher on mobile devices.
+-   **FIX**: **Connections**: Fixed Discover People query (removed invalid column ordering).
+
+## 8.3.7
 
 ## 8.3.6
 
