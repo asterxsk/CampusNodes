@@ -180,43 +180,44 @@ const Navigation = () => {
                                                         />
                                                     )}
                                                 </div>
-        
+                                            );
+                                        }
 
                                         return (
-                                                <Link
-                                                    key={item.name}
-                                                    to={item.path}
-                                                    className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
-                                                >
-                                                    <div className="relative z-10 p-2">
-                                                        {item.icon}
-                                                        {item.isMessages && unreadCount > 0 && (
-                                                            <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
-                                                        )}
-                                                    </div>
-                                                    <AnimatePresence>
-                                                        {isNavHovered && (
-                                                            <motion.span
-                                                                initial={{ opacity: 0, height: 0 }}
-                                                                animate={{ opacity: 1, height: 'auto' }}
-                                                                exit={{ opacity: 0, height: 0 }}
-                                                                className="text-[10px] font-medium mt-1 whitespace-nowrap"
-                                                            >
-                                                                {item.name}
-                                                            </motion.span>
-                                                        )}
-                                                    </AnimatePresence>
-
-                                                    {/* Active Dot */}
-                                                    {isActive && !isNavHovered && (
-                                                        <motion.div
-                                                            layoutId="navDot"
-                                                            className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
-                                                        />
+                                            <Link
+                                                key={item.name}
+                                                to={item.path}
+                                                className={`relative group flex flex-col items-center justify-center w-16 h-full transition-colors ${isActive ? 'text-accent' : 'text-gray-400 hover:text-white'}`}
+                                            >
+                                                <div className="relative z-10 p-2">
+                                                    {item.icon}
+                                                    {item.isMessages && unreadCount > 0 && (
+                                                        <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black" />
                                                     )}
-                                                </Link>
-                                            );
-                                        })}
+                                                </div>
+                                                <AnimatePresence>
+                                                    {isNavHovered && (
+                                                        <motion.span
+                                                            initial={{ opacity: 0, height: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto' }}
+                                                            exit={{ opacity: 0, height: 0 }}
+                                                            className="text-[10px] font-medium mt-1 whitespace-nowrap"
+                                                        >
+                                                            {item.name}
+                                                        </motion.span>
+                                                    )}
+                                                </AnimatePresence>
+
+                                                {/* Active Dot */}
+                                                {isActive && !isNavHovered && (
+                                                    <motion.div
+                                                        layoutId="navDot"
+                                                        className="absolute bottom-2 w-1 h-1 bg-accent rounded-full"
+                                                    />
+                                                )}
+                                            </Link>
+                                        );
+                                    })}
                                 </motion.div>
                             )}
                         </AnimatePresence>
