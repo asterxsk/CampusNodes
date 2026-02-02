@@ -285,8 +285,8 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                         className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
                                     >
                                         <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
-                                                ? 'bg-accent text-black rounded-tr-sm'
-                                                : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
+                                            ? 'bg-accent text-black rounded-tr-sm'
+                                            : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
                                             }`}>
                                             <p>{msg.content}</p>
                                             <p className={`text-[9px] mt-1 text-right ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
@@ -322,11 +322,6 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 ) : (
                     // Empty State (Desktop Right Side)
                     <div className="hidden md:flex flex-col items-center justify-center h-full text-gray-500 bg-background/50 relative">
-                        {isModal && (
-                            <button onClick={onClose} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors z-50">
-                                <X size={24} />
-                            </button>
-                        )}
                         <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 animate-pulse">
                             <Send size={40} className="text-white/20" />
                         </div>

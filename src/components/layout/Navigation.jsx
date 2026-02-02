@@ -60,16 +60,15 @@ const Navigation = () => {
             {/* ==================== DESKTOP TOP BAR (Floating Pill) ==================== */}
             <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
                 <motion.div
+                    layout
                     className="pointer-events-auto bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl overflow-hidden"
-                    initial={{ height: 60, padding: "0px 24px" }}
+                    initial={{ height: 60, borderRadius: 9999 }}
                     animate={{
-                        height: isNavHovered ? 80 : 50, // Slightly smaller idle height
-                        width: isNavHovered ? 'auto' : 'auto',
-                        padding: isNavHovered ? "0px 24px" : "0px 16px"
+                        height: isNavHovered ? 80 : 50,
                     }}
+                    style={{ padding: isNavHovered ? "0px 24px" : "0px 16px" }}
                     onHoverStart={() => setIsNavHovered(true)}
-                    onHoverEnd={() => { }} // Let proximity handle closing
-                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
                 >
                     <div className="flex items-center gap-2 h-full relative">
                         {/* === IDLE STATE (Logo + Text) === */}
