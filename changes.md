@@ -1,10 +1,12 @@
 # Changelog
 
-## 8.5.0 (Current)
--   **FEATURE**: **Custom Modals**: Delete confirmations now use site-themed modals (not browser dialogs).
--   **FEATURE**: **Toast Notifications**: Info/success/error messages now appear as pill notifications at the top.
--   **UI**: **Mobile Nav**: Added text labels under each icon (Home, Campus, Chats, Social).
--   **PERF**: Removed backdrop-blur from VersionBanner modal to improve performance.
+## 8.5.1 (Current)
+-   **FIX**: **Desktop Nav**: Fixed resizing bug by using explicit width (520px when expanded).
+-   **FIX**: **Mobile Bottom Bar**: Removed backdrop-blur for better scroll performance.
+-   **FIX**: **Chat Input**: Added keyboard awareness with visualViewport API for proper positioning.
+-   **UI**: **Product Details**: Replaced "C" logo with Campus Nodes logo in fallback placeholders.
+
+## 8.5.0
 
 ## 8.4.1
 

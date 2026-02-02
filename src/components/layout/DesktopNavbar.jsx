@@ -26,21 +26,19 @@ const DesktopNavbar = () => {
     return (
         <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
             <motion.div
-                layout
                 className="pointer-events-auto bg-black/90 border border-white/10 rounded-full overflow-hidden relative"
                 initial={false}
                 animate={{
-                    width: isHovered ? 'auto' : 180,
+                    width: isHovered ? 520 : 180,
                     height: 50,
                     boxShadow: isHovered
                         ? '0 0 30px rgba(255,255,255,0.15), 0 0 60px rgba(255,255,255,0.05)'
                         : '0 10px 40px rgba(0,0,0,0.5)',
                     borderColor: isHovered ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)'
                 }}
-                style={{ minWidth: 180 }}
                 onHoverStart={() => setIsHovered(true)}
                 onHoverEnd={() => setIsHovered(false)}
-                transition={{ type: "spring", stiffness: 400, damping: 30, mass: 0.8 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
                 {/* Notification indicator when collapsed */}
                 {!isHovered && totalNotifications > 0 && (

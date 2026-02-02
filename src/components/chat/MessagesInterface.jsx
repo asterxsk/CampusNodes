@@ -19,12 +19,29 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
 
     const messagesEndRef = useRef(null);
+    const inputRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    // Handle mobile keyboard visibility
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.visualViewport) {
+                const offset = window.innerHeight - window.visualViewport.height;
+                setKeyboardOffset(offset > 50 ? offset : 0);
+            }
+        };
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', handleResize);
+            return () => window.visualViewport.removeEventListener('resize', handleResize);
+        }
+    }, []);
 
     useEffect(() => {
         if (user) fetchFriends();
@@ -311,10 +328,15 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area - Added pb-20 for mobile bottom bar clearance */}
-                        <form onSubmit={sendMessage} className="p-4 pb-24 md:pb-4 bg-background border-t border-white/10 shrink-0">
+                        {/* Input Area - Keyboard responsive on mobile */}
+                        <form
+                            onSubmit={sendMessage}
+                            className="p-4 pb-24 md:pb-4 bg-background border-t border-white/10 shrink-0 transition-all"
+                            style={{ paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 16}px` : undefined }}
+                        >
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
                                 <input
+                                    ref={inputRef}
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}

@@ -112,7 +112,7 @@ const MobileNavbar = () => {
             </AnimatePresence>
 
             {/* Bottom Navigation Bar */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/10 z-[100] safe-area-bottom pb-safe backdrop-blur-md">
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-[100] safe-area-bottom pb-safe">
                 <div className="flex items-center justify-around py-2 px-2">
                     {/* 1. Home */}
                     <Link to="/" className={`flex flex-col items-center gap-0.5 transition-all ${location.pathname === '/' ? 'text-accent' : 'text-gray-500 hover:text-white'}`}>

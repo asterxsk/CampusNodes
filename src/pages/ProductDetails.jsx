@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useUI } from '../context/UIContext'; // Import UI
+import { useUI } from '../context/UIContext';
 import { MARKET_ITEMS } from '../data/marketItems';
 import { ArrowLeft, Star, ShoppingCart, CreditCard } from 'lucide-react';
 import Button from '../components/ui/Button';
+import Logo from '../components/ui/Logo';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -63,7 +64,7 @@ const ProductDetails = () => {
                                     />
                                     <div className="fallback-placeholder hidden absolute inset-0 bg-zinc-900 flex-col items-center justify-center gap-4">
                                         <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                            <span className="font-display font-bold text-5xl text-white">C</span>
+                                            <Logo className="w-14 h-14" />
                                         </div>
                                         <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Seller did not upload an image</p>
                                     </div>
@@ -71,7 +72,7 @@ const ProductDetails = () => {
                             ) : (
                                 <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center gap-4">
                                     <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                        <span className="font-display font-bold text-5xl text-white">C</span>
+                                        <Logo className="w-14 h-14" />
                                     </div>
                                     <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Seller did not upload an image</p>
                                 </div>
