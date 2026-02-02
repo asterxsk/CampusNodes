@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const menuItems = [
     { name: 'Home', path: '/', icon: <Home size={20} /> },
     { name: 'Market', path: '/market', icon: <ShoppingBag size={20} /> },
-    { name: 'Services', path: '/services', isPopup: true, icon: <Wrench size={20} /> },
+    { name: 'Services', path: '/services', icon: <Wrench size={20} /> },
     { name: 'Forum', path: '/forum', icon: <MessageCircle size={20} /> },
     { name: 'Social', path: '/connections', icon: <Users size={20} /> },
     { name: 'Chat', path: '/messages', icon: <MessageSquare size={20} />, isMessages: true },
