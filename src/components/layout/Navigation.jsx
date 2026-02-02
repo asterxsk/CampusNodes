@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Wrench, Users, User, MessageSquare, Home, X, MessageCircle, ChevronDown } from 'lucide-react';
 import Logo from '../ui/Logo';
