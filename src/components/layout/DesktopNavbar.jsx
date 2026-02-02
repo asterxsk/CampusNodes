@@ -11,7 +11,6 @@ const menuItems = [
     { name: 'Services', path: '/services', icon: <Wrench size={20} /> },
     { name: 'Forum', path: '/forum', icon: <MessageCircle size={20} /> },
     { name: 'Social', path: '/connections', icon: <Users size={20} />, isSocial: true },
-    { name: 'Chat', path: '/messages', icon: <MessageSquare size={20} />, isMessages: true },
 ];
 
 const DesktopNavbar = () => {

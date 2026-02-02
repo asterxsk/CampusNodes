@@ -342,7 +342,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         {/* Input Area - Keyboard responsive on mobile */}
                         <form
                             onSubmit={sendMessage}
-                            className={`p-4 ${isModal ? 'pb-4' : 'pb-24 md:pb-4'} bg-background border-t border-white/10 shrink-0 transition-all`}
+                            className={`p-4 ${isModal ? 'pb-4' : 'pb-16 md:pb-4'} bg-background border-t border-white/10 shrink-0 transition-all`}
                             style={{ paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 16}px` : undefined }}
                         >
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">

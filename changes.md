@@ -1,9 +1,11 @@
 # Changelog
 
-## 8.5.6 (Current)
--   **UX**: **Chat Layout**: Messages now align to the bottom (WhatsApp-style) to fix empty space issues.
--   **FIX**: **Auto-Scroll**: Improved scroll-to-bottom reliability for new messages.
--   **UI**: **Desktop Chat**: Removed excessive bottom padding in the popup modal.
+## 8.5.7 (Current)
+-   **UI**: **Desktop Nav**: Removed "Chat" button from the center floating pill (kept only the top-right button).
+-   **FIX**: **Mobile Chat**: Reduced input bottom padding to fix gap above navbar.
+-   **FIX**: **Mobile Nav**: Improved anchoring stability with hardware acceleration styles.
+
+## 8.5.6
 
 ## 8.5.5
 -   **UI**: **Navigation**: Chat button in desktop top-right now correctly opens the Chat Popup instead of navigating to page.
