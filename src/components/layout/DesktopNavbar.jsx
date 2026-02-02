@@ -27,11 +27,15 @@ const DesktopNavbar = () => {
         <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
             <motion.div
                 layout
-                className="pointer-events-auto bg-black/90 border border-white/10 rounded-full shadow-2xl overflow-hidden relative"
+                className="pointer-events-auto bg-black/90 border border-white/10 rounded-full overflow-hidden relative"
                 initial={false}
                 animate={{
                     width: isHovered ? 'auto' : 180,
                     height: 50,
+                    boxShadow: isHovered
+                        ? '0 0 30px rgba(255,255,255,0.15), 0 0 60px rgba(255,255,255,0.05)'
+                        : '0 10px 40px rgba(0,0,0,0.5)',
+                    borderColor: isHovered ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)'
                 }}
                 style={{ minWidth: 180 }}
                 onHoverStart={() => setIsHovered(true)}

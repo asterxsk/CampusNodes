@@ -1,8 +1,12 @@
 # Changelog
 
-## 8.3.9 (Current)
--   **FEATURE**: **Notifications**: Added badges for unread messages (red) and pending friend requests (yellow) on both Desktop and Mobile navigation.
--   **UI**: Desktop navbar shows a pulsing indicator when collapsed if there are notifications.
+## 8.4.0 (Current)
+-   **FIX**: **Mobile Chat**: Input field no longer hidden behind bottom bar; added proper padding.
+-   **FIX**: **Chat Header**: Removed overlapping close/clear buttons; removed call/video icons (backend unsupported).
+-   **UI**: **Desktop Nav**: Added glow effect on hover with animated border.
+-   **UI**: **Mobile Messages**: Reduced top margin for more screen space.
+
+## 8.3.9
 
 ## 8.3.8
 

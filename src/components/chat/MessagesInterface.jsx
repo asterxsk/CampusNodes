@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Send, User, Trash2, Lock, MoreVertical, Search, Phone, Video, X } from 'lucide-react';
+import { ChevronLeft, Send, Trash2, Lock, MoreVertical, Search } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
@@ -182,7 +182,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 </div>
 
                 {/* Friends List */}
-                <div className="flex-1 overflow-y-auto px-2 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-2 pb-20 md:pb-2 custom-scrollbar">
                     {loading && friends.length === 0 ? (
                         <div className="text-center py-10 text-gray-500 text-sm">Loading chats...</div>
                     ) : filteredFriends.length === 0 ? (
@@ -228,7 +228,6 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 {activeChat ? (
                     <>
                         {/* Chat Header */}
-                        {/* Chat Header */}
                         <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-black/50 shrink-0">
                             <div className="flex items-center gap-3">
                                 <button onClick={() => setActiveChat(null)} className="md:hidden p-2 -ml-2 hover:bg-white/10 rounded-full text-white">
@@ -251,21 +250,10 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 text-gray-400">
-                                <button className="p-2 hover:bg-white/10 rounded-full hover:text-white transition-colors">
-                                    <Phone size={20} />
-                                </button>
-                                <button className="p-2 hover:bg-white/10 rounded-full hover:text-white transition-colors">
-                                    <Video size={20} />
-                                </button>
+                            <div className="flex items-center gap-1 text-gray-400">
                                 <button onClick={clearChat} className="p-2 hover:bg-red-500/10 rounded-full hover:text-red-500 transition-colors" title="Clear Chat">
-                                    <Trash2 size={20} />
+                                    <Trash2 size={18} />
                                 </button>
-                                {isModal && (
-                                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full text-white md:hidden">
-                                        <X size={20} />
-                                    </button>
-                                )}
                             </div>
                         </div>
 
@@ -300,8 +288,8 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Area */}
-                        <form onSubmit={sendMessage} className="p-4 bg-background border-t border-white/10 shrink-0">
+                        {/* Input Area - Added pb-20 for mobile bottom bar clearance */}
+                        <form onSubmit={sendMessage} className="p-4 pb-24 md:pb-4 bg-background border-t border-white/10 shrink-0">
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
                                 <input
                                     type="text"
