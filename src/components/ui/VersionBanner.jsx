@@ -7,6 +7,7 @@ const VersionBanner = () => {
 
     // Hardcoded patch notes for now
     const patchNotes = [
+        { version: "v8.3.1", date: "Feb 2026", changes: ["Redesigned Mobile Bottom Bar", "Forum Comments & PFPs", "Performance Improvements"] },
         { version: "v8.3.0", date: "Feb 2026", changes: ["Added Messages Modal for Desktop", "Dynamic Navigation Bar", "Performance & UI Enhancements"] },
         { version: "v8.2.0", date: "Jan 2026", changes: ["Enhanced Global Chat", "Mobile UI Fixes"] },
     ];
@@ -20,7 +21,7 @@ const VersionBanner = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
             >
-                <span className="text-xs font-mono font-bold">v8.3.0</span>
+                <span className="text-xs font-mono font-bold">v8.3.1</span>
                 <span className="w-0 overflow-hidden group-hover:w-auto group-hover:pl-1 transition-all duration-300 text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100">
                     Patch Notes
                 </span>
