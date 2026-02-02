@@ -1,10 +1,12 @@
 # Changelog
 
-## 8.4.0 (Current)
--   **FIX**: **Mobile Chat**: Input field no longer hidden behind bottom bar; added proper padding.
--   **FIX**: **Chat Header**: Removed overlapping close/clear buttons; removed call/video icons (backend unsupported).
--   **UI**: **Desktop Nav**: Added glow effect on hover with animated border.
--   **UI**: **Mobile Messages**: Reduced top margin for more screen space.
+## 8.4.1 (Current)
+-   **FIX**: **Mobile Nav**: Fixed bottom bar not sticking (removed problematic transform).
+-   **FIX**: **Messages**: Page now uses fixed positioning to prevent scrolling issues with bottom bar.
+-   **FIX**: **Clear Chat**: Now properly clears only user's sent messages (RLS limitation) and updates UI correctly.
+-   **NOTE**: Forum already has real-time updates for new posts.
+
+## 8.4.0
 
 ## 8.3.9
 

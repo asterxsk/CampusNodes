@@ -129,15 +129,22 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     };
 
     const clearChat = async () => {
-        if (!activeChat || !window.confirm('Clear all messages with this person?')) return;
+        if (!activeChat || !window.confirm('Clear your sent messages with this person? (Only messages you sent will be deleted)')) return;
         try {
-            await supabase.from('messages').delete()
-                .eq('sender_id', user.id).eq('receiver_id', activeChat.id);
-            await supabase.from('messages').delete()
-                .eq('sender_id', activeChat.id).eq('receiver_id', user.id);
-            setMessages([]);
+            // Due to RLS, we can only delete messages where current user is the sender
+            const { error } = await supabase
+                .from('messages')
+                .delete()
+                .eq('sender_id', user.id)
+                .eq('receiver_id', activeChat.id);
+
+            if (error) throw error;
+
+            // Remove only the user's sent messages from local state
+            setMessages(prev => prev.filter(msg => msg.sender_id !== user.id));
         } catch (err) {
             console.error("Failed to clear chat", err);
+            alert("Failed to clear messages. Please try again.");
         }
     };
 
