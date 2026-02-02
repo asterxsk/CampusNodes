@@ -1,6 +1,12 @@
 # Changelog
 
-## 8.0.0 (Current)
+## 8.1.0 (Current)
+-   **UI**: **Desktop Nav**: Replaced Sidebar with a Floating Top Bar ("Glass Pill" design).
+-   **UI**: **Layout**: Removed left sidebar padding for a full-width desktop layout.
+-   **UI**: **Profile**: Moved to fixed top-right corner.
+-   **FEATURE**: **Forum**: Added as a top-level navigation item.
+
+## 8.0.0
 -   **FEATURE**: **Social Feed (Forum)**: Added a new page for campus-wide posts (`/forum`).
 -   **UI**: **Mobile Nav**: Reordered icons (Home, Services, Market, Chat, Profile).
 -   **UI**: **Services Sheet**: "Services" button now opens a slide-up drawer to select Gigs or Forum.

@@ -3,7 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { UIProvider, useUI } from './context/UIContext';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Sidebar from './components/layout/Sidebar';
+import Navigation from './components/layout/Navigation';
 import CustomCursor from './components/ui/CustomCursor';
 import Preloader from './components/ui/Preloader';
 import Hero from './components/hero/Hero';
@@ -49,11 +49,10 @@ const GlobalBackground = () => {
 
 const MainLayout = ({ children }) => {
   const location = useLocation();
-  const { isSidebarCollapsed } = useUI();
   const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
 
   return (
-    <div className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white cursor-none relative z-10 transition-all duration-300 ${isHome ? 'bg-transparent' : 'bg-background'} ${isSidebarCollapsed ? 'md:pl-0' : 'md:pl-[260px]'}`}>
+    <div className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white cursor-none relative z-10 transition-all duration-300 ${isHome ? 'bg-transparent' : 'bg-background'}`}>
       {children}
     </div>
   );
@@ -72,7 +71,7 @@ const App = () => {
             {/* Global Persistent 3D Background */}
             <GlobalBackground />
 
-            <Sidebar />
+            <Navigation />
 
             <MainLayout>
               <Routes>
