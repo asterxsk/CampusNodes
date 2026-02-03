@@ -57,11 +57,39 @@ export const UIProvider = ({ children }) => {
         }
     };
 
-    // Listen for friendship changes
+
+
+    // Fetch unread messages count/senders
+    const fetchUnreadMessages = async () => {
+        if (!user) return;
+        try {
+            // Get all unique sender_ids for unread messages sent to current user
+            const { data, error } = await supabase
+                .from('messages')
+                .select('sender_id')
+                .eq('receiver_id', user.id)
+                .eq('is_read', false);
+
+            if (error) throw error;
+
+            if (data) {
+                const senders = new Set(data.map(msg => msg.sender_id));
+                setUnreadSenders(senders);
+            }
+        } catch (err) {
+            console.error('Error fetching unread messages:', err);
+        }
+    };
+
+    // Listen for new incoming messages and updates to read status
     useEffect(() => {
         fetchPendingRequests();
+        fetchUnreadMessages();
 
-        if (!user) return;
+        if (!user) {
+            setUnreadSenders(new Set());
+            return;
+        }
 
         const channel = supabase.channel('ui_friend_requests')
             .on('postgres_changes', {
@@ -72,33 +100,39 @@ export const UIProvider = ({ children }) => {
             }, () => fetchPendingRequests())
             .subscribe();
 
-        return () => supabase.removeChannel(channel);
-    }, [user]);
-
-    // Listen for new incoming messages to update unread badges
-    useEffect(() => {
-        if (!user) {
-            setUnreadSenders(new Set());
-            return;
-        }
-
-        // Subscribe to new messages where current user is the receiver
+        // Subscribe to messages changes
         const messagesChannel = supabase
-            .channel('ui_new_messages')
+            .channel('ui_messages_tracking')
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
                 table: 'messages',
                 filter: `receiver_id=eq.${user.id}`
             }, (payload) => {
-                // Add the sender to unread senders (only if chat is not currently open to that user)
-                if (payload.new && payload.new.sender_id) {
+                // If is_read is false (default), add to unread
+                // Note: If chat is open, the message component handles marking it read immediately,
+                // triggering an UPDATE event which will remove it.
+                if (payload.new && !payload.new.is_read) {
                     addUnreadSender(payload.new.sender_id);
                 }
             })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'messages',
+                filter: `receiver_id=eq.${user.id}`
+            }, (payload) => {
+                // If message marked as read, we might need to refresh or check
+                // Easier strategy: Refetch unread counts to be accurate or remove if we know the specific sender logic
+                // For robustness, let's just refetch unread senders
+                fetchUnreadMessages();
+            })
             .subscribe();
 
-        return () => supabase.removeChannel(messagesChannel);
+        return () => {
+            supabase.removeChannel(channel);
+            supabase.removeChannel(messagesChannel);
+        };
     }, [user]);
 
     return (

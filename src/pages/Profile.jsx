@@ -123,6 +123,23 @@ const Profile = () => {
     const handleRemoveAvatar = async () => {
         try {
             setAvatarLoading(true);
+
+            // Delete from storage if URL exists
+            if (avatarUrl) {
+                // Extract the path after '/avatars/' 
+                // URL format: .../storage/v1/object/public/avatars/USER_ID/FILENAME
+                const path = avatarUrl.split('/avatars/')[1];
+                if (path) {
+                    const { error: storageError } = await supabase.storage
+                        .from('avatars')
+                        .remove([path]);
+
+                    if (storageError) {
+                        console.error('Error removing file from storage:', storageError);
+                    }
+                }
+            }
+
             const { error } = await supabase.auth.updateUser({
                 data: { avatar_url: null }
             });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, Send, Trash2, Lock, MoreVertical, Search } from 'lucide-react';
+import { ChevronLeft, Send, Trash2, Lock, MoreVertical, Search, ArrowDown } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
@@ -20,17 +20,29 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [keyboardOffset, setKeyboardOffset] = useState(0);
+    const [firstUnreadId, setFirstUnreadId] = useState(null);
+    const [showScrollButton, setShowScrollButton] = useState(false);
 
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
     const messagesContainerRef = useRef(null);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = (smooth = true) => {
         if (messagesContainerRef.current) {
             const { scrollHeight, clientHeight } = messagesContainerRef.current;
-            messagesContainerRef.current.scrollTop = scrollHeight - clientHeight;
+            messagesContainerRef.current.scrollTo({
+                top: scrollHeight - clientHeight,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
         }
+    };
+
+    const checkScroll = () => {
+        if (!messagesContainerRef.current) return;
+        const { scrollHeight, scrollTop, clientHeight } = messagesContainerRef.current;
+        // Show button if user is scrolled up more than 300px from bottom
+        setShowScrollButton(scrollHeight - scrollTop - clientHeight > 300);
     };
 
     // Handle mobile keyboard visibility
@@ -44,7 +56,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
 
                 // Scroll messages to bottom when keyboard opens
                 if (offset > 150) {
-                    setTimeout(scrollToBottom, 100);
+                    setTimeout(() => scrollToBottom(true), 100);
                 }
             }
         };
@@ -63,9 +75,49 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
         if (user) fetchFriends();
     }, [user]);
 
+    // Auto-scroll on new messages if near bottom
+    useEffect(() => {
+        // Only auto-scroll if we are already near the bottom OR if it's a new message we just sent
+        // For simplicity, we'll auto-scroll unless the user is way up, 
+        // but typically for "new message arrived" we might want to show a badge instead if scrolled up.
+        // For now, let's keep simple behavior but respect manual scroll a bit? 
+        // Actually, previous behavior was always scroll. Let's stick to that for consistency unless requested otherwise.
+        if (!showScrollButton) {
+            scrollToBottom();
+        }
+    }, [messages]);
+
+    const markMessagesAsRead = async (senderId) => {
+        try {
+            // Update ALL messages from this sender to me as read to ensure no "stuck" notifications
+            // Actually, to be aggressive and fix the user's issue, let's just update anything that isn't true.
+            // Or simpler: just update where receiver is me and sender is them.
+            // But we can keep .eq('is_read', false) if we trust the DB. 
+            // Let's use use .or('is_read.eq.false,is_read.is.null') logic if possible, or just drop the filter to be safe.
+            // Dropping the filter adds overhead but guarantees consistency.
+
+            const { error: updateError } = await supabase
+                .from('messages')
+                .update({ is_read: true, read_at: new Date().toISOString() })
+                .eq('sender_id', senderId)
+                .eq('receiver_id', user.id)
+                .neq('is_read', true); // Update false or null
+
+            if (updateError) throw updateError;
+
+            // Also update local unread count via context
+            removeUnreadSender(senderId);
+        } catch (err) {
+            console.error("Error marking messages as read:", err);
+        }
+    };
+
     useEffect(() => {
         if (activeChat) {
-            removeUnreadSender(activeChat.id);
+            // Reset unread marker state when switching chats
+            setFirstUnreadId(null);
+
+            // Fetch first, then mark read internally
             fetchMessages(activeChat.id);
 
             const channel = supabase
@@ -75,12 +127,29 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                     schema: 'public',
                     table: 'messages',
                     filter: `sender_id=eq.${activeChat.id}`
-                }, (payload) => {
+                }, async (payload) => {
                     if (payload.new.receiver_id === user.id) {
                         const decryptedContent = decryptMessage(payload.new.content, payload.new.sender_id, payload.new.receiver_id);
                         const msgWithDecrypted = { ...payload.new, content: decryptedContent };
                         setMessages(prev => [...prev, msgWithDecrypted]);
-                        scrollToBottom();
+
+                        // If user is looking (not scrolled up), scroll to bottom
+                        if (!showScrollButton) scrollToBottom();
+
+                        // Mark as read immediately
+                        await markMessagesAsRead(activeChat.id);
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `sender_id=eq.${user.id}` // Listen for updates to messages WE sent (e.g. marked as read)
+                }, (payload) => {
+                    if (payload.new.receiver_id === activeChat.id) {
+                        setMessages(prev => prev.map(msg =>
+                            msg.id === payload.new.id ? { ...msg, ...payload.new, content: msg.content } : msg
+                        ));
                     }
                 })
                 .subscribe();
@@ -134,13 +203,35 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 }
             });
 
+            // Identify first unread message from the OTHER person
+            const firstUnread = filteredMessages.find(m => m.sender_id === friendId && !m.is_read);
+            if (firstUnread) {
+                setFirstUnreadId(firstUnread.id);
+            } else {
+                setFirstUnreadId(null); // No unread messages
+            }
+
             const decryptedMessages = filteredMessages.map(msg => ({
                 ...msg,
                 content: decryptMessage(msg.content, msg.sender_id, msg.receiver_id)
             }));
             setMessages(decryptedMessages);
-            // Instant scroll on load
-            setTimeout(scrollToBottom, 50);
+
+            // Mark messages as read AFTER identifying which ones were unread
+            if (firstUnread) {
+                await markMessagesAsRead(friendId);
+            }
+
+            // Scroll logic
+            if (firstUnread) {
+                // If there are unread messages, we might want to scroll to the banner?
+                // For now, let's just stick to bottom or maybe scroll to banner could be a nice touch later.
+                // Keeping standard behavior: scroll to bottom
+                setTimeout(() => scrollToBottom(false), 50);
+            } else {
+                setTimeout(() => scrollToBottom(false), 50);
+            }
+
         } catch (err) {
             console.error("Error fetching messages:", err);
         } finally {
@@ -341,8 +432,9 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         </div>
 
                         <div
-                            className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[url('/chat-bg.png')] bg-repeat bg-opacity-5 flex flex-col"
+                            className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[url('/chat-bg.png')] bg-repeat bg-opacity-5 flex flex-col relative"
                             ref={messagesContainerRef}
+                            onScroll={checkScroll}
                         >
                             <div className="flex-1 min-h-0" /> {/* Spacer to push messages down */}
                             <div className="space-y-2 flex flex-col justify-end">
@@ -356,23 +448,48 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                     </div>
                                 ) : (
                                     messages.map((msg) => (
-                                        <div
-                                            key={msg.id}
-                                            className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
-                                        >
-                                            <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
-                                                ? 'bg-accent text-black rounded-tr-sm'
-                                                : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
-                                                }`}>
-                                                <p>{msg.content}</p>
-                                                <p className={`text-[9px] mt-1 text-right ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
-                                                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                        <React.Fragment key={msg.id}>
+                                            {/* Unread Banner */}
+                                            {msg.id === firstUnreadId && (
+                                                <div className="w-full flex justify-center my-4 animate-fade-in">
+                                                    <div className="bg-accent/10 border border-accent/20 backdrop-blur-sm text-accent text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg">
+                                                        Unread Messages
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div
+                                                className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div className={`max-w-[70%] md:max-w-[60%] px-4 py-2 rounded-2xl text-sm shadow-sm ${msg.sender_id === user.id
+                                                    ? 'bg-accent text-black rounded-tr-sm'
+                                                    : 'bg-[#1f1f1f] text-white rounded-tl-sm border border-white/5'
+                                                    }`}>
+                                                    <p>{msg.content}</p>
+                                                    <p className={`text-[9px] mt-1 text-right flex items-center justify-end gap-1 ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
+                                                        <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                        {msg.sender_id === user.id && msg.is_read && (
+                                                            <span className="font-bold"> • Read</span>
+                                                        )}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </React.Fragment>
                                     ))
                                 )}
                             </div>
+
+                            {/* Jump to Latest Button */}
+                            {showScrollButton && (
+                                <div className="sticky bottom-0 left-0 right-0 flex justify-center pb-2 pointer-events-none">
+                                    <button
+                                        onClick={() => scrollToBottom(true)}
+                                        className="pointer-events-auto bg-black/80 backdrop-blur hover:bg-black text-white p-2 rounded-full border border-white/20 shadow-lg text-xs flex items-center gap-2 transition-all animate-bounce"
+                                    >
+                                        <ArrowDown size={14} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Input Area - Keyboard responsive on mobile */}

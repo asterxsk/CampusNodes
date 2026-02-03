@@ -18,6 +18,7 @@ const DesktopNavbar = () => {
     const { unreadCount, pendingRequestCount, setIsChatOpen } = useUI();
     const location = useLocation();
     const [isHovered, setIsHovered] = useState(false);
+    const [hoveredItem, setHoveredItem] = useState(null);
     const [isServicesSheetOpen, setIsServicesSheetOpen] = useState(false);
 
     // Total notification count for collapsed state indicator
@@ -26,6 +27,7 @@ const DesktopNavbar = () => {
     return (
         <div className="hidden md:flex fixed top-6 left-0 right-0 justify-center z-50 pointer-events-none">
             <motion.div
+                layout
                 className="pointer-events-auto bg-black/90 border border-white/10 rounded-full overflow-hidden relative"
                 initial={false}
                 animate={{
@@ -37,7 +39,7 @@ const DesktopNavbar = () => {
                 }}
                 onHoverStart={() => setIsHovered(true)}
                 onHoverEnd={() => setIsHovered(false)}
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                transition={{ type: "spring", stiffness: 260, damping: 20 }}
             >
                 {/* Notification indicator when collapsed */}
                 {!isHovered && totalNotifications > 0 && (
@@ -51,14 +53,14 @@ const DesktopNavbar = () => {
                     </div>
 
                     <div className="flex items-center overflow-hidden h-full">
-                        <AnimatePresence initial={false}>
+                        <AnimatePresence mode="popLayout" initial={false}>
                             {!isHovered ? (
                                 <motion.div
                                     key="label"
-                                    initial={{ opacity: 0, x: -20, position: 'absolute' }}
-                                    animate={{ opacity: 1, x: 0, position: 'relative' }}
-                                    exit={{ opacity: 0, x: 20, position: 'absolute' }}
-                                    transition={{ duration: 0.2 }}
+                                    initial={{ opacity: 0, x: -20, filter: 'blur(4px)' }}
+                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                                    exit={{ opacity: 0, x: 20, filter: 'blur(4px)' }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
                                     className="px-4 whitespace-nowrap"
                                 >
                                     <span className="font-bold text-sm text-white font-display tracking-wider">CampusNodes</span>
@@ -69,15 +71,27 @@ const DesktopNavbar = () => {
                                     initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
                                     animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                                     exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                                    transition={{ duration: 0.2, delay: 0.05 }}
+                                    transition={{ duration: 0.3, delay: 0.05 }}
                                     className="flex items-center gap-1 pr-2"
+                                    onMouseLeave={() => setHoveredItem(null)}
                                 >
                                     {menuItems.map((item) => {
                                         const isActive = location.pathname === item.path;
 
-                                        const ItemContent = () => (
-                                            <div className="relative flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors group/item">
-                                                <div className={`relative transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
+                                        const renderContent = () => (
+                                            <div
+                                                className="relative flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors group/item"
+                                                onMouseEnter={() => setHoveredItem(item.name)}
+                                            >
+                                                {hoveredItem === item.name && (
+                                                    <motion.div
+                                                        layoutId="hover-indicator"
+                                                        className="absolute inset-0 bg-white/10 rounded-full"
+                                                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                                                    />
+                                                )}
+
+                                                <div className={`relative z-10 transition-colors ${isActive ? 'text-accent' : 'text-gray-400 group-hover/item:text-white'}`}>
                                                     {item.icon}
                                                     {/* Badge for messages */}
                                                     {item.isMessages && unreadCount > 0 && (
@@ -92,10 +106,11 @@ const DesktopNavbar = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className={`text-xs font-medium whitespace-nowrap ${isActive ? 'text-accent' : 'text-gray-300 group-hover/item:text-white'}`}>
+                                                <span className={`relative z-10 text-xs font-medium whitespace-nowrap ${isActive ? 'text-accent' : 'text-gray-300 group-hover/item:text-white'}`}>
                                                     {item.name}
                                                 </span>
 
+                                                {/* Active Page Indicator */}
                                                 {isActive && (
                                                     <motion.div layoutId="nav-indicator" className="absolute inset-0 bg-white/5 rounded-full border border-white/5" />
                                                 )}
@@ -105,20 +120,20 @@ const DesktopNavbar = () => {
                                         if (item.isPopup) {
                                             return (
                                                 <button key={item.name} onClick={() => setIsServicesSheetOpen(true)}>
-                                                    <ItemContent />
+                                                    {renderContent()}
                                                 </button>
                                             );
                                         }
                                         if (item.isMessages) {
                                             return (
                                                 <button key={item.name} onClick={() => setIsChatOpen(true)}>
-                                                    <ItemContent />
+                                                    {renderContent()}
                                                 </button>
                                             );
                                         }
                                         return (
                                             <Link key={item.name} to={item.path}>
-                                                <ItemContent />
+                                                {renderContent()}
                                             </Link>
                                         );
                                     })}

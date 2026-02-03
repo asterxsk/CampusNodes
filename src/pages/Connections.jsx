@@ -109,6 +109,7 @@ const Connections = () => {
         fetchData();
         const channel = supabase.channel('connections_page_realtime')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => fetchData())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
             .subscribe();
         return () => supabase.removeChannel(channel);
     }, [user]);

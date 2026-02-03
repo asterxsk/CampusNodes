@@ -79,23 +79,27 @@ const VersionBanner = () => {
                                 <div className="space-y-6">
                                     <div className="relative pl-4 border-l-2 border-accent">
                                         <span className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-accent ring-4 ring-[#0f0f0f]" />
-                                        <div className="mb-1 flex items-center gap-2">
+                                        <div className="mb-2 flex items-center gap-2">
                                             <span className="text-sm font-bold text-white">Latest Update</span>
                                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-mono">v{version}</span>
                                         </div>
-                                        <p className="text-xs text-white/60 leading-relaxed">
-                                            Major performance boost! PixelGrid now auto-optimizes for screen size. Smooth scrolling enabled. Content scales to fill wide screens.
-                                        </p>
+                                        <ul className="text-xs text-white/60 leading-relaxed space-y-2 list-disc pl-3 marker:text-accent/50">
+                                            <li><strong className="text-white/80">Chat Experience:</strong> Auto-scroll fixed on PC. Added "Unread" banner and "Jump to Latest" button.</li>
+                                            <li><strong className="text-white/80">Read Receipts:</strong> See when your messages are read with real-time updates.</li>
+                                            <li><strong className="text-white/80">Live Discovery:</strong> New users appear instantly in Connections without refreshing.</li>
+                                            <li><strong className="text-white/80">UI Polish:</strong> Friend profile button now has smooth hover animations.</li>
+                                            <li><strong className="text-white/80">Checkout Security:</strong> Improved date validation to ensure valid delivery slots.</li>
+                                        </ul>
                                     </div>
 
                                     {/* Placeholder for older history to make it look populated */}
                                     <div className="relative pl-4 border-l-2 border-white/10 opacity-50">
                                         <span className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-white/20 ring-4 ring-[#0f0f0f]" />
                                         <div className="mb-1">
-                                            <span className="text-xs font-bold text-white">Previous Releases</span>
+                                            <span className="text-xs font-bold text-white">Previous Highlights</span>
                                         </div>
                                         <p className="text-xs text-white/60 leading-relaxed">
-                                            Forum likes/comments, dynamic cart, chat notifications, and UI polish.
+                                            Forum likes/comments, dynamic cart calculations, navigation redesign, and performance optimizations.
                                         </p>
                                     </div>
                                 </div>

@@ -81,9 +81,24 @@ const Checkout = () => {
         if (!formData.deliveryLocation.trim()) {
             newErrors.deliveryLocation = 'Delivery location is required';
         }
+
+        // Date Validation
+        const selectedDate = new Date(formData.deliveryDate);
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+        const currentYear = currentDate.getFullYear();
+
         if (!formData.deliveryDate) {
             newErrors.deliveryDate = 'Delivery date is required';
+        } else if (isNaN(selectedDate.getTime())) {
+            newErrors.deliveryDate = 'Invalid date';
+        } else if (selectedDate < currentDate) {
+            newErrors.deliveryDate = 'Delivery date cannot be in the past';
+        } else if (selectedDate.getFullYear() < currentYear || selectedDate.getFullYear() > currentYear + 1) {
+            // Basic sanity check: prevent year 0001 or far future
+            newErrors.deliveryDate = 'Please select a valid date within this year';
         }
+
         if (!formData.deliveryTime) {
             newErrors.deliveryTime = 'Delivery time is required';
         }
