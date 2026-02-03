@@ -100,8 +100,8 @@ const Marketplace = () => {
     }, [filter]);
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-20 px-6 md:px-12">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-background pt-4 md:pt-24 pb-20 px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="w-full mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-12">
                     <h1 className="text-5xl font-display font-bold text-white mb-6 md:mb-0">Marketplace</h1>
 
@@ -122,7 +122,7 @@ const Marketplace = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                     {filteredItems.map((item, index) => (
                         <div key={item.id} className="market-card opacity-0">
                             <MarketCard item={item} />

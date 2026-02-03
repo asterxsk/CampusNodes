@@ -35,16 +35,27 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
 
     // Handle mobile keyboard visibility
     useEffect(() => {
-        const handleResize = () => {
+        const handleViewportChange = () => {
             if (window.visualViewport) {
                 const offset = window.innerHeight - window.visualViewport.height;
-                setKeyboardOffset(offset > 50 ? offset : 0);
+                // Only apply offset if it's significant (keyboard is likely open)
+                // Threshold of 150 to avoid triggering on URL bar changes
+                setKeyboardOffset(offset > 150 ? offset : 0);
+
+                // Scroll messages to bottom when keyboard opens
+                if (offset > 150) {
+                    setTimeout(scrollToBottom, 100);
+                }
             }
         };
 
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', handleResize);
-            return () => window.visualViewport.removeEventListener('resize', handleResize);
+            window.visualViewport.addEventListener('resize', handleViewportChange);
+            window.visualViewport.addEventListener('scroll', handleViewportChange);
+            return () => {
+                window.visualViewport.removeEventListener('resize', handleViewportChange);
+                window.visualViewport.removeEventListener('scroll', handleViewportChange);
+            };
         }
     }, []);
 
@@ -106,17 +117,27 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     const fetchMessages = async (friendId) => {
         setLoading(true);
         try {
+            // Fetch messages between user and friend, excluding soft-deleted ones
             const { data } = await supabase
                 .from('messages')
                 .select('*')
                 .or(`and(sender_id.eq.${user.id},receiver_id.eq.${friendId}),and(sender_id.eq.${friendId},receiver_id.eq.${user.id})`)
                 .order('created_at', { ascending: true });
 
-            const decryptedMessages = (data || []).map(msg => ({
+            // Filter out messages based on deletion flags
+            // If user is sender, check deleted_by_sender. If user is receiver, check deleted_by_receiver.
+            const filteredMessages = (data || []).filter(msg => {
+                if (msg.sender_id === user.id) {
+                    return !msg.deleted_by_sender;
+                } else {
+                    return !msg.deleted_by_receiver;
+                }
+            });
+
+            const decryptedMessages = filteredMessages.map(msg => ({
                 ...msg,
                 content: decryptMessage(msg.content, msg.sender_id, msg.receiver_id)
             }));
-            setMessages(decryptedMessages);
             setMessages(decryptedMessages);
             // Instant scroll on load
             setTimeout(scrollToBottom, 50);
@@ -160,9 +181,9 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
         if (!activeChat) return;
 
         const confirmed = await showConfirm({
-            title: 'Clear Messages',
-            message: 'Clear your sent messages with this person? Only messages you sent will be deleted.',
-            confirmText: 'Clear',
+            title: 'Clear Chat History',
+            message: 'This will permanently clear all messages in this conversation for BOTH you and the other person. This action cannot be undone.',
+            confirmText: 'Clear All',
             cancelText: 'Cancel',
             variant: 'danger'
         });
@@ -170,18 +191,27 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
         if (!confirmed) return;
 
         try {
-            // Due to RLS, we can only delete messages where current user is the sender
-            const { error } = await supabase
+            // Update messages where current user is the sender - mark as deleted by sender
+            const { error: error1 } = await supabase
                 .from('messages')
-                .delete()
+                .update({ deleted_by_sender: true, deleted_by_receiver: true })
                 .eq('sender_id', user.id)
                 .eq('receiver_id', activeChat.id);
 
-            if (error) throw error;
+            if (error1) throw error1;
 
-            // Remove only the user's sent messages from local state
-            setMessages(prev => prev.filter(msg => msg.sender_id !== user.id));
-            toast.success('Messages cleared');
+            // Update messages where current user is the receiver - mark as deleted by both
+            const { error: error2 } = await supabase
+                .from('messages')
+                .update({ deleted_by_sender: true, deleted_by_receiver: true })
+                .eq('sender_id', activeChat.id)
+                .eq('receiver_id', user.id);
+
+            if (error2) throw error2;
+
+            // Clear local state
+            setMessages([]);
+            toast.success('Chat cleared for both users');
         } catch (err) {
             console.error("Failed to clear chat", err);
             toast.error('Failed to clear messages');
@@ -271,7 +301,13 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
             </div>
 
             {/* ==================== RIGHT CHAT AREA (Main) ==================== */}
-            <div className={`flex-1 flex flex-col bg-[#0a0a0a] transition-transform duration-300 absolute md:relative inset-0 z-30 ${activeChat ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}>
+            <div
+                className={`flex-1 flex flex-col bg-[#0a0a0a] transition-all duration-300 absolute md:relative inset-0 z-30 ${activeChat ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}`}
+                style={{
+                    height: keyboardOffset > 0 ? `calc(100% - ${keyboardOffset}px)` : '100%',
+                    top: 0
+                }}
+            >
                 {activeChat ? (
                     <>
                         {/* Chat Header */}
@@ -342,8 +378,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         {/* Input Area - Keyboard responsive on mobile */}
                         <form
                             onSubmit={sendMessage}
-                            className={`p-4 ${isModal ? 'pb-4' : 'pb-16 md:pb-4'} bg-background border-t border-white/10 shrink-0 transition-all`}
-                            style={{ paddingBottom: keyboardOffset > 0 ? `${keyboardOffset + 16}px` : undefined }}
+                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-16 md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
                         >
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
                                 <input

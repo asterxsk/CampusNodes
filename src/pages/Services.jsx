@@ -92,8 +92,8 @@ const ServiceCard = ({ service, index }) => {
 
 const Services = () => {
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-background pt-4 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 xl:px-12">
+            <div className="w-full mx-auto">
                 <div className="mb-16 animate-fade-in">
                     <span className="text-accent text-sm font-bold uppercase tracking-widest mb-2 block">Our Ecosystem</span>
                     <h1 className="text-5xl md:text-7xl font-display font-bold text-white mb-8">
@@ -104,7 +104,7 @@ const Services = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {SERVICES_DATA.map((service, index) => (
                         <div
                             key={service.id}

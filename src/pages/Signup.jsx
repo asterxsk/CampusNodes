@@ -46,11 +46,51 @@ const Signup = () => {
         console.log('Starting signup process');
         console.log('Email:', formData.email);
 
+        // Name Validation: At least 2 characters, letters only
+        const namePattern = /^[a-zA-Z]{2,}$/;
+        if (!namePattern.test(formData.firstName.trim())) {
+            setError("First name must be at least 2 characters and contain only letters.");
+            setLoading(false);
+            return;
+        }
+        if (!namePattern.test(formData.lastName.trim())) {
+            setError("Last name must be at least 2 characters and contain only letters.");
+            setLoading(false);
+            return;
+        }
+
         // Email Validation: Restricted to @gmail.com
         const isValidFormat = formData.email.toLowerCase().endsWith('@gmail.com');
 
         if (!isValidFormat) {
             setError("Email must be a valid @gmail.com address.");
+            setLoading(false);
+            return;
+        }
+
+        // Password Validation: 8+ chars, uppercase, lowercase, number
+        const hasUpperCase = /[A-Z]/.test(formData.password);
+        const hasLowerCase = /[a-z]/.test(formData.password);
+        const hasNumber = /[0-9]/.test(formData.password);
+        const hasMinLength = formData.password.length >= 8;
+
+        if (!hasMinLength) {
+            setError("Password must be at least 8 characters long.");
+            setLoading(false);
+            return;
+        }
+        if (!hasUpperCase) {
+            setError("Password must contain at least one uppercase letter.");
+            setLoading(false);
+            return;
+        }
+        if (!hasLowerCase) {
+            setError("Password must contain at least one lowercase letter.");
+            setLoading(false);
+            return;
+        }
+        if (!hasNumber) {
+            setError("Password must contain at least one number.");
             setLoading(false);
             return;
         }

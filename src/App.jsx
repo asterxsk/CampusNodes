@@ -21,6 +21,8 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Payment from './pages/Payment';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 import ProductDetails from './pages/ProductDetails';
 import ForgotPassword from './pages/ForgotPassword';
 
@@ -28,6 +30,7 @@ import VersionBanner from './components/ui/VersionBanner';
 import AuthModal from './components/ui/AuthModal'; // Import AuthModal
 
 import MessagesModal from './components/chat/MessagesModal';
+import CartIcon from './components/layout/CartIcon';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -95,12 +98,15 @@ const App = () => {
                     <Route path="/messages" element={<Messages />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/payment" element={<Payment />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
                     <Route path="/market/:id" element={<ProductDetails />} />
                   </Routes>
                 </MainLayout>
 
                 <AuthModal />
                 <MessagesModal />
+                <CartIcon />
 
                 <CustomCursor />
               </Router>

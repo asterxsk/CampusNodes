@@ -37,10 +37,16 @@ const Forum = () => {
     // Comments State
     const [activePostId, setActivePostId] = useState(null);
     const [comments, setComments] = useState({}); // { postId: [comments] }
+    const [topComments, setTopComments] = useState({}); // { postId: topComment } - most liked or first comment
     const [newComment, setNewComment] = useState('');
     const [loadingComments, setLoadingComments] = useState(false);
 
-    // Initial Fetch
+    // Likes State
+    const [userLikes, setUserLikes] = useState(new Set()); // Set of post IDs the user has liked
+    const [likeCounts, setLikeCounts] = useState({}); // { postId: count }
+    const [commentCounts, setCommentCounts] = useState({}); // { postId: count }
+
+    // Fetch posts with like counts and comment counts
     const fetchPosts = async () => {
         try {
             const { data, error } = await supabase
@@ -59,6 +65,70 @@ const Forum = () => {
 
             if (error) throw error;
             setPosts(data || []);
+
+            // Fetch like counts for each post
+            if (data && data.length > 0) {
+                const postIds = data.map(p => p.id);
+
+                // Get like counts
+                const { data: likesData } = await supabase
+                    .from('post_likes')
+                    .select('post_id')
+                    .in('post_id', postIds);
+
+                const counts = {};
+                likesData?.forEach(like => {
+                    counts[like.post_id] = (counts[like.post_id] || 0) + 1;
+                });
+                setLikeCounts(counts);
+
+                // Get comment counts
+                const { data: commentsData } = await supabase
+                    .from('post_comments')
+                    .select('post_id')
+                    .in('post_id', postIds);
+
+                const commentCountsMap = {};
+                commentsData?.forEach(comment => {
+                    commentCountsMap[comment.post_id] = (commentCountsMap[comment.post_id] || 0) + 1;
+                });
+                setCommentCounts(commentCountsMap);
+
+                // Fetch top comment for each post (most recent for now, as we don't have comment likes)
+                const { data: topCommentsData } = await supabase
+                    .from('post_comments')
+                    .select(`
+                        *,
+                        profiles:user_id (
+                            first_name,
+                            last_name,
+                            avatar_url
+                        )
+                    `)
+                    .in('post_id', postIds)
+                    .order('created_at', { ascending: true });
+
+                // Group and get first comment per post
+                const topCommentsMap = {};
+                topCommentsData?.forEach(comment => {
+                    if (!topCommentsMap[comment.post_id]) {
+                        topCommentsMap[comment.post_id] = comment;
+                    }
+                });
+                setTopComments(topCommentsMap);
+
+                // Check which posts current user has liked
+                if (user) {
+                    const { data: userLikesData } = await supabase
+                        .from('post_likes')
+                        .select('post_id')
+                        .eq('user_id', user.id)
+                        .in('post_id', postIds);
+
+                    const likedSet = new Set(userLikesData?.map(l => l.post_id) || []);
+                    setUserLikes(likedSet);
+                }
+            }
         } catch (err) {
             console.error("Error fetching posts:", err);
         } finally {
@@ -94,15 +164,21 @@ const Forum = () => {
     useEffect(() => {
         fetchPosts();
 
-        // Realtime Subscription
+        // Realtime Subscription for posts, likes, and comments
         const channel = supabase
-            .channel('public:posts')
+            .channel('forum_realtime')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
                 fetchPosts();
             })
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments' }, payload => {
-                // Refresh comments if the active post is the one that got a new comment
-                if (activePostId && payload.new.post_id === activePostId) {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, () => {
+                // Refresh posts to get updated like counts
+                fetchPosts();
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, payload => {
+                // Refresh posts to get updated comment counts
+                fetchPosts();
+                // Also refresh comments if the active post got a new comment
+                if (activePostId && payload.new?.post_id === activePostId) {
                     fetchComments(activePostId);
                 }
             })
@@ -111,7 +187,7 @@ const Forum = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [activePostId]);
+    }, [activePostId, user]);
 
     const handleCreatePost = async (e) => {
         e.preventDefault();
@@ -161,7 +237,62 @@ const Forum = () => {
 
     const handleLike = async (postId) => {
         if (!user) return openAuthModal();
-        toast.info('Likes coming soon!');
+
+        const isLiked = userLikes.has(postId);
+
+        // Optimistic UI update
+        setUserLikes(prev => {
+            const newSet = new Set(prev);
+            if (isLiked) {
+                newSet.delete(postId);
+            } else {
+                newSet.add(postId);
+            }
+            return newSet;
+        });
+
+        setLikeCounts(prev => ({
+            ...prev,
+            [postId]: (prev[postId] || 0) + (isLiked ? -1 : 1)
+        }));
+
+        try {
+            if (isLiked) {
+                // Unlike - delete the like
+                const { error } = await supabase
+                    .from('post_likes')
+                    .delete()
+                    .eq('post_id', postId)
+                    .eq('user_id', user.id);
+                if (error) throw error;
+            } else {
+                // Like - insert new like
+                const { error } = await supabase
+                    .from('post_likes')
+                    .insert({
+                        post_id: postId,
+                        user_id: user.id
+                    });
+                if (error) throw error;
+            }
+        } catch (err) {
+            console.error("Error toggling like:", err);
+            // Revert optimistic update on error
+            setUserLikes(prev => {
+                const newSet = new Set(prev);
+                if (isLiked) {
+                    newSet.add(postId);
+                } else {
+                    newSet.delete(postId);
+                }
+                return newSet;
+            });
+            setLikeCounts(prev => ({
+                ...prev,
+                [postId]: (prev[postId] || 0) + (isLiked ? 1 : -1)
+            }));
+            toast.error('Failed to update like');
+        }
     };
 
     const toggleComments = (postId) => {
@@ -198,8 +329,8 @@ const Forum = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-32 px-4 md:px-8">
-            <div className="max-w-2xl mx-auto">
+        <div className="min-h-screen bg-background pt-4 md:pt-24 pb-32 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto w-full">
                 <header className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold font-display text-white">Campus Feed</h1>
@@ -301,12 +432,18 @@ const Forum = () => {
                                             <div className="flex items-center gap-6 mt-4 pt-3 border-t border-white/5">
                                                 <button
                                                     onClick={() => handleLike(post.id)}
-                                                    className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition-colors group/like"
+                                                    className={`flex items-center gap-2 transition-colors group/like ${userLikes.has(post.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
                                                 >
                                                     <div className="p-1.5 rounded-full group-hover/like:bg-red-500/10 transition-colors">
-                                                        <Heart size={16} />
+                                                        <Heart
+                                                            size={16}
+                                                            fill={userLikes.has(post.id) ? 'currentColor' : 'none'}
+                                                            className="transition-all"
+                                                        />
                                                     </div>
-                                                    <span className="text-xs">Like</span>
+                                                    <span className="text-xs">
+                                                        {likeCounts[post.id] > 0 ? likeCounts[post.id] : 'Like'}
+                                                    </span>
                                                 </button>
 
                                                 <button
@@ -316,11 +453,44 @@ const Forum = () => {
                                                     <div className="p-1.5 rounded-full hover:bg-blue-400/10 transition-colors">
                                                         <MessageCircle size={16} />
                                                     </div>
-                                                    <span className="text-xs">Comment</span>
+                                                    <span className="text-xs">
+                                                        {commentCounts[post.id] > 0 ? commentCounts[post.id] : 'Comment'}
+                                                    </span>
                                                 </button>
                                             </div>
 
-                                            {/* Comments Section */}
+                                            {/* Top Comment Preview (Always Visible if exists) */}
+                                            {topComments[post.id] && activePostId !== post.id && (
+                                                <div className="mt-4 pt-3 border-t border-white/5">
+                                                    <div className="flex gap-3">
+                                                        <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
+                                                            {topComments[post.id].profiles?.avatar_url ? (
+                                                                <img src={topComments[post.id].profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
+                                                                    {topComments[post.id].profiles?.first_name?.[0]}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className="text-xs font-bold text-white">
+                                                                {topComments[post.id].profiles?.first_name} {topComments[post.id].profiles?.last_name}
+                                                            </span>
+                                                            <p className="text-sm text-gray-400 line-clamp-2">{topComments[post.id].content}</p>
+                                                        </div>
+                                                    </div>
+                                                    {commentCounts[post.id] > 1 && (
+                                                        <button
+                                                            onClick={() => toggleComments(post.id)}
+                                                            className="text-xs text-gray-500 hover:text-accent mt-2 transition-colors"
+                                                        >
+                                                            View all {commentCounts[post.id]} comments
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Expanded Comments Section */}
                                             <AnimatePresence>
                                                 {activePostId === post.id && (
                                                     <motion.div
@@ -330,34 +500,42 @@ const Forum = () => {
                                                         className="overflow-hidden"
                                                     >
                                                         <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
-                                                            {/* Comment List */}
+                                                            {/* All Comments */}
                                                             {loadingComments ? (
                                                                 <div className="text-center text-xs text-gray-500 py-2">Loading comments...</div>
                                                             ) : (comments[post.id] || []).length > 0 ? (
-                                                                (comments[post.id] || []).map((comment) => (
-                                                                    <div key={comment.id} className="flex gap-3">
-                                                                        <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
-                                                                            {comment.profiles?.avatar_url ? (
-                                                                                <img src={comment.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                                                                            ) : (
-                                                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
-                                                                                    {comment.profiles?.first_name?.[0]}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                        <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
-                                                                            <div className="flex items-center justify-between">
-                                                                                <span className="text-xs font-bold text-white">
-                                                                                    {comment.profiles?.first_name} {comment.profiles?.last_name}
-                                                                                </span>
-                                                                                <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                                                                <>
+                                                                    {(comments[post.id] || []).map((comment) => (
+                                                                        <div key={comment.id} className="flex gap-3">
+                                                                            <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
+                                                                                {comment.profiles?.avatar_url ? (
+                                                                                    <img src={comment.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                                                                ) : (
+                                                                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
+                                                                                        {comment.profiles?.first_name?.[0]}
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                            <p className="text-sm text-gray-300 mt-1">{comment.content}</p>
+                                                                            <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
+                                                                                <div className="flex items-center justify-between">
+                                                                                    <span className="text-xs font-bold text-white">
+                                                                                        {comment.profiles?.first_name} {comment.profiles?.last_name}
+                                                                                    </span>
+                                                                                    <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                                                                                </div>
+                                                                                <p className="text-sm text-gray-300 mt-1">{comment.content}</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                ))
+                                                                    ))}
+                                                                    <button
+                                                                        onClick={() => setActivePostId(null)}
+                                                                        className="text-xs text-gray-500 hover:text-white transition-colors"
+                                                                    >
+                                                                        Hide comments
+                                                                    </button>
+                                                                </>
                                                             ) : (
-                                                                <p className="text-xs text-gray-500 italic">No comments yet.</p>
+                                                                <p className="text-xs text-gray-500 italic">No comments yet. Be the first!</p>
                                                             )}
 
                                                             {/* Add Comment Input */}

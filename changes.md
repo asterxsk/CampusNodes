@@ -1,6 +1,35 @@
 # Changelog
 
-## 8.5.12 (Current)
+## 8.6.0 (Current)
+-   **UI**: **Desktop Nav Refined**: Navbar expands naturally based on content width, Cart moved below Profile for cleaner layout.
+-   **FEATURE**: **Chat Cleanup**: "Clear Chat" now deletes messages for BOTH users. Added auto-cleanup for messages older than 24h.
+-   **FIX**: **Cart Pricing**: Fixed issue where prices displayed as 0 due to formatting characters. Removed double currency symbols.
+-   **SEC**: **Signup**: Enforced strict password rules (8+ chars, upper, lower, number) and valid name checks.
+-   **PERF**: **Database**: Optimized indexes and removed redundant RLS policies for 8+ tables.
+
+## 8.5.15
+-   **PERF**: **PixelGrid Optimization**: Dynamic node density based on screen size. Caps at 800 nodes, throttled to target FPS (20-30), pauses when tab hidden.
+-   **PERF**: **GPU Acceleration**: Added `will-change`, `transform: translateZ(0)` hints for smoother animations.
+-   **UI**: **Smooth Scroll**: Added `scroll-behavior: smooth` for smooth scrolling throughout the site.
+-   **UI**: **Fluid Containers**: Content now scales to fill available space on wide screens (max-w-[1800px]).
+-   **UI**: **Responsive Grids**: Marketplace now shows up to 5 columns on 2xl screens.
+-   **CSS**: Added `.gpu-accelerated`, `.contain-paint`, `.container-fluid` utility classes.
+
+## 8.5.14
+-   **FEATURE**: **Forum Likes**: Full like/unlike functionality with optimistic UI and real-time updates.
+-   **FEATURE**: **Forum Comments**: Comment counts now display in real-time next to posts.
+-   **FIX**: **Cart Button**: Now properly appears on mobile (top-right corner) when items are added. Toast feedback on add to cart.
+-   **UI**: **Forum Real-time**: Posts, likes, and comments now auto-refresh when updated by anyone.
+-   **UI**: **Version Notes**: Updated patch notes in version banner with current changes.
+
+## 8.5.13
+-   **FEATURE**: **Cart Button**: Now dynamically appears only when 1+ items are added to cart, with smooth animations.
+-   **FIX**: **Chat Notifications**: Notification badges now properly update in real-time for both mobile and desktop.
+-   **FIX**: **Mobile Chat Keyboard**: Chat interface now dynamically adjusts height when keyboard opens (no more content going too high).
+-   **UI**: **Mobile Layout**: Reduced top padding on all pages from pt-24/pt-32 to pt-4 on mobile devices (content starts closer to top).
+-   **DB**: **Cleanup Script**: Added `cleanup_unverified_users.sql` to automatically delete user accounts that don't complete OTP verification within 24 hours.
+
+## 8.5.12
 -   **UI**: **Desktop Nav**: Fine-tuned the expanded width to 640px to eliminate excess space while preventing clipping.
 
 ## 8.5.11

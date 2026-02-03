@@ -75,6 +75,32 @@ export const UIProvider = ({ children }) => {
         return () => supabase.removeChannel(channel);
     }, [user]);
 
+    // Listen for new incoming messages to update unread badges
+    useEffect(() => {
+        if (!user) {
+            setUnreadSenders(new Set());
+            return;
+        }
+
+        // Subscribe to new messages where current user is the receiver
+        const messagesChannel = supabase
+            .channel('ui_new_messages')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages',
+                filter: `receiver_id=eq.${user.id}`
+            }, (payload) => {
+                // Add the sender to unread senders (only if chat is not currently open to that user)
+                if (payload.new && payload.new.sender_id) {
+                    addUnreadSender(payload.new.sender_id);
+                }
+            })
+            .subscribe();
+
+        return () => supabase.removeChannel(messagesChannel);
+    }, [user]);
+
     return (
         <UIContext.Provider value={{
             isAuthModalOpen, openAuthModal, closeAuthModal,

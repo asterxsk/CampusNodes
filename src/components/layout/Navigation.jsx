@@ -25,15 +25,13 @@ const Navigation = () => {
 
             {/* Desktop Profile (Fixed Top Right) - Kept separate from the centralized Nav Pill */}
             <div className="hidden md:block fixed top-6 right-6 z-50">
-                <div className="flex items-center gap-3">
-                    {/* Profile Button */}
-
-                    {/* Profile Button */}
+                <div className="flex flex-col items-end gap-2">
+                    {/* Profile Button - PFP only, name on hover */}
                     <button
                         onClick={handleUserClick}
-                        className="flex items-center gap-3 bg-black/50 border border-white/10 pl-1 pr-4 py-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group"
+                        className="flex items-center gap-0 bg-black/50 border border-white/10 p-1 rounded-full hover:bg-black/70 transition-all hover:border-white/30 group overflow-hidden"
                     >
-                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 relative group-hover:scale-105 transition-transform">
+                        <div className="w-9 h-9 rounded-full bg-gray-700 overflow-hidden border border-white/20 relative group-hover:scale-105 transition-transform shrink-0">
                             {user?.user_metadata?.avatar_url ? (
                                 <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -42,12 +40,15 @@ const Navigation = () => {
                                 </div>
                             )}
                         </div>
-                        <div className="text-left">
-                            {user ? (
-                                <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">{user.user_metadata?.first_name}</p>
-                            ) : (
-                                <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">Sign In</p>
-                            )}
+                        {/* Name appears on hover with smooth animation */}
+                        <div className="max-w-0 group-hover:max-w-[150px] overflow-hidden transition-all duration-300 ease-out">
+                            <div className="pl-2 pr-3 whitespace-nowrap">
+                                {user ? (
+                                    <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">{user.user_metadata?.first_name}</p>
+                                ) : (
+                                    <p className="text-xs font-bold text-white group-hover:text-accent transition-colors">Sign In</p>
+                                )}
+                            </div>
                         </div>
                     </button>
                 </div>

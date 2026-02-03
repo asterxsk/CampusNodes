@@ -84,7 +84,7 @@ const VersionBanner = () => {
                                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-mono">v{version}</span>
                                         </div>
                                         <p className="text-xs text-white/60 leading-relaxed">
-                                            Chat is back in the main menu! We've also fixed the &quot;Clear Chat&quot; button overlap and improved the mobile messaging experience with auto-scroll and better layout.
+                                            Major performance boost! PixelGrid now auto-optimizes for screen size. Smooth scrolling enabled. Content scales to fill wide screens.
                                         </p>
                                     </div>
 
@@ -95,7 +95,7 @@ const VersionBanner = () => {
                                             <span className="text-xs font-bold text-white">Previous Releases</span>
                                         </div>
                                         <p className="text-xs text-white/60 leading-relaxed">
-                                            Includes major UI overhauls, navigation restructuring, and core stability fixes.
+                                            Forum likes/comments, dynamic cart, chat notifications, and UI polish.
                                         </p>
                                     </div>
                                 </div>

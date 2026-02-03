@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
+import { useToast } from '../context/ToastContext';
 import { MARKET_ITEMS } from '../data/marketItems';
 import { ArrowLeft, Star, ShoppingCart, CreditCard } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -13,7 +14,8 @@ const ProductDetails = () => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { user } = useAuth();
-    const { openAuthModal } = useUI(); // UI Hook
+    const { openAuthModal } = useUI();
+    const toast = useToast();
     const product = MARKET_ITEMS.find(item => item.id === parseInt(id));
     const [selectedImage, setSelectedImage] = useState(0);
 
@@ -22,7 +24,13 @@ const ProductDetails = () => {
             openAuthModal();
             return;
         }
-        navigate('/payment');
+        // Navigate to checkout with this item as a direct purchase
+        navigate('/checkout', {
+            state: {
+                directPurchase: true,
+                item: product
+            }
+        });
     };
 
     const handleAddToCart = () => {
@@ -30,13 +38,18 @@ const ProductDetails = () => {
             openAuthModal();
             return;
         }
-        addToCart(product);
+        const success = addToCart(product);
+        if (success) {
+            toast.success(`${product.title} added to cart!`);
+        } else {
+            toast.info('Item already in cart');
+        }
     };
 
     if (!product) return <div className="text-white pt-32 text-center">Product not found</div>;
 
     return (
-        <div className="min-h-screen bg-background pt-24 pb-20 px-6 md:px-12">
+        <div className="min-h-screen bg-background pt-4 md:pt-24 pb-20 px-6 md:px-12">
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => navigate(-1)}

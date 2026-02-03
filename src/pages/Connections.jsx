@@ -201,11 +201,11 @@ const Connections = () => {
     );
 
     return (
-        <div className="min-h-screen bg-background pt-32 pb-20 px-6 md:px-12 relative overflow-hidden">
+        <div className="min-h-screen bg-background pt-4 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 xl:px-12 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="max-w-7xl mx-auto">
+            <div className="w-full mx-auto">
                 <header className="mb-12">
                     <h1 className="text-5xl font-display font-bold text-white mb-4">Network & Circle</h1>
                     <p className="text-gray-400">Manage your close circle and discover new connections.</p>
