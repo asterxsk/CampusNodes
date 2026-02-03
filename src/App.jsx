@@ -6,10 +6,9 @@ import { ToastProvider } from './context/ToastContext';
 import { ModalProvider } from './context/ModalContext';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navigation from './components/layout/Navigation';
-import CustomCursor from './components/ui/CustomCursor';
 import Preloader from './components/ui/Preloader';
 import Hero from './components/hero/Hero';
-import PixelGrid from './components/hero/PixelGrid';
+
 
 import Marketplace from './pages/Marketplace';
 import Services from './pages/Services';
@@ -40,16 +39,25 @@ const ScrollToTop = () => {
   return null;
 };
 
+import LiquidEther from './components/hero/LiquidEther';
+
 // Wrapper to handle background visibility based on route
 const GlobalBackground = () => {
   const location = useLocation();
   const isHome = location.pathname === '/' || location.pathname === '/campusnodes/' || location.pathname === '/CampusNodes/';
 
   return (
-    <div
-      className={`fixed inset-0 z-0 transition-opacity duration-1000 ${isHome ? 'opacity-100 pointer-events-auto' : 'opacity-10 pointer-events-none'}`}
-    >
-      <PixelGrid />
+    <div className="fixed inset-0 z-0 bg-black">
+      {/* Persistent Liquid Ether Background */}
+      <div className="absolute inset-0 z-0">
+        <LiquidEther />
+      </div>
+
+      {/* Dimming Overlay for non-home pages */}
+      <div
+        className={`absolute inset-0 z-10 bg-black transition-opacity duration-1000 ${isHome ? 'opacity-30' : 'opacity-85'}`}
+        style={{ pointerEvents: 'none' }}
+      />
     </div>
   );
 };
@@ -60,7 +68,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <div
-      className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white cursor-none relative z-10 ${isHome ? 'bg-transparent' : 'bg-background'}`}
+      className={`min-h-screen text-white font-sans selection:bg-accent selection:text-white relative z-10 ${isHome ? 'bg-transparent' : 'bg-background'}`}
     >
       {children}
     </div>
@@ -107,8 +115,6 @@ const App = () => {
                 <AuthModal />
                 <MessagesModal />
                 <CartIcon />
-
-                <CustomCursor />
               </Router>
             </ModalProvider>
           </ToastProvider>

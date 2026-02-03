@@ -146,6 +146,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                     table: 'messages',
                     filter: `sender_id=eq.${user.id}` // Listen for updates to messages WE sent (e.g. marked as read)
                 }, (payload) => {
+                    // console.log('Realtime UPDATE received:', payload);
                     if (payload.new.receiver_id === activeChat.id) {
                         setMessages(prev => prev.map(msg =>
                             msg.id === payload.new.id ? { ...msg, ...payload.new, content: msg.content } : msg
@@ -156,6 +157,15 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
 
             return () => supabase.removeChannel(channel);
         }
+    }, [activeChat]);
+
+    // Refresh messages on window focus to ensure read status is up to date
+    useEffect(() => {
+        const handleFocus = () => {
+            if (activeChat) fetchMessages(activeChat.id);
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
     }, [activeChat]);
 
     const fetchFriends = async () => {
@@ -467,9 +477,15 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                                     }`}>
                                                     <p>{msg.content}</p>
                                                     <p className={`text-[9px] mt-1 text-right flex items-center justify-end gap-1 ${msg.sender_id === user.id ? 'text-black/60' : 'text-gray-500'}`}>
-                                                        <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                        {msg.sender_id === user.id && msg.is_read && (
-                                                            <span className="font-bold"> • Read</span>
+                                                        <span>
+                                                            {msg.created_at && !isNaN(new Date(msg.created_at).getTime())
+                                                                ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                                                : ''}
+                                                        </span>
+                                                        {msg.sender_id === user.id && msg.is_read === true && (
+                                                            <span className="font-bold flex items-center gap-0.5" title={msg.read_at ? `Read at ${new Date(msg.read_at).toLocaleString()}` : 'Read'}>
+                                                                <span>•</span> Read
+                                                            </span>
                                                         )}
                                                     </p>
                                                 </div>
@@ -495,7 +511,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         {/* Input Area - Keyboard responsive on mobile */}
                         <form
                             onSubmit={sendMessage}
-                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-16 md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
+                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-32 md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
                         >
                             <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
                                 <input

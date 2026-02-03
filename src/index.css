@@ -17,15 +17,6 @@
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 
-  /* Global cursor removal for custom cursor */
-  body,
-  a,
-  button,
-  input,
-  textarea,
-  select {
-    cursor: none !important;
-  }
 
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
