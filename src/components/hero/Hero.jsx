@@ -18,10 +18,10 @@ const Hero = () => {
             <div className="absolute top-1/4 -left-20 w-96 h-96 bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="z-10 text-center px-4 max-w-5xl mx-auto pointer-events-auto">
-                <h1 className="text-6xl md:text-9xl font-bold font-display tracking-tighter text-white mb-6 animate-fade-in">
+                <h1 className="text-4xl md:text-9xl font-bold font-display tracking-tighter text-white mb-6 animate-fade-in">
                     <TextType
                         as="span"
-                        text={["CAMPUS NODES", "NOTES", "TEXTBOOKS", "TOOLS", "ELECTRONICS", "ESSENTIAL"]}
+                        text={["CAMPUS NODES", "NOTES", "TEXTBOOKS", "TOOLS", "ELECTRONICS", "ESSENTIALS"]}
                         typingSpeed={100}
                         deletingSpeed={50}
                         pauseDuration={2000}

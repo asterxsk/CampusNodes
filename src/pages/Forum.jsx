@@ -7,6 +7,7 @@ import { useUI } from '../context/UIContext';
 import { useToast } from '../context/ToastContext';
 import { useModal } from '../context/ModalContext';
 import Button from '../components/ui/Button';
+import PostCommentsModal from '../components/forum/PostCommentsModal';
 
 // Utility for relative time
 const timeAgo = (dateString) => {
@@ -296,12 +297,7 @@ const Forum = () => {
     };
 
     const toggleComments = (postId) => {
-        if (activePostId === postId) {
-            setActivePostId(null);
-        } else {
-            setActivePostId(postId);
-            fetchComments(postId);
-        }
+        setActivePostId(postId);
     };
 
     const handlePostComment = async (e, postId) => {
@@ -460,8 +456,11 @@ const Forum = () => {
                                             </div>
 
                                             {/* Top Comment Preview (Always Visible if exists) */}
-                                            {topComments[post.id] && activePostId !== post.id && (
-                                                <div className="mt-4 pt-3 border-t border-white/5">
+                                            {topComments[post.id] && (
+                                                <button
+                                                    onClick={() => toggleComments(post.id)}
+                                                    className="mt-4 pt-3 border-t border-white/5 w-full text-left group/comment"
+                                                >
                                                     <div className="flex gap-3">
                                                         <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
                                                             {topComments[post.id].profiles?.avatar_url ? (
@@ -473,92 +472,22 @@ const Forum = () => {
                                                             )}
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <span className="text-xs font-bold text-white">
-                                                                {topComments[post.id].profiles?.first_name} {topComments[post.id].profiles?.last_name}
-                                                            </span>
-                                                            <p className="text-sm text-gray-400 line-clamp-2">{topComments[post.id].content}</p>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-xs font-bold text-white">
+                                                                    {topComments[post.id].profiles?.first_name} {topComments[post.id].profiles?.last_name}
+                                                                </span>
+                                                                <span className="text-[10px] text-gray-500">{timeAgo(topComments[post.id].created_at)}</span>
+                                                            </div>
+                                                            <p className="text-sm text-gray-400 line-clamp-1 group-hover/comment:text-gray-300 transition-colors">{topComments[post.id].content}</p>
                                                         </div>
                                                     </div>
                                                     {commentCounts[post.id] > 1 && (
-                                                        <button
-                                                            onClick={() => toggleComments(post.id)}
-                                                            className="text-xs text-gray-500 hover:text-accent mt-2 transition-colors"
-                                                        >
+                                                        <p className="text-xs text-gray-500 mt-2 pl-9">
                                                             View all {commentCounts[post.id]} comments
-                                                        </button>
+                                                        </p>
                                                     )}
-                                                </div>
+                                                </button>
                                             )}
-
-                                            {/* Expanded Comments Section */}
-                                            <AnimatePresence>
-                                                {activePostId === post.id && (
-                                                    <motion.div
-                                                        initial={{ height: 0, opacity: 0 }}
-                                                        animate={{ height: 'auto', opacity: 1 }}
-                                                        exit={{ height: 0, opacity: 0 }}
-                                                        className="overflow-hidden"
-                                                    >
-                                                        <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
-                                                            {/* All Comments */}
-                                                            {loadingComments ? (
-                                                                <div className="text-center text-xs text-gray-500 py-2">Loading comments...</div>
-                                                            ) : (comments[post.id] || []).length > 0 ? (
-                                                                <>
-                                                                    {(comments[post.id] || []).map((comment) => (
-                                                                        <div key={comment.id} className="flex gap-3">
-                                                                            <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
-                                                                                {comment.profiles?.avatar_url ? (
-                                                                                    <img src={comment.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                                                                                ) : (
-                                                                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
-                                                                                        {comment.profiles?.first_name?.[0]}
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className="flex-1 bg-white/5 rounded-xl px-3 py-2">
-                                                                                <div className="flex items-center justify-between">
-                                                                                    <span className="text-xs font-bold text-white">
-                                                                                        {comment.profiles?.first_name} {comment.profiles?.last_name}
-                                                                                    </span>
-                                                                                    <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
-                                                                                </div>
-                                                                                <p className="text-sm text-gray-300 mt-1">{comment.content}</p>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                    <button
-                                                                        onClick={() => setActivePostId(null)}
-                                                                        className="text-xs text-gray-500 hover:text-white transition-colors"
-                                                                    >
-                                                                        Hide comments
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <p className="text-xs text-gray-500 italic">No comments yet. Be the first!</p>
-                                                            )}
-
-                                                            {/* Add Comment Input */}
-                                                            <form onSubmit={(e) => handlePostComment(e, post.id)} className="flex items-center gap-2 mt-2">
-                                                                <input
-                                                                    type="text"
-                                                                    value={newComment}
-                                                                    onChange={(e) => setNewComment(e.target.value)}
-                                                                    placeholder="Write a comment..."
-                                                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-sm text-white focus:outline-none focus:border-accent/50"
-                                                                />
-                                                                <button
-                                                                    type="submit"
-                                                                    disabled={!newComment.trim()}
-                                                                    className="shrink-0 p-1.5 bg-accent text-black rounded-full disabled:opacity-50"
-                                                                >
-                                                                    <Send size={14} />
-                                                                </button>
-                                                            </form>
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -573,6 +502,14 @@ const Forum = () => {
                     </div>
                 )}
             </div>
+
+            {/* Comments Modal */}
+            {activePostId && (
+                <PostCommentsModal
+                    postId={activePostId}
+                    onClose={() => setActivePostId(null)}
+                />
+            )}
         </div>
     );
 };

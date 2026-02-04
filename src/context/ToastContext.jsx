@@ -31,7 +31,7 @@ export const ToastProvider = ({ children }) => {
             {children}
 
             {/* Toast Container */}
-            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none">
+            <div className="fixed top-4 md:top-auto md:bottom-12 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <motion.div

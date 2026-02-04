@@ -23,10 +23,12 @@ import Payment from './pages/Payment';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductDetails from './pages/ProductDetails';
+import ServiceDetails from './pages/ServiceDetails';
 import ForgotPassword from './pages/ForgotPassword';
 
 import VersionBanner from './components/ui/VersionBanner';
 import AuthModal from './components/ui/AuthModal'; // Import AuthModal
+import ProfileModal from './components/ui/ProfileModal';
 
 import MessagesModal from './components/chat/MessagesModal';
 import CartIcon from './components/layout/CartIcon';
@@ -40,6 +42,8 @@ const ScrollToTop = () => {
 };
 
 import LiquidEther from './components/hero/LiquidEther';
+import ChatFAB from './components/chat/ChatFAB';
+import CustomCursor from './components/ui/CustomCursor';
 
 // Wrapper to handle background visibility based on route
 const GlobalBackground = () => {
@@ -109,11 +113,16 @@ const App = () => {
                     <Route path="/cart" element={<Cart />} />
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/market/:id" element={<ProductDetails />} />
+                    <Route path="/services/:id" element={<ServiceDetails />} />
+                    <Route path="/book" element={<Checkout />} />
                   </Routes>
                 </MainLayout>
 
                 <AuthModal />
+                <ProfileModal />
                 <MessagesModal />
+                <ChatFAB />
+                <CustomCursor />
                 <CartIcon />
               </Router>
             </ModalProvider>

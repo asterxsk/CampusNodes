@@ -6,16 +6,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 
+// Menu Item Component for the Sheet
+const MenuItem = ({ icon: Icon, label, desc, onClick, color }) => (
+    <button
+        onClick={onClick}
+        className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group active:scale-95"
+    >
+        <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color} bg-opacity-20`}>
+                <Icon size={24} className={color.replace('bg-', 'text-')} />
+            </div>
+            <div className="text-left">
+                <h3 className="text-white font-bold text-lg">{label}</h3>
+                <p className="text-gray-400 text-xs">{desc}</p>
+            </div>
+        </div>
+        <ChevronRight className="text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
+    </button>
+);
+
 const MobileNavbar = () => {
     const { user } = useAuth();
-    const { openAuthModal, unreadCount, pendingRequestCount } = useUI();
+    const { openAuthModal, unreadCount, pendingRequestCount, openProfileModal } = useUI();
     const location = useLocation();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleUserClick = () => {
         if (user) {
-            navigate('/profile');
+            openProfileModal();
         } else {
             openAuthModal();
         }
@@ -31,24 +50,7 @@ const MobileNavbar = () => {
         setIsMenuOpen(false);
     };
 
-    // Menu Item Component for the Sheet
-    const MenuItem = ({ icon: Icon, label, desc, path, color }) => (
-        <button
-            onClick={() => handleMenuNavigation(path)}
-            className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group active:scale-95"
-        >
-            <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color} bg-opacity-20`}>
-                    <Icon size={24} className={color.replace('bg-', 'text-')} />
-                </div>
-                <div className="text-left">
-                    <h3 className="text-white font-bold text-lg">{label}</h3>
-                    <p className="text-gray-400 text-xs">{desc}</p>
-                </div>
-            </div>
-            <ChevronRight className="text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
-        </button>
-    );
+    // Use portal to render at body level (fixes fixed positioning with parent transforms)
 
     // Use portal to render at body level (fixes fixed positioning with parent transforms)
     return createPortal(
@@ -74,7 +76,7 @@ const MobileNavbar = () => {
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl z-[90] p-6 pb-24 safe-area-bottom shadow-2xl"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl z-[101] p-6 pb-24 safe-area-bottom shadow-2xl"
                         style={{ maxHeight: '70vh' }}
                     >
                         <div className="flex items-center justify-between mb-6">
@@ -92,21 +94,21 @@ const MobileNavbar = () => {
                                 icon={MessageCircle}
                                 label="Forum"
                                 desc="Join the campus discussion"
-                                path="/forum"
+                                onClick={() => handleMenuNavigation('/forum')}
                                 color="text-pink-500"
                             />
                             <MenuItem
                                 icon={ShoppingBag}
                                 label="Marketplace"
                                 desc="Buy and sell items"
-                                path="/market"
+                                onClick={() => handleMenuNavigation('/market')}
                                 color="text-blue-500"
                             />
                             <MenuItem
                                 icon={Wrench}
                                 label="Services"
                                 desc="Find compiled gigs & help"
-                                path="/services"
+                                onClick={() => handleMenuNavigation('/services')}
                                 color="text-yellow-500"
                             />
                         </div>

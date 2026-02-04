@@ -11,7 +11,9 @@ export const UIProvider = ({ children }) => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+
     const [isNavHovered, setIsNavHovered] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const openAuthModal = () => setIsAuthModalOpen(true);
     const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -146,7 +148,11 @@ export const UIProvider = ({ children }) => {
             pendingRequestCount,
             fetchPendingRequests,
             isSidebarCollapsed, setIsSidebarCollapsed,
-            isNavHovered, setIsNavHovered
+
+            isNavHovered, setIsNavHovered,
+            isProfileModalOpen, setIsProfileModalOpen,
+            openProfileModal: () => setIsProfileModalOpen(true),
+            closeProfileModal: () => setIsProfileModalOpen(false)
         }}>
             {children}
         </UIContext.Provider>

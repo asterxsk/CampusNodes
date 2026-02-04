@@ -9,13 +9,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const Navigation = () => {
     const { user } = useAuth();
-    const { openAuthModal, unreadCount, setIsChatOpen } = useUI();
+    const { openAuthModal, unreadCount, setIsChatOpen, openProfileModal } = useUI();
     const navigate = useNavigate();
     const [isProfileHovered, setIsProfileHovered] = useState(false);
 
     const handleUserClick = () => {
         if (user) {
-            navigate('/profile');
+            openProfileModal();
         } else {
             openAuthModal();
         }

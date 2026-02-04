@@ -14,8 +14,8 @@ const DesktopNavbar = () => {
         { label: 'Services', href: '/services' },
         { label: 'Forum', href: '/forum' },
         { label: 'Social', href: '/connections' },
-        { label: 'Chat', onClick: () => setIsChatOpen(true) }
-    ], [setIsChatOpen]);
+        { label: 'Social', href: '/connections' }
+    ], []);
     // Removed href for Chat to ensure it works as an overlay button via PillNav's new onClick support
 
     return (

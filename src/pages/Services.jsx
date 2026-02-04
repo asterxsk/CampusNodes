@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import Button from '../components/ui/Button';
 
 import { BookOpen, Box, Calendar, PenTool, Search, Printer, Wrench, Camera, Code } from 'lucide-react';
@@ -54,9 +55,9 @@ const SERVICES_DATA = [
     }
 ];
 
-const ServiceCard = ({ service, index }) => {
+const ServiceCard = ({ service }) => {
     return (
-        <div className="service-card group relative p-8 bg-surface border border-white/5 hover:border-white/20 hover:z-[50] transition-all duration-500 min-h-[300px] flex flex-col justify-end">
+        <Link to={`/services/${service.id}`} className="service-card group relative p-8 bg-surface border border-white/5 hover:border-white/20 hover:z-[50] transition-all duration-500 min-h-[300px] flex flex-col justify-end block">
             <div className="absolute top-8 right-8 text-gray-700 group-hover:text-accent transition-colors duration-500">
                 {service.icon}
             </div>
@@ -86,7 +87,7 @@ const ServiceCard = ({ service, index }) => {
 
             {/* Hover Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-        </div>
+        </Link>
     );
 };
 
@@ -111,7 +112,7 @@ const Services = () => {
                             style={{ animationDelay: `${index * 150}ms` }}
                             className="opacity-0 animate-fade-in fill-mode-forwards"
                         >
-                            <ServiceCard service={service} index={index} />
+                            <ServiceCard service={service} />
                         </div>
                     ))}
                 </div>

@@ -165,7 +165,9 @@ const Checkout = () => {
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Delivery Form */}
                     <div className="flex-1">
-                        <h1 className="text-3xl font-display font-bold text-white mb-2">Delivery Details</h1>
+                        <h1 className="text-3xl font-display font-bold text-white mb-2">
+                            {location.pathname === '/book' ? 'Booking Details' : 'Delivery Details'}
+                        </h1>
                         <p className="text-gray-400 mb-8">Tell us when and where to deliver your items</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6">

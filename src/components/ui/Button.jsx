@@ -28,7 +28,7 @@ const Button = ({
     };
 
     // NOTE: Using 'group/btn' here to isolate hover state from parent groups (like cards)
-    const baseStyles = "relative group/btn font-display font-bold uppercase tracking-widest text-xs px-8 py-4 transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-none flex items-center justify-center gap-2";
+    const baseStyles = "relative group/btn font-display font-bold uppercase tracking-widest text-xs px-8 py-4 transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:cursor-none flex items-center justify-center gap-2 rounded-full";
 
     const variants = {
         primary: "bg-white text-black border border-transparent hover:bg-zinc-200",
