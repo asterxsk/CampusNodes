@@ -136,3 +136,11 @@ Thumbs.db
 supabase/functions/*/deno.lock
 .claude/
 *.sql
+
+# User-specific dev files
+dev resources/
+openspec/
+openspec
+prev.md
+.env.local
+AGENTS.md
