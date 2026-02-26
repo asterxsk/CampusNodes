@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import Button from '../components/ui/Button';
 import { supabase } from '../lib/supabaseClient';
 import { Mail, Lock, User, ArrowRight, CheckCircle, Check } from 'lucide-react';
 import Toast, { useToast, ToastContainer } from '../components/ui/Toast';
+import { containsProfanity } from '../utils/profanityFilter';
 
 const Signup = () => {
     const formRef = useRef(null);
@@ -55,6 +56,12 @@ const Signup = () => {
         }
         if (!namePattern.test(formData.lastName.trim())) {
             setError("Last name must be at least 2 characters and contain only letters.");
+            setLoading(false);
+            return;
+        }
+
+        if (containsProfanity(formData.firstName) || containsProfanity(formData.lastName)) {
+            setError("Your name contains restricted words. Please use a different name.");
             setLoading(false);
             return;
         }

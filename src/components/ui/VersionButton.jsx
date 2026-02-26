@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles, X, GitCommit } from 'lucide-react';
 import pkg from '../../../package.json';
 
-const VersionBanner = () => {
+const VersionButton = () => {
     const [isOpen, setIsOpen] = useState(false);
     const version = pkg.version;
     const location = useLocation();
@@ -84,11 +85,11 @@ const VersionBanner = () => {
                                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/20 text-accent font-mono">v{version}</span>
                                         </div>
                                         <ul className="text-xs text-white/60 leading-relaxed space-y-2 list-disc pl-3 marker:text-accent/50">
-                                            <li><strong className="text-white/80">Chat Experience:</strong> Auto-scroll fixed on PC. Added "Unread" banner and "Jump to Latest" button.</li>
-                                            <li><strong className="text-white/80">Read Receipts:</strong> See when your messages are read with real-time updates.</li>
-                                            <li><strong className="text-white/80">Live Discovery:</strong> New users appear instantly in Connections without refreshing.</li>
-                                            <li><strong className="text-white/80">UI Polish:</strong> Friend profile button now has smooth hover animations.</li>
-                                            <li><strong className="text-white/80">Checkout Security:</strong> Improved date validation to ensure valid delivery slots.</li>
+                                            <li><strong className="text-white/80">Performance & Polish:</strong> Optimized page transitions and staggered entrance animations for a flash-free experience.</li>
+                                            <li><strong className="text-white/80">Loading States:</strong> Integrated custom Skeletons for faster perceived loads on Marketplace and Services.</li>
+                                            <li><strong className="text-white/80">Stability:</strong> Implemented React Error Boundaries system-wide and fixed synchronous state update bugs.</li>
+                                            <li><strong className="text-white/80">Monitoring:</strong> Integrated Web Vitals for real-world performance tracking.</li>
+                                            <li><strong className="text-white/80">Refinements:</strong> Blisteringly fast hero animations, improved social UI loading sequences, and minor mobile UI fixes.</li>
                                         </ul>
                                     </div>
 
@@ -99,7 +100,7 @@ const VersionBanner = () => {
                                             <span className="text-xs font-bold text-white">Previous Highlights</span>
                                         </div>
                                         <p className="text-xs text-white/60 leading-relaxed">
-                                            Forum likes/comments, dynamic cart calculations, navigation redesign, and performance optimizations.
+                                            v8.7: Interactive buttons, complete Cart System, redesigned Profile modal, and Forum performance fixes.
                                         </p>
                                     </div>
                                 </div>
@@ -117,4 +118,4 @@ const VersionBanner = () => {
     );
 };
 
-export default VersionBanner;
+export default VersionButton;

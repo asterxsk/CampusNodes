@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Heart, MessageCircle, MoreHorizontal, User, Trash2, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useUI } from '../context/UIContext';
 import { useToast } from '../context/ToastContext';
-import { useModal } from '../context/ModalContext';
+import { Heart, MessageCircle, User, Trash2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import Button from '../components/ui/Button';
+import Avatar from '../components/ui/Avatar';
 import PostCommentsModal from '../components/forum/PostCommentsModal';
 
 // Utility for relative time
@@ -25,11 +24,110 @@ const timeAgo = (dateString) => {
     return date.toLocaleDateString();
 };
 
+// Memoized Post Card to prevent re-renders when modal opens
+const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLiked, likeCount, commentCount, topComment }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            layout
+            className="bg-surface border border-white/5 p-5 rounded-2xl group hover:bg-white/5 transition-colors"
+        >
+            <div className="flex gap-3">
+                <div className="shrink-0">
+                    <Avatar 
+                        url={post.profiles?.avatar_url}
+                        firstName={post.profiles?.first_name}
+                        size="sm"
+                        className="border border-white/10"
+                    />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                            <span className="font-bold text-white text-sm hover:underline cursor-pointer">
+                                {post.profiles?.first_name} {post.profiles?.last_name}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <span>@{post.profiles?.role || 'Student'}</span>
+                                <span>•</span>
+                                <span>{timeAgo(post.created_at)}</span>
+                            </div>
+                        </div>
+
+                        {/* Options (Delete) */}
+                        {user && user.id === post.user_id && (
+                            <button
+                                onClick={() => onDelete(post.id)}
+                                className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                title="Delete post"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Post Content */}
+                    <p className="mt-3 text-white whitespace-pre-wrap leading-relaxed">{post.content}</p>
+
+                    {/* Engagement */}
+                    <div className="mt-4 flex items-center gap-6">
+                        <button
+                            onClick={() => onLike(post.id)}
+                            className={`flex items-center gap-2 text-sm transition-colors ${hasLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                        >
+                            <Heart size={18} fill={hasLiked ? 'currentColor' : 'none'} />
+                            <span>{likeCount || 0}</span>
+                        </button>
+
+                        <button
+                            onClick={() => onToggleComments(post.id)}
+                            className="flex items-center gap-2 text-sm text-gray-400 hover:text-accent transition-colors"
+                        >
+                            <MessageCircle size={18} />
+                            <span>{commentCount > 0 ? commentCount : 'Comment'}</span>
+                        </button>
+                    </div>
+
+                    {/* Top Comment Preview */}
+                    {topComment && (
+                        <div
+                            onClick={() => onToggleComments(post.id)}
+                            className="mt-4 pt-3 border-t border-white/5 w-full text-left group/comment cursor-pointer"
+                        >
+                            <div className="flex gap-2 items-start">
+                                <Avatar 
+                                    url={topComment.profiles?.avatar_url}
+                                    firstName={topComment.profiles?.first_name}
+                                    size="xs"
+                                    className="border border-white/10 shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-semibold text-white">{topComment.profiles?.first_name} {topComment.profiles?.last_name}</span>
+                                        <span className="text-[10px] text-gray-500">{timeAgo(topComment.created_at)}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-400 line-clamp-1 group-hover/comment:text-gray-300 transition-colors">{topComment.content}</p>
+                                </div>
+                            </div>
+                            {commentCount > 1 && (
+                                <p className="text-xs text-accent mt-2 pl-8 hover:underline">
+                                    View all {commentCount} comments
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
+    );
+});
+
 const Forum = () => {
     const { user } = useAuth();
-    const { openAuthModal } = useUI();
     const toast = useToast();
-    const { showConfirm } = useModal();
+
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newPostContent, setNewPostContent] = useState('');
@@ -37,162 +135,155 @@ const Forum = () => {
 
     // Comments State
     const [activePostId, setActivePostId] = useState(null);
-    const [comments, setComments] = useState({}); // { postId: [comments] }
-    const [topComments, setTopComments] = useState({}); // { postId: topComment } - most liked or first comment
-    const [newComment, setNewComment] = useState('');
-    const [loadingComments, setLoadingComments] = useState(false);
+    const [topComments, setTopComments] = useState({});
 
     // Likes State
-    const [userLikes, setUserLikes] = useState(new Set()); // Set of post IDs the user has liked
-    const [likeCounts, setLikeCounts] = useState({}); // { postId: count }
-    const [commentCounts, setCommentCounts] = useState({}); // { postId: count }
+    const [userLikes, setUserLikes] = useState(new Set());
+    const [likeCounts, setLikeCounts] = useState({});
+    const [commentCounts, setCommentCounts] = useState({});
 
     // Fetch posts with like counts and comment counts
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async () => {
         try {
-            const { data, error } = await supabase
+            // Fetch posts first
+            const { data: postsData, error: postsError } = await supabase
                 .from('posts')
-                .select(`
-                    *,
-                    profiles:user_id (
-                        id,
-                        first_name,
-                        last_name,
-                        avatar_url,
-                        role
-                    )
-                `)
+                .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) throw error;
-            setPosts(data || []);
+            if (postsError) throw postsError;
 
-            // Fetch like counts for each post
-            if (data && data.length > 0) {
-                const postIds = data.map(p => p.id);
+            if (!postsData || postsData.length === 0) {
+                setPosts([]);
+                return;
+            }
 
-                // Get like counts
-                const { data: likesData } = await supabase
-                    .from('post_likes')
-                    .select('post_id')
-                    .in('post_id', postIds);
+            // Get unique user_ids from posts
+            const userIds = [...new Set(postsData.map(p => p.user_id))];
+            
+            // Fetch profiles separately
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, avatar_url, role')
+                .in('id', userIds);
 
-                const counts = {};
-                likesData?.forEach(like => {
-                    counts[like.post_id] = (counts[like.post_id] || 0) + 1;
+            if (profilesError) {
+                console.error("Error fetching profiles:", profilesError);
+            }
+
+            // Create profile map
+            const profileMap = {};
+            profilesData?.forEach(profile => {
+                profileMap[profile.id] = profile;
+            });
+
+            // Merge posts with profiles
+            const mergedPosts = postsData.map(post => ({
+                ...post,
+                profiles: profileMap[post.user_id] || null
+            }));
+
+            setPosts(mergedPosts);
+
+            // Fetch like counts and user likes
+            const postIds = postsData.map(p => p.id);
+
+            const { data: likesData } = await supabase
+                .from('post_likes')
+                .select('post_id, user_id')
+                .in('post_id', postIds);
+
+            const counts = {};
+            const userLikedSet = new Set();
+            
+            likesData?.forEach(like => {
+                counts[like.post_id] = (counts[like.post_id] || 0) + 1;
+                if (user && like.user_id === user.id) {
+                    userLikedSet.add(like.post_id);
+                }
+            });
+            
+            setLikeCounts(counts);
+            setUserLikes(userLikedSet);
+
+            // Get comment counts
+            const { data: commentsData } = await supabase
+                .from('post_comments')
+                .select('post_id')
+                .in('post_id', postIds);
+
+            const commentCountsMap = {};
+            commentsData?.forEach(comment => {
+                commentCountsMap[comment.post_id] = (commentCountsMap[comment.post_id] || 0) + 1;
+            });
+            setCommentCounts(commentCountsMap);
+
+            // Fetch top comments
+            const { data: topCommentsData } = await supabase
+                .from('post_comments')
+                .select('*')
+                .in('post_id', postIds)
+                .order('created_at', { ascending: true });
+
+            // Get user_ids from comments and fetch their profiles
+            if (topCommentsData && topCommentsData.length > 0) {
+                const commentUserIds = [...new Set(topCommentsData.map(c => c.user_id))];
+                const { data: commentProfilesData } = await supabase
+                    .from('profiles')
+                    .select('id, first_name, last_name, avatar_url')
+                    .in('id', commentUserIds);
+
+                const commentProfileMap = {};
+                commentProfilesData?.forEach(profile => {
+                    commentProfileMap[profile.id] = profile;
                 });
-                setLikeCounts(counts);
 
-                // Get comment counts
-                const { data: commentsData } = await supabase
-                    .from('post_comments')
-                    .select('post_id')
-                    .in('post_id', postIds);
+                // Merge comments with profiles
+                const mergedComments = topCommentsData.map(comment => ({
+                    ...comment,
+                    profiles: commentProfileMap[comment.user_id] || null
+                }));
 
-                const commentCountsMap = {};
-                commentsData?.forEach(comment => {
-                    commentCountsMap[comment.post_id] = (commentCountsMap[comment.post_id] || 0) + 1;
-                });
-                setCommentCounts(commentCountsMap);
-
-                // Fetch top comment for each post (most recent for now, as we don't have comment likes)
-                const { data: topCommentsData } = await supabase
-                    .from('post_comments')
-                    .select(`
-                        *,
-                        profiles:user_id (
-                            first_name,
-                            last_name,
-                            avatar_url
-                        )
-                    `)
-                    .in('post_id', postIds)
-                    .order('created_at', { ascending: true });
-
-                // Group and get first comment per post
                 const topCommentsMap = {};
-                topCommentsData?.forEach(comment => {
+                mergedComments.forEach(comment => {
                     if (!topCommentsMap[comment.post_id]) {
                         topCommentsMap[comment.post_id] = comment;
                     }
                 });
                 setTopComments(topCommentsMap);
-
-                // Check which posts current user has liked
-                if (user) {
-                    const { data: userLikesData } = await supabase
-                        .from('post_likes')
-                        .select('post_id')
-                        .eq('user_id', user.id)
-                        .in('post_id', postIds);
-
-                    const likedSet = new Set(userLikesData?.map(l => l.post_id) || []);
-                    setUserLikes(likedSet);
-                }
             }
         } catch (err) {
-            console.error("Error fetching posts:", err);
+            console.error('Error fetching posts:', err);
+            toast.error('Failed to load posts');
         } finally {
             setLoading(false);
         }
-    };
-
-    const fetchComments = async (postId) => {
-        setLoadingComments(true);
-        try {
-            const { data, error } = await supabase
-                .from('post_comments')
-                .select(`
-                    *,
-                    profiles:user_id (
-                        first_name,
-                        last_name,
-                        avatar_url
-                    )
-                `)
-                .eq('post_id', postId)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-            setComments(prev => ({ ...prev, [postId]: data }));
-        } catch (err) {
-            console.error("Error fetching comments:", err);
-        } finally {
-            setLoadingComments(false);
-        }
-    };
+    }, [user, toast]);
 
     useEffect(() => {
         fetchPosts();
 
-        // Realtime Subscription for posts, likes, and comments
+        // Realtime Subscription
         const channel = supabase
-            .channel('forum_realtime')
+            .channel('forum_updates')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
                 fetchPosts();
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'post_likes' }, () => {
-                // Refresh posts to get updated like counts
                 fetchPosts();
             })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, payload => {
-                // Refresh posts to get updated comment counts
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, () => {
                 fetchPosts();
-                // Also refresh comments if the active post got a new comment
-                if (activePostId && payload.new?.post_id === activePostId) {
-                    fetchComments(activePostId);
-                }
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [activePostId, user]);
+    }, [fetchPosts]);
 
-    const handleCreatePost = async (e) => {
-        e.preventDefault();
-        if (!user) return openAuthModal();
+    const handleCreatePost = async () => {
+        if (!user) return;
         if (!newPostContent.trim()) return;
 
         setIsSubmitting(true);
@@ -206,42 +297,44 @@ const Forum = () => {
 
             if (error) throw error;
             setNewPostContent('');
-            toast.success('Post created successfully!');
+            toast.success('Post created!');
+            fetchPosts();
         } catch (err) {
-            console.error("Error creating post:", err);
-            toast.error('Failed to post. Please try again.');
+            console.error('Error creating post:', err);
+            toast.error('Failed to create post');
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDeletePost = async (postId) => {
-        const confirmed = await showConfirm({
-            title: 'Delete Post',
-            message: 'Are you sure you want to delete this post? This action cannot be undone.',
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
-            variant: 'danger'
-        });
-
-        if (!confirmed) return;
-
+        if (!user) return;
+        
         try {
-            const { error } = await supabase.from('posts').delete().eq('id', postId);
+            const { error } = await supabase
+                .from('posts')
+                .delete()
+                .eq('id', postId)
+                .eq('user_id', user.id);
+
             if (error) throw error;
-            toast.success('Post deleted successfully');
+            toast.success('Post deleted');
+            fetchPosts();
         } catch (err) {
-            console.error("Error deleting post:", err);
+            console.error('Error deleting post:', err);
             toast.error('Failed to delete post');
         }
     };
 
     const handleLike = async (postId) => {
-        if (!user) return openAuthModal();
+        if (!user) {
+            toast.error('Please sign in to like posts');
+            return;
+        }
 
         const isLiked = userLikes.has(postId);
 
-        // Optimistic UI update
+        // Optimistic update
         setUserLikes(prev => {
             const newSet = new Set(prev);
             if (isLiked) {
@@ -251,7 +344,7 @@ const Forum = () => {
             }
             return newSet;
         });
-
+        
         setLikeCounts(prev => ({
             ...prev,
             [postId]: (prev[postId] || 0) + (isLiked ? -1 : 1)
@@ -259,26 +352,19 @@ const Forum = () => {
 
         try {
             if (isLiked) {
-                // Unlike - delete the like
-                const { error } = await supabase
+                await supabase
                     .from('post_likes')
                     .delete()
                     .eq('post_id', postId)
                     .eq('user_id', user.id);
-                if (error) throw error;
             } else {
-                // Like - insert new like
-                const { error } = await supabase
+                await supabase
                     .from('post_likes')
-                    .insert({
-                        post_id: postId,
-                        user_id: user.id
-                    });
-                if (error) throw error;
+                    .insert({ post_id: postId, user_id: user.id });
             }
         } catch (err) {
-            console.error("Error toggling like:", err);
-            // Revert optimistic update on error
+            console.error('Error updating like:', err);
+            // Revert optimistic update
             setUserLikes(prev => {
                 const newSet = new Set(prev);
                 if (isLiked) {
@@ -300,57 +386,30 @@ const Forum = () => {
         setActivePostId(postId);
     };
 
-    const handlePostComment = async (e, postId) => {
-        e.preventDefault();
-        if (!user) return openAuthModal();
-        if (!newComment.trim()) return;
-
-        try {
-            const { error } = await supabase
-                .from('post_comments')
-                .insert({
-                    post_id: postId,
-                    user_id: user.id,
-                    content: newComment.trim()
-                });
-
-            if (error) throw error;
-            setNewComment('');
-            fetchComments(postId);
-            toast.success('Comment posted!');
-        } catch (err) {
-            console.error("Error posting comment:", err);
-            toast.error('Failed to post comment');
-        }
-    };
-
     return (
         <div className="min-h-screen bg-background pt-4 md:pt-24 pb-32 px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto w-full">
                 <header className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold font-display text-white">Campus Feed</h1>
-                        <p className="text-gray-400 text-sm">See what's happening around campus.</p>
+                        <p className="text-gray-400 text-sm">See what&apos;s happening around campus.</p>
                     </div>
                 </header>
 
                 {/* Create Post Card */}
                 <div className="bg-surface border border-white/10 rounded-2xl p-4 mb-8">
                     <div className="flex gap-4">
-                        <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden shrink-0 border border-white/10">
-                            {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-white">
-                                    <User size={20} />
-                                </div>
-                            )}
-                        </div>
+                        <Avatar
+                            url={user?.user_metadata?.avatar_url}
+                            firstName={user?.user_metadata?.first_name}
+                            size="md"
+                            className="shrink-0"
+                        />
                         <div className="flex-1">
                             <textarea
                                 value={newPostContent}
                                 onChange={(e) => setNewPostContent(e.target.value)}
-                                placeholder="What's on your mind?"
+                                placeholder="What&apos;s on your mind?"
                                 className="w-full bg-transparent text-white placeholder-gray-500 resize-none focus:outline-none min-h-[60px] text-base"
                                 rows={2}
                             />
@@ -378,119 +437,18 @@ const Forum = () => {
                     <div className="space-y-4">
                         <AnimatePresence mode="popLayout">
                             {posts.map((post) => (
-                                <motion.div
+                                <PostCard
                                     key={post.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    layout
-                                    className="bg-surface border border-white/5 p-5 rounded-2xl group hover:bg-white/5 transition-colors"
-                                >
-                                    <div className="flex gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden shrink-0 border border-white/10">
-                                            {post.profiles?.avatar_url ? (
-                                                <img src={post.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-blue-500 to-purple-600">
-                                                    {post.profiles?.first_name?.[0] || '?'}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-white text-sm hover:underline cursor-pointer">
-                                                        {post.profiles?.first_name} {post.profiles?.last_name}
-                                                    </span>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                                                        <span>@{post.profiles?.role || 'Student'}</span>
-                                                        <span>•</span>
-                                                        <span>{timeAgo(post.created_at)}</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Options (Delete) */}
-                                                {user && user.id === post.user_id && (
-                                                    <button
-                                                        onClick={() => handleDeletePost(post.id)}
-                                                        className="text-gray-500 hover:text-red-500 transition-colors p-1"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            <div className="mt-2 text-gray-200 text-[15px] whitespace-pre-wrap leading-relaxed">
-                                                {post.content}
-                                            </div>
-
-                                            {/* Actions */}
-                                            <div className="flex items-center gap-6 mt-4 pt-3 border-t border-white/5">
-                                                <button
-                                                    onClick={() => handleLike(post.id)}
-                                                    className={`flex items-center gap-2 transition-colors group/like ${userLikes.has(post.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
-                                                >
-                                                    <div className="p-1.5 rounded-full group-hover/like:bg-red-500/10 transition-colors">
-                                                        <Heart
-                                                            size={16}
-                                                            fill={userLikes.has(post.id) ? 'currentColor' : 'none'}
-                                                            className="transition-all"
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs">
-                                                        {likeCounts[post.id] > 0 ? likeCounts[post.id] : 'Like'}
-                                                    </span>
-                                                </button>
-
-                                                <button
-                                                    onClick={() => toggleComments(post.id)}
-                                                    className={`flex items-center gap-2 transition-colors ${activePostId === post.id ? 'text-blue-400' : 'text-gray-400 hover:text-blue-400'}`}
-                                                >
-                                                    <div className="p-1.5 rounded-full hover:bg-blue-400/10 transition-colors">
-                                                        <MessageCircle size={16} />
-                                                    </div>
-                                                    <span className="text-xs">
-                                                        {commentCounts[post.id] > 0 ? commentCounts[post.id] : 'Comment'}
-                                                    </span>
-                                                </button>
-                                            </div>
-
-                                            {/* Top Comment Preview (Always Visible if exists) */}
-                                            {topComments[post.id] && (
-                                                <button
-                                                    onClick={() => toggleComments(post.id)}
-                                                    className="mt-4 pt-3 border-t border-white/5 w-full text-left group/comment"
-                                                >
-                                                    <div className="flex gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden shrink-0">
-                                                            {topComments[post.id].profiles?.avatar_url ? (
-                                                                <img src={topComments[post.id].profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center text-[10px] text-white bg-slate-600">
-                                                                    {topComments[post.id].profiles?.first_name?.[0]}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-xs font-bold text-white">
-                                                                    {topComments[post.id].profiles?.first_name} {topComments[post.id].profiles?.last_name}
-                                                                </span>
-                                                                <span className="text-[10px] text-gray-500">{timeAgo(topComments[post.id].created_at)}</span>
-                                                            </div>
-                                                            <p className="text-sm text-gray-400 line-clamp-1 group-hover/comment:text-gray-300 transition-colors">{topComments[post.id].content}</p>
-                                                        </div>
-                                                    </div>
-                                                    {commentCounts[post.id] > 1 && (
-                                                        <p className="text-xs text-gray-500 mt-2 pl-9">
-                                                            View all {commentCounts[post.id]} comments
-                                                        </p>
-                                                    )}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
+                                    post={post}
+                                    user={user}
+                                    onLike={handleLike}
+                                    onDelete={handleDeletePost}
+                                    onToggleComments={toggleComments}
+                                    hasLiked={userLikes.has(post.id)}
+                                    likeCount={likeCounts[post.id] || 0}
+                                    commentCount={commentCounts[post.id] || 0}
+                                    topComment={topComments[post.id]}
+                                />
                             ))}
                         </AnimatePresence>
 
@@ -503,7 +461,7 @@ const Forum = () => {
                 )}
             </div>
 
-            {/* Comments Modal */}
+            {/* Comments Modal - Rendered outside main content to prevent re-renders */}
             {activePostId && (
                 <PostCommentsModal
                     postId={activePostId}

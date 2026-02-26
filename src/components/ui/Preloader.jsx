@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PixelGrid from '../hero/PixelGrid';
+import LiquidEther from '../hero/LiquidEther';
 
 const messages = [
     "Finishing the prompt...",
@@ -22,21 +22,17 @@ const messages = [
 
 const Preloader = () => {
     const [loading, setLoading] = useState(true);
-    const [shuffledMessages, setShuffledMessages] = useState([]);
-    const [messageIndex, setMessageIndex] = useState(0);
-    const [fadeOut, setFadeOut] = useState(false);
-    const [progress, setProgress] = useState(0);
-
-    useEffect(() => {
-        // Fisher-Yates shuffle for better randomness
+    const [shuffledMessages] = useState(() => {
         const shuffled = [...messages];
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
-        setShuffledMessages(shuffled);
-        setMessageIndex(Math.floor(Math.random() * shuffled.length));
-    }, []);
+        return shuffled;
+    });
+    const [messageIndex, setMessageIndex] = useState(() => Math.floor(Math.random() * messages.length));
+    const [fadeOut, setFadeOut] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     // Cycle messages every 1.5s
     useEffect(() => {
@@ -71,9 +67,9 @@ const Preloader = () => {
 
     return (
         <div className={`fixed inset-0 z-[10000] bg-black flex flex-col items-center justify-center transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Preload the Pixel Grid behind the loader */}
+            {/* Preload the Liquid Ether background behind the loader */}
             <div className="absolute inset-0 opacity-30">
-                <PixelGrid />
+                <LiquidEther />
             </div>
 
             <div className="relative z-10 flex flex-col items-center">

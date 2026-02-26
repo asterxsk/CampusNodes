@@ -1,37 +1,29 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Trash2, ShoppingBag, ArrowLeft, ArrowRight, Package } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingBag, ArrowLeft, Package, Minus, Plus, Loader2 } from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import Button from '../components/ui/Button';
 
 const Cart = () => {
     const navigate = useNavigate();
-    const { cartItems, removeFromCart, clearCart } = useCart();
-    console.log('Cart Items Debug:', cartItems); // Debug logging
+    const { cartItems, updateQuantity, removeFromCart, clearCart, cartTotals, operationLoading, maxQuantity } = useCart();
 
-    // Helper to parse price reliably
-    const parsePrice = (price) => {
-        if (typeof price === 'number') return price;
-        if (!price) return 0;
-        // Robustly find the first valid number group
-        const matches = String(price).match(/[0-9.]+/);
-        if (matches) {
-            // Remove any extra dots if present (e.g. 1.2.3 -> 1.2) - basic safety
-            return parseFloat(matches[0]) || 0;
-        }
-        return 0;
-    };
-
-    // Calculate totals
-    const subtotal = cartItems.reduce((sum, item) => sum + parsePrice(item.price), 0);
-    const platformFee = subtotal * 0.05; // 5% Campus Nodes fee
-    const gst = (subtotal + platformFee) * 0.18; // 18% GST
-    const total = subtotal + platformFee + gst;
+    const { subtotal, itemCount: totalItems, platformFee, gst, total } = cartTotals();
 
     const handleCheckout = () => {
         if (cartItems.length > 0) {
             navigate('/checkout');
+        }
+    };
+
+    const handleQuantityChange = async (itemId, currentQty, delta) => {
+        const newQty = currentQty + delta;
+        if (newQty <= 0) {
+            await removeFromCart(itemId);
+        } else {
+            await updateQuantity(itemId, newQty);
         }
     };
 
@@ -78,8 +70,10 @@ const Cart = () => {
                             <h1 className="text-3xl font-display font-bold text-white">Your Cart</h1>
                             <button
                                 onClick={clearCart}
-                                className="text-sm text-red-400 hover:text-red-300 transition-colors"
+                                disabled={operationLoading}
+                                className="text-sm text-red-400 hover:text-red-300 transition-colors disabled:opacity-50 flex items-center gap-1"
                             >
+                                {operationLoading && <Loader2 size={14} className="animate-spin" />}
                                 Clear All
                             </button>
                         </div>
@@ -115,16 +109,42 @@ const Cart = () => {
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-white truncate">{item.title}</h3>
                                             <p className="text-sm text-gray-400 mb-2">{item.category}</p>
-                                            <p className="text-accent font-bold">₹{parsePrice(item.price).toLocaleString()}</p>
+                                            <p className="text-accent font-bold">
+                                                {item.price}
+                                                {item.quantity > 1 && (
+                                                    <span className="text-sm text-gray-400 font-normal ml-2">
+                                                        × {item.quantity}
+                                                    </span>
+                                                )}
+                                            </p>
                                         </div>
 
-                                        {/* Remove Button */}
-                                        <button
-                                            onClick={() => removeFromCart(item.id)}
-                                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors self-start"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                        {/* Quantity Controls */}
+                                        <div className="flex flex-col items-end gap-2 self-center">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleQuantityChange(item.id, item.quantity, -1)}
+                                                    disabled={operationLoading}
+                                                    className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 disabled:opacity-50 rounded-lg text-white transition-colors"
+                                                >
+                                                    <Minus size={16} />
+                                                </button>
+                                                <span className="w-8 text-center text-white font-semibold">
+                                                    {item.quantity}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleQuantityChange(item.id, item.quantity, 1)}
+                                                    disabled={operationLoading || item.quantity >= maxQuantity}
+                                                    className="w-8 h-8 flex items-center justify-center bg-white/10 hover:bg-white/20 disabled:opacity-50 rounded-lg text-white transition-colors"
+                                                    title={item.quantity >= maxQuantity ? `Maximum ${maxQuantity} items` : ''}
+                                                >
+                                                    <Plus size={16} />
+                                                </button>
+                                            </div>
+                                            {item.quantity >= maxQuantity && (
+                                                <span className="text-xs text-amber-400">Max {maxQuantity}</span>
+                                            )}
+                                        </div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -138,7 +158,7 @@ const Cart = () => {
 
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-gray-400">
-                                    <span>Subtotal ({cartItems.length} items)</span>
+                                    <span>Subtotal ({totalItems} items)</span>
                                     <span className="text-white">₹{subtotal.toLocaleString()}</span>
                                 </div>
 
@@ -169,6 +189,7 @@ const Cart = () => {
                             <Button
                                 onClick={handleCheckout}
                                 variant="primary"
+                                disabled={operationLoading}
                                 className="w-full py-3 flex items-center justify-center gap-2"
                             >
                                 Proceed to Checkout

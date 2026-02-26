@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, Send, Trash2, Lock, MoreVertical, Search, ArrowDown } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
@@ -6,8 +6,9 @@ import { useUI } from '../../context/UIContext';
 import { useToast } from '../../context/ToastContext';
 import { useModal } from '../../context/ModalContext';
 import { encryptMessage, decryptMessage } from '../../lib/encryption';
+import Avatar from '../../components/ui/Avatar';
 
-const MessagesInterface = ({ onClose, isModal = false }) => {
+const MessagesInterface = ({ isModal = false }) => {
     const { user } = useAuth();
     const { removeUnreadSender, unreadSenders } = useUI();
     const toast = useToast();
@@ -22,13 +23,16 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
     const [keyboardOffset, setKeyboardOffset] = useState(0);
     const [firstUnreadId, setFirstUnreadId] = useState(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
+    const showScrollButtonRef = useRef(false);
 
-    const messagesEndRef = useRef(null);
+    useEffect(() => { showScrollButtonRef.current = showScrollButton; }, [showScrollButton]);
+
+    // const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
     const messagesContainerRef = useRef(null);
 
-    const scrollToBottom = (smooth = true) => {
+    const scrollToBottom = useCallback((smooth = true) => {
         if (messagesContainerRef.current) {
             const { scrollHeight, clientHeight } = messagesContainerRef.current;
             messagesContainerRef.current.scrollTo({
@@ -36,7 +40,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 behavior: smooth ? 'smooth' : 'auto'
             });
         }
-    };
+    }, []);
 
     const checkScroll = () => {
         if (!messagesContainerRef.current) return;
@@ -50,11 +54,8 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
         const handleViewportChange = () => {
             if (window.visualViewport) {
                 const offset = window.innerHeight - window.visualViewport.height;
-                // Only apply offset if it's significant (keyboard is likely open)
-                // Threshold of 150 to avoid triggering on URL bar changes
                 setKeyboardOffset(offset > 150 ? offset : 0);
 
-                // Scroll messages to bottom when keyboard opens
                 if (offset > 150) {
                     setTimeout(() => scrollToBottom(true), 100);
                 }
@@ -69,104 +70,36 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                 window.visualViewport.removeEventListener('scroll', handleViewportChange);
             };
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        if (user) fetchFriends();
-    }, [user]);
+    // useEffect(() => {
+    //     if (user) fetchFriends();
+    // }, [user]);
 
-    // Auto-scroll on new messages if near bottom
     useEffect(() => {
-        // Only auto-scroll if we are already near the bottom OR if it's a new message we just sent
-        // For simplicity, we'll auto-scroll unless the user is way up, 
-        // but typically for "new message arrived" we might want to show a badge instead if scrolled up.
-        // For now, let's keep simple behavior but respect manual scroll a bit? 
-        // Actually, previous behavior was always scroll. Let's stick to that for consistency unless requested otherwise.
         if (!showScrollButton) {
             scrollToBottom();
         }
-    }, [messages]);
+    }, [messages, showScrollButton, scrollToBottom]);
 
-    const markMessagesAsRead = async (senderId) => {
+    const markMessagesAsRead = useCallback(async (senderId) => {
         try {
-            // Update ALL messages from this sender to me as read to ensure no "stuck" notifications
-            // Actually, to be aggressive and fix the user's issue, let's just update anything that isn't true.
-            // Or simpler: just update where receiver is me and sender is them.
-            // But we can keep .eq('is_read', false) if we trust the DB. 
-            // Let's use use .or('is_read.eq.false,is_read.is.null') logic if possible, or just drop the filter to be safe.
-            // Dropping the filter adds overhead but guarantees consistency.
-
             const { error: updateError } = await supabase
                 .from('messages')
                 .update({ is_read: true, read_at: new Date().toISOString() })
                 .eq('sender_id', senderId)
                 .eq('receiver_id', user.id)
-                .neq('is_read', true); // Update false or null
+                .neq('is_read', true);
 
             if (updateError) throw updateError;
-
-            // Also update local unread count via context
             removeUnreadSender(senderId);
         } catch (err) {
             console.error("Error marking messages as read:", err);
         }
-    };
+    }, [user.id, removeUnreadSender]);
 
-    useEffect(() => {
-        if (activeChat) {
-            // Reset unread marker state when switching chats
-            setFirstUnreadId(null);
-
-            // Fetch first, then mark read internally
-            fetchMessages(activeChat.id);
-
-            const channel = supabase
-                .channel(`chat:${activeChat.id}`)
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `sender_id=eq.${activeChat.id}`
-                }, async (payload) => {
-                    if (payload.new.receiver_id === user.id) {
-                        const decryptedContent = decryptMessage(payload.new.content, payload.new.sender_id, payload.new.receiver_id);
-                        const msgWithDecrypted = { ...payload.new, content: decryptedContent };
-                        setMessages(prev => [...prev, msgWithDecrypted]);
-
-                        // If user is looking (not scrolled up), scroll to bottom
-                        if (!showScrollButton) scrollToBottom();
-
-                        // Mark as read immediately
-                        await markMessagesAsRead(activeChat.id);
-                    }
-                })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `sender_id=eq.${user.id}` // Listen for updates to messages WE sent (e.g. marked as read)
-                }, (payload) => {
-                    // console.log('Realtime UPDATE received:', payload);
-                    if (payload.new.receiver_id === activeChat.id) {
-                        setMessages(prev => prev.map(msg =>
-                            msg.id === payload.new.id ? { ...msg, ...payload.new, content: msg.content } : msg
-                        ));
-                    }
-                })
-                .subscribe();
-
-            return () => supabase.removeChannel(channel);
-        }
-    }, [activeChat]);
-
-    // Refresh messages on window focus to ensure read status is up to date
-    useEffect(() => {
-        const handleFocus = () => {
-            if (activeChat) fetchMessages(activeChat.id);
-        };
-        window.addEventListener('focus', handleFocus);
-        return () => window.removeEventListener('focus', handleFocus);
-    }, [activeChat]);
+    const markMessagesAsReadCallback = useCallback(markMessagesAsRead, [markMessagesAsRead]);
 
     const fetchFriends = async () => {
         setLoading(true);
@@ -192,6 +125,12 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
             setLoading(false);
         }
     };
+
+    const fetchFriendsCallback = React.useCallback(fetchFriends, [user]);
+
+    useEffect(() => {
+        if (user) fetchFriendsCallback();
+    }, [user, fetchFriendsCallback]);
 
     const fetchMessages = async (friendId) => {
         setLoading(true);
@@ -248,6 +187,72 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
             setLoading(false);
         }
     };
+
+    const fetchMessagesCallback = React.useCallback(fetchMessages, [user.id, scrollToBottom, markMessagesAsRead]);
+
+    // Refresh messages on window focus to ensure read status is up to date
+    useEffect(() => {
+        const handleFocus = () => {
+            if (activeChat) fetchMessagesCallback(activeChat.id);
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [activeChat, fetchMessagesCallback]);
+
+    // Moved usage before definition fix:
+    // Actually, we must place the useEffect AFTER this block or use function hoisting, but using useCallback prevents hoisting.
+    // So we will insert the useEffect HERE.
+
+    useEffect(() => {
+        if (activeChat) {
+            // Reset unread marker state when switching chats
+            setFirstUnreadId(null);
+
+            // Focus input when chat opens
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
+
+            // Fetch first, then mark read internally
+            fetchMessagesCallback(activeChat.id);
+
+            const channel = supabase
+                .channel(`chat:${activeChat.id}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `sender_id=eq.${activeChat.id}`
+                }, async (payload) => {
+                    if (payload.new.receiver_id === user.id) {
+                        const decryptedContent = decryptMessage(payload.new.content, payload.new.sender_id, payload.new.receiver_id);
+                        const msgWithDecrypted = { ...payload.new, content: decryptedContent };
+                        setMessages(prev => [...prev, msgWithDecrypted]);
+
+                        if (!showScrollButtonRef.current) scrollToBottom();
+
+                        // Mark as read immediately
+                        await markMessagesAsReadCallback(activeChat.id);
+                    }
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `sender_id=eq.${user.id}` // Listen for updates to messages WE sent (e.g. marked as read)
+                }, (payload) => {
+                    // console.log('Realtime UPDATE received:', payload);
+                    if (payload.new.receiver_id === activeChat.id) {
+                        setMessages(prev => prev.map(msg =>
+                            msg.id === payload.new.id ? { ...msg, ...payload.new, content: msg.content } : msg
+                        ));
+                    }
+                })
+                .subscribe();
+
+            return () => supabase.removeChannel(channel);
+        }
+    }, [activeChat, user.id, fetchMessagesCallback, markMessagesAsReadCallback, scrollToBottom]);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -373,15 +378,11 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                 className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all mb-1 ${activeChat?.id === friend.id ? 'bg-white/10' : 'hover:bg-white/5'}`}
                             >
                                 <div className="relative">
-                                    <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden border border-white/10">
-                                        {friend.avatar_url ? (
-                                            <img src={friend.avatar_url} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white">
-                                                {friend.first_name?.[0]}
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Avatar
+                                        url={friend.avatar_url}
+                                        firstName={friend.first_name}
+                                        size="md"
+                                    />
                                     {unreadSenders.has(friend.id) && (
                                         <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-accent rounded-full border-2 border-black" />
                                     )}
@@ -417,15 +418,11 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                                 <button onClick={() => setActiveChat(null)} className="md:hidden p-2 -ml-2 hover:bg-white/10 rounded-full text-white">
                                     <ChevronLeft size={24} />
                                 </button>
-                                <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden border border-white/10">
-                                    {activeChat.avatar_url ? (
-                                        <img src={activeChat.avatar_url} alt="" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-sm font-bold text-white">
-                                            {activeChat.first_name?.[0]}
-                                        </div>
-                                    )}
-                                </div>
+                                <Avatar
+                                    url={activeChat.avatar_url}
+                                    firstName={activeChat.first_name}
+                                    size="md"
+                                />
                                 <div>
                                     <h2 className="font-bold text-white text-sm">{activeChat.first_name} {activeChat.last_name}</h2>
                                     <p className="text-[10px] text-accent flex items-center gap-1">
@@ -442,7 +439,7 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         </div>
 
                         <div
-                            className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[url('/chat-bg.png')] bg-repeat bg-opacity-5 flex flex-col relative"
+                            className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-black/5 flex flex-col relative"
                             ref={messagesContainerRef}
                             onScroll={checkScroll}
                         >
@@ -511,16 +508,20 @@ const MessagesInterface = ({ onClose, isModal = false }) => {
                         {/* Input Area - Keyboard responsive on mobile */}
                         <form
                             onSubmit={sendMessage}
-                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-32 md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
+                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-[90px] md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
                         >
-                            <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors">
+                            <div
+                                className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors cursor-text"
+                                onClick={() => inputRef.current?.focus()}
+                            >
                                 <input
                                     ref={inputRef}
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Type a message..."
-                                    className="flex-1 bg-transparent text-white placeholder:text-gray-500 focus:outline-none text-sm py-1"
+                                    className="flex-1 bg-transparent text-white placeholder:text-gray-500 focus:outline-none text-sm py-1 cursor-text"
+                                    autoFocus
                                 />
                                 <button
                                     type="submit"

@@ -3,21 +3,23 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
 import { ArrowLeft, MapPin, Clock, Package, CreditCard } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import Button from '../components/ui/Button';
 
 const Checkout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const toast = useToast();
-    const { cartItems, clearCart } = useCart();
+    const { cartItems } = useCart();
 
-    // Check if this is a direct "Buy Now" purchase
+    // Check if this is a direct "Buy Now" purchase or a service booking
     const directPurchase = location.state?.directPurchase;
     const directItem = location.state?.item;
+    const isBooking = location.state?.type === 'booking';
+    const service = location.state?.service;
 
-    // Use direct item or cart items
-    const items = directPurchase && directItem ? [directItem] : cartItems;
+    // Use direct item, service, or cart items
+    const items = isBooking && service ? [service] : (directPurchase && directItem ? [directItem] : cartItems);
 
     const [formData, setFormData] = useState({
         deliveryLocation: '',
@@ -166,7 +168,7 @@ const Checkout = () => {
                     {/* Delivery Form */}
                     <div className="flex-1">
                         <h1 className="text-3xl font-display font-bold text-white mb-2">
-                            {location.pathname === '/book' ? 'Booking Details' : 'Delivery Details'}
+                            {isBooking || location.pathname === '/book' ? 'Booking Details' : 'Delivery Details'}
                         </h1>
                         <p className="text-gray-400 mb-8">Tell us when and where to deliver your items</p>
 

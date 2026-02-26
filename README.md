@@ -9,9 +9,9 @@
 
   [![GitHub release (latest by date)](https://img.shields.io/github/v/release/asterxsk/CampusNodes?style=for-the-badge&color=blue&label=v8.6.0)](https://github.com/asterxsk/CampusNodes/releases)
   [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/asterxsk/CampusNodes/blob/main/LICENSE)
-  [![Website](https://img.shields.io/website?url=https%3A%2F%2Fasterxsk.github.io%2FCampusNodes%2F&style=for-the-badge&label=Live%20Demo&logo=vercel)](https://asterxsk.github.io/CampusNodes/)
+  [![Website](https://img.shields.io/website?url=https%3A%2F%2Fcnodes.vercel.app&style=for-the-badge&label=Live%20Demo&logo=vercel)](https://cnodes.vercel.app/)
   
-  [**Explore Live Site**](https://asterxsk.github.io/CampusNodes/) • [**Join Discord**](https://discord.gg/pTrdZ3vN) • [**Report Bug**](https://github.com/asterxsk/CampusNodes/issues)
+  [**Explore Live Site**](https://cnodes.vercel.app/) • [**Join Discord**](https://discord.gg/pTrdZ3vN) • [**Report Bug**](https://github.com/asterxsk/CampusNodes/issues)
 
 </div>
 
@@ -59,7 +59,7 @@ Built with cutting-edge modern web technologies for performance and scale.
 | **3D Graphics** | [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/) |
 | **Backend & Auth** | [Supabase](https://supabase.com/) |
 | **State Management** | React Context API |
-| **Deployment** | GitHub Pages |
+| **Deployment** | [Vercel](https://vercel.com) |
 
 ---
 

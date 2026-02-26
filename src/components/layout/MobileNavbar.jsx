@@ -2,28 +2,33 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, Users, User, MessageSquare, LayoutGrid, ShoppingBag, MessageCircle, Wrench, X, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import Avatar from '../ui/Avatar';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 
 // Menu Item Component for the Sheet
-const MenuItem = ({ icon: Icon, label, desc, onClick, color }) => (
-    <button
-        onClick={onClick}
-        className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group active:scale-95"
-    >
-        <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color} bg-opacity-20`}>
-                <Icon size={24} className={color.replace('bg-', 'text-')} />
+const MenuItem = ({ label, desc, onClick, color, icon: Icon }) => {
+    const bgColor = color.replace('text-', 'bg-');
+    return (
+        <button
+            onClick={onClick}
+            className="w-full flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group active:scale-95"
+        >
+            <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${bgColor} bg-opacity-20`}>
+                    {Icon ? <Icon size={24} className={color} /> : <div className={`w-6 h-6 rounded-full ${bgColor}`} />}
+                </div>
+                <div className="text-left">
+                    <h3 className="text-white font-bold text-lg">{label}</h3>
+                    <p className="text-gray-400 text-xs">{desc}</p>
+                </div>
             </div>
-            <div className="text-left">
-                <h3 className="text-white font-bold text-lg">{label}</h3>
-                <p className="text-gray-400 text-xs">{desc}</p>
-            </div>
-        </div>
-        <ChevronRight className="text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
-    </button>
-);
+            <ChevronRight className="text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" size={20} />
+        </button>
+    );
+};
 
 const MobileNavbar = () => {
     const { user } = useAuth();
@@ -76,7 +81,7 @@ const MobileNavbar = () => {
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl z-[101] p-6 pb-24 safe-area-bottom shadow-2xl"
+                        className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 rounded-t-3xl md:rounded-3xl z-[99] p-6 pb-[90px] md:pb-24 shadow-2xl"
                         style={{ maxHeight: '70vh' }}
                     >
                         <div className="flex items-center justify-between mb-6">
@@ -91,25 +96,25 @@ const MobileNavbar = () => {
 
                         <div className="space-y-3">
                             <MenuItem
-                                icon={MessageCircle}
                                 label="Forum"
                                 desc="Join the campus discussion"
                                 onClick={() => handleMenuNavigation('/forum')}
                                 color="text-pink-500"
+                                icon={MessageCircle}
                             />
                             <MenuItem
-                                icon={ShoppingBag}
                                 label="Marketplace"
                                 desc="Buy and sell items"
                                 onClick={() => handleMenuNavigation('/market')}
                                 color="text-blue-500"
+                                icon={ShoppingBag}
                             />
                             <MenuItem
-                                icon={Wrench}
                                 label="Services"
                                 desc="Find compiled gigs & help"
                                 onClick={() => handleMenuNavigation('/services')}
                                 color="text-yellow-500"
+                                icon={Wrench}
                             />
                         </div>
                     </motion.div>
@@ -142,14 +147,15 @@ const MobileNavbar = () => {
                     {/* 3. Profile (Center) */}
                     <button
                         onClick={handleUserClick}
-                        className="relative -mt-6 flex flex-col items-center"
+                        className="relative -mt-6 flex flex-col items-center z-[105]"
                     >
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 border-black transition-all ${location.pathname === '/profile' ? 'bg-accent text-black scale-105' : 'bg-zinc-800 text-gray-400'}`}>
-                            {user?.user_metadata?.avatar_url ? (
-                                <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                            ) : (
-                                <User size={20} />
-                            )}
+                        <div className={`w-12 h-12 min-w-[48px] min-h-[48px] rounded-full flex items-center justify-center aspect-square shrink-0 border-4 border-black transition-all overflow-hidden ${location.pathname === '/profile' ? 'bg-accent text-black scale-105' : 'bg-zinc-800 text-gray-400'}`}>
+                            <Avatar
+                                url={user?.user_metadata?.avatar_url}
+                                firstName={user?.user_metadata?.first_name}
+                                size="md"
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                     </button>
 

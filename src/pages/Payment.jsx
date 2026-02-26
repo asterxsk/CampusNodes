@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 import { CheckCircle, ArrowLeft, CreditCard, Shield } from 'lucide-react';
 import Logo from '../components/ui/Logo';
 import Button from '../components/ui/Button';
@@ -8,7 +7,7 @@ import Button from '../components/ui/Button';
 const Payment = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { clearCart } = useCart();
+    // const { } = useCart();
     const orderDetails = location.state?.orderDetails;
 
     // Try to get order from session storage if not in location state

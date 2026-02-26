@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import { Send, X, User, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useUI } from '../../context/UIContext';
 import { useToast } from '../../context/ToastContext';
+import Avatar from '../../components/ui/Avatar';
 
 // Utility for relative time (duplicated to avoid circular deps or verify if utils exist)
 const timeAgo = (dateString) => {
@@ -31,42 +33,74 @@ const PostCommentsModal = ({ postId, onClose }) => {
     const [loading, setLoading] = useState(true);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errorShown, setErrorShown] = useState(false);
     const bottomRef = useRef(null);
 
     // Fetch comments
-    const fetchComments = async () => {
+    const fetchComments = React.useCallback(async (showError = false) => {
         setLoading(true);
         try {
-            const { data, error } = await supabase
+            // First, fetch comments without the join
+            const { data: commentsData, error: commentsError } = await supabase
                 .from('post_comments')
-                .select(`
-                    *,
-                    profiles:user_id (
-                        first_name,
-                        last_name,
-                        avatar_url
-                    )
-                `)
+                .select('*')
                 .eq('post_id', postId)
                 .order('created_at', { ascending: true });
 
-            if (error) throw error;
-            setComments(data || []);
+            if (commentsError) throw commentsError;
+
+            if (!commentsData || commentsData.length === 0) {
+                setComments([]);
+                setLoading(false);
+                return;
+            }
+
+            // Get unique user_ids from comments
+            const userIds = [...new Set(commentsData.map(c => c.user_id))];
+
+            // Fetch profiles separately
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, avatar_url')
+                .in('id', userIds);
+
+            if (profilesError) {
+                console.error("Error fetching profiles:", profilesError);
+            }
+
+            // Create a map of user_id to profile
+            const profileMap = {};
+            if (profilesData) {
+                profilesData.forEach(profile => {
+                    profileMap[profile.id] = profile;
+                });
+            }
+
+            // Merge comments with profiles
+            const mergedComments = commentsData.map(comment => ({
+                ...comment,
+                profiles: profileMap[comment.user_id] || null
+            }));
+
+            setComments(mergedComments);
 
             // Scroll to bottom on load if there are comments
-            if (data?.length > 0) {
+            if (mergedComments.length > 0) {
                 setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
             }
         } catch (err) {
             console.error("Error fetching comments:", err);
-            toast.error("Failed to load comments");
+            if (showError && !errorShown) {
+                toast.error("Failed to load comments");
+                setErrorShown(true);
+            }
         } finally {
             setLoading(false);
         }
-    };
+    }, [postId, toast, errorShown]);
 
     useEffect(() => {
-        if (postId) fetchComments();
+        if (postId) fetchComments(true); // Show error on initial load only
 
         // Realtime subscription for this post's comments
         const channel = supabase
@@ -77,14 +111,14 @@ const PostCommentsModal = ({ postId, onClose }) => {
                 table: 'post_comments',
                 filter: `post_id=eq.${postId}`
             }, () => {
-                fetchComments();
+                fetchComments(false); // Don't show error on realtime updates
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [postId]);
+    }, [postId, fetchComments]);
 
     const handlePostComment = async (e) => {
         e.preventDefault();
@@ -113,16 +147,35 @@ const PostCommentsModal = ({ postId, onClose }) => {
         }
     };
 
+    const handleDeleteComment = async (commentId) => {
+        if (!user) return;
+
+        try {
+            const { error } = await supabase
+                .from('post_comments')
+                .delete()
+                .eq('id', commentId)
+                .eq('user_id', user.id); // Ensure user can only delete their own comments
+
+            if (error) throw error;
+            toast.success('Comment deleted');
+            // Realtime will handle the UI update
+        } catch (err) {
+            console.error("Error deleting comment:", err);
+            toast.error('Failed to delete comment');
+        }
+    };
+
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
+            <div className="fixed inset-0 z-[120] flex items-end md:items-center justify-center">
                 {/* Backdrop */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                    className="absolute inset-0 bg-black/80"
                 />
 
                 {/* Modal */}
@@ -150,22 +203,31 @@ const PostCommentsModal = ({ postId, onClose }) => {
                         ) : comments.length > 0 ? (
                             comments.map((comment) => (
                                 <div key={comment.id} className="flex gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden shrink-0 border border-white/10">
-                                        {comment.profiles?.avatar_url ? (
-                                            <img src={comment.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-xs text-white bg-slate-600">
-                                                {comment.profiles?.first_name?.[0]}
-                                            </div>
-                                        )}
-                                    </div>
+                                    <Avatar
+                                        url={comment.profiles?.avatar_url}
+                                        firstName={comment.profiles?.first_name}
+                                        size="sm"
+                                        className="shrink-0"
+                                    />
                                     <div className="flex-1">
-                                        <div className="bg-white/5 rounded-2xl rounded-tl-none px-4 py-3">
+                                        <div className="bg-white/5 rounded-2xl rounded-tl-none px-4 py-3 relative group">
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-sm font-bold text-white">
-                                                    {comment.profiles?.first_name} {comment.profiles?.last_name}
+                                                    {comment.profiles?.first_name || 'Unknown'} {comment.profiles?.last_name || 'User'}
                                                 </span>
-                                                <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
+                                                    {/* Delete button - only show for comment author */}
+                                                    {user && user.id === comment.user_id && (
+                                                        <button
+                                                            onClick={() => handleDeleteComment(comment.id)}
+                                                            className="p-1 text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                            title="Delete comment"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                                         </div>
@@ -185,17 +247,14 @@ const PostCommentsModal = ({ postId, onClose }) => {
                     </div>
 
                     {/* Sticky Input Footer */}
-                    <div className="p-4 bg-surface border-t border-white/5 pb-safe">
+                    <div className="p-4 bg-surface border-t border-white/5 pb-[90px] md:pb-safe">
                         <form onSubmit={handlePostComment} className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-700 overflow-hidden shrink-0 border border-white/10 hidden sm:block">
-                                {user?.user_metadata?.avatar_url ? (
-                                    <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs text-white">
-                                        <User size={14} />
-                                    </div>
-                                )}
-                            </div>
+                            <Avatar
+                                url={user?.user_metadata?.avatar_url}
+                                firstName={user?.user_metadata?.first_name}
+                                size="sm"
+                                className="hidden sm:block shrink-0"
+                            />
                             <div className="flex-1 relative">
                                 <input
                                     type="text"

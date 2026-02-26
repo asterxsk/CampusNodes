@@ -13,8 +13,8 @@ export const encryptMessage = (text, senderId, receiverId) => {
         if (!text) return '';
         const key = getChatKey(senderId, receiverId);
         return CryptoJS.AES.encrypt(text, key).toString();
-    } catch (error) {
-        console.error("Encryption failed:", error);
+    } catch { // Removed 'error' variable as per instruction
+        console.error("Encryption failed:"); // Removed 'error' from console.error as it's no longer caught
         return text; // Fallback? Or fail? Fallback might look weird but potentially better than crashing.
     }
 };
@@ -32,7 +32,7 @@ export const decryptMessage = (ciphertext, senderId, receiverId) => {
             return ciphertext;
         }
         return originalText;
-    } catch (error) {
+    } catch {
         // If it fails (e.g. malformed), return original
         return ciphertext;
     }

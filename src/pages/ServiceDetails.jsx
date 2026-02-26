@@ -1,7 +1,9 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BookOpen, Printer, Wrench, Code, Camera, Calendar, ArrowLeft, CheckCircle, Star } from 'lucide-react';
+import { BookOpen, Printer, Wrench, Code, Camera, Calendar, ArrowLeft, CheckCircle, Star, MessageSquare } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 // Reusing data for consistency - ideally this comes from a shared constant or Supabase
 const SERVICES_DATA = [
@@ -76,7 +78,21 @@ const SERVICES_DATA = [
 const ServiceDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const toast = useToast();
+    const { user } = useAuth();
     const service = SERVICES_DATA.find(s => s.id === id);
+
+    const handleBookNow = () => {
+        if (!user) {
+            toast.error('Please sign in to book a service');
+            return;
+        }
+        navigate('/checkout', { state: { service, type: 'booking' } });
+    };
+
+    const handleContactProvider = () => {
+        toast.info('Messaging feature coming soon! Contact provider directly for now.');
+    };
 
     if (!service) {
         return (
@@ -140,10 +156,19 @@ const ServiceDetails = () => {
                                 </div>
 
                                 <div className="flex gap-4">
-                                    <Button variant="primary" className="px-8 py-3">
+                                    <Button 
+                                        variant="primary" 
+                                        className="px-8 py-3"
+                                        onClick={handleBookNow}
+                                    >
                                         Book Now
                                     </Button>
-                                    <Button variant="outline" className="px-8 py-3">
+                                    <Button 
+                                        variant="outline" 
+                                        className="px-8 py-3 flex items-center gap-2"
+                                        onClick={handleContactProvider}
+                                    >
+                                        <MessageSquare size={18} />
                                         Contact Provider
                                     </Button>
                                 </div>

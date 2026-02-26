@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, createElement, useMemo, useCallback } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { twMerge } from 'tailwind-merge';
 
@@ -145,30 +145,33 @@ const TextType = ({
         isVisible,
         reverseMode,
         variableSpeed,
-        onSentenceComplete
+        onSentenceComplete,
+        getRandomSpeed
     ]);
 
     const shouldHideCursor =
         hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
 
-    return createElement(
-        Component,
-        {
-            ref: containerRef,
-            className: twMerge('inline-block whitespace-pre-wrap tracking-tight', className),
-            ...props
-        },
-        <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
-            {displayedText}
-        </span>,
-        showCursor && (
-            <span
-                ref={cursorRef}
-                className={`ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
-            >
-                {cursorCharacter}
+    const Tag = Component;
+
+    return (
+        <Tag
+            ref={containerRef}
+            className={twMerge('inline-block whitespace-pre-wrap tracking-tight', className)}
+            {...props}
+        >
+            <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
+                {displayedText}
             </span>
-        )
+            {showCursor && (
+                <span
+                    ref={cursorRef}
+                    className={`ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
+                >
+                    {cursorCharacter}
+                </span>
+            )}
+        </Tag>
     );
 };
 

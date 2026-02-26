@@ -3,6 +3,7 @@ import anime from 'animejs/lib/anime.es.js';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { Shield, BookOpen, Edit2, X, Save, Camera, Trash2, Loader2, Upload, LogOut, Lock } from 'lucide-react';
+import { containsProfanity } from '../utils/profanityFilter';
 
 const Profile = () => {
     const { user, signOut } = useAuth();
@@ -57,6 +58,12 @@ const Profile = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+
+        if (containsProfanity(formData.firstName) || containsProfanity(formData.lastName)) {
+            alert("Your name contains restricted words. Please use a different name.");
+            return;
+        }
+
         setLoading(true);
         const { error } = await supabase.auth.updateUser({
             data: {
@@ -226,7 +233,7 @@ const Profile = () => {
                     )}
 
                     {/* Avatar Section */}
-                    <div className="relative group w-32 h-32 shrink-0">
+                    <div className="relative group w-32 h-32 aspect-square shrink-0">
                         <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-800 to-black border-2 border-white/20 flex items-center justify-center text-4xl font-bold text-white shadow-2xl overflow-hidden relative">
                             {avatarLoading ? (
                                 <Loader2 className="animate-spin text-white" size={32} />

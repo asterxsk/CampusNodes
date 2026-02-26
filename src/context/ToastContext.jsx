@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useContext, useState, useCallback } from 'react';
+import { ToastContext } from './Contexts';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Check, X, AlertTriangle, Info } from 'lucide-react';
-
-const ToastContext = createContext();
 
 export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([]);
@@ -20,7 +19,6 @@ export const ToastProvider = ({ children }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
-    // Convenience methods
     const success = useCallback((message) => addToast(message, 'success'), [addToast]);
     const error = useCallback((message) => addToast(message, 'error'), [addToast]);
     const warning = useCallback((message) => addToast(message, 'warning'), [addToast]);
@@ -29,12 +27,10 @@ export const ToastProvider = ({ children }) => {
     return (
         <ToastContext.Provider value={{ addToast, removeToast, success, error, warning, info }}>
             {children}
-
-            {/* Toast Container */}
             <div className="fixed top-4 md:top-auto md:bottom-12 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 pointer-events-none">
                 <AnimatePresence>
                     {toasts.map((toast) => (
-                        <motion.div
+                        <Motion.div
                             key={toast.id}
                             initial={{ opacity: 0, y: -20, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -57,7 +53,7 @@ export const ToastProvider = ({ children }) => {
                             >
                                 <X size={14} />
                             </button>
-                        </motion.div>
+                        </Motion.div>
                     ))}
                 </AnimatePresence>
             </div>
@@ -65,10 +61,7 @@ export const ToastProvider = ({ children }) => {
     );
 };
 
-export const useToast = () => {
-    const context = useContext(ToastContext);
-    if (!context) {
-        throw new Error('useToast must be used within a ToastProvider');
-    }
-    return context;
-};
+// eslint-disable-next-line react-refresh/only-export-components
+export const useToast = () => useContext(ToastContext);
+
+export default ToastProvider;

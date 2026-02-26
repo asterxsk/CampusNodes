@@ -1,13 +1,14 @@
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 
 const ChatFAB = () => {
     const { setIsChatOpen, unreadCount } = useUI();
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="hidden md:block fixed bottom-6 right-6 z-50">
             <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}

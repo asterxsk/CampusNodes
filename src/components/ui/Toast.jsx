@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+/* eslint-disable react-refresh/only-export-components */
+
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Check, X, AlertCircle, Info } from 'lucide-react';
 
-// Toast types: success, error, warning, info
 const icons = {
     success: <Check size={18} />,
     error: <X size={18} />,
@@ -39,13 +40,41 @@ const Toast = ({ message, type = 'info', onClose, duration = 4000, isInsideConta
     );
 };
 
-// Toast Container - manages multiple toasts
-export const ToastContainer = ({ toasts, removeToast }) => {
+export default Toast;
+
+const useToast = () => {
+    const [toasts, setToasts] = useState([]);
+
+    useEffect(() => {
+        import('./ToastManager').then(({ registerToastSetter }) => {
+            registerToastSetter(setToasts);
+        });
+        return () => {
+            import('./ToastManager').then(({ registerToastSetter }) => {
+                registerToastSetter(null);
+            });
+        };
+    }, []);
+
+    const addToast = (message, type = 'info', duration = 4000) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, message, type, duration }]);
+        return id;
+    };
+
+    const removeToast = (id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    };
+
+    return { toasts, addToast, removeToast };
+};
+
+const ToastContainer = ({ toasts, removeToast }) => {
     return (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[10001] pointer-events-none flex flex-col items-center gap-3">
             <AnimatePresence>
                 {toasts.map((toast) => (
-                    <motion.div
+                    <Motion.div
                         key={toast.id}
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -59,45 +88,11 @@ export const ToastContainer = ({ toasts, removeToast }) => {
                             duration={toast.duration}
                             isInsideContainer={true}
                         />
-                    </motion.div>
+                    </Motion.div>
                 ))}
             </AnimatePresence>
         </div>
     );
 };
 
-// Hook to use toasts
-let toastId = 0;
-let globalToasts = [];
-let globalSetToasts = null;
-
-export const useToast = () => {
-    const [toasts, setToasts] = useState([]);
-
-    useEffect(() => {
-        globalSetToasts = setToasts;
-        return () => { globalSetToasts = null; };
-    }, []);
-
-    const addToast = (message, type = 'info', duration = 4000) => {
-        const id = ++toastId;
-        setToasts(prev => [...prev, { id, message, type, duration }]);
-        return id;
-    };
-
-    const removeToast = (id) => {
-        setToasts(prev => prev.filter(t => t.id !== id));
-    };
-
-    return { toasts, addToast, removeToast };
-};
-
-// Global toast function for use anywhere
-export const showToast = (message, type = 'info', duration = 4000) => {
-    if (globalSetToasts) {
-        const id = ++toastId;
-        globalSetToasts(prev => [...prev, { id, message, type, duration }]);
-    }
-};
-
-export default Toast;
+export { useToast, ToastContainer };

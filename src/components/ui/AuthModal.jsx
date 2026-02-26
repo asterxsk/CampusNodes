@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';
 import { X, UserPlus, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Button from './Button';
