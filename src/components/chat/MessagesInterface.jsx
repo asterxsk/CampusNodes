@@ -16,10 +16,13 @@ const MessagesInterface = ({ isModal = false }) => {
 
     const [activeChat, setActiveChat] = useState(null);
     const [friends, setFriends] = useState([]);
+    const [activeChats, setActiveChats] = useState([]);
+    const [showNewChatModal, setShowNewChatModal] = useState(false);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [newChatSearchTerm, setNewChatSearchTerm] = useState('');
     const [keyboardOffset, setKeyboardOffset] = useState(0);
     const [firstUnreadId, setFirstUnreadId] = useState(null);
     const [showScrollButton, setShowScrollButton] = useState(false);
@@ -104,13 +107,18 @@ const MessagesInterface = ({ isModal = false }) => {
     const fetchFriends = async () => {
         setLoading(true);
         try {
+            // Fetch accepted friendships
             const { data: friendships } = await supabase
                 .from('friendships')
                 .select('*')
                 .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
                 .eq('status', 'accepted');
 
-            if (!friendships?.length) { setFriends([]); return; }
+            if (!friendships?.length) {
+                setFriends([]);
+                setActiveChats([]);
+                return;
+            }
 
             const friendIds = friendships.map(f => f.user1_id === user.id ? f.user2_id : f.user1_id);
             const { data: profiles } = await supabase
@@ -119,8 +127,30 @@ const MessagesInterface = ({ isModal = false }) => {
                 .in('id', friendIds);
 
             setFriends(profiles || []);
+
+            // Now determine which of these friends have an active chat history
+            // We'll fetch the most recent messages for the user to see who they've talked to
+            const { data: recentMessages } = await supabase
+                .from('messages')
+                .select('sender_id, receiver_id')
+                .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+                .or(`and(sender_id.eq.${user.id},deleted_by_sender.eq.false),and(receiver_id.eq.${user.id},deleted_by_receiver.eq.false)`)
+                .order('created_at', { ascending: false });
+
+            const activeFriendIds = new Set();
+            if (recentMessages) {
+                recentMessages.forEach(msg => {
+                    const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+                    activeFriendIds.add(otherId);
+                });
+            }
+
+            // Filter friends to only those with active chat history
+            const activeProfiles = (profiles || []).filter(p => activeFriendIds.has(p.id));
+            setActiveChats(activeProfiles);
+
         } catch (err) {
-            console.error("Error fetching friends:", err);
+            console.error("Error fetching friends and active chats:", err);
         } finally {
             setLoading(false);
         }
@@ -278,6 +308,14 @@ const MessagesInterface = ({ isModal = false }) => {
                 receiver_id: activeChat.id,
                 content: encryptedContent
             });
+
+            // If this is a newly initiated chat, ensure they are in the activeChats list
+            setActiveChats(prev => {
+                if (!prev.some(p => p.id === activeChat.id)) {
+                    return [...prev, activeChat];
+                }
+                return prev;
+            });
         } catch (err) {
             console.error("Error sending message:", err);
         }
@@ -317,6 +355,11 @@ const MessagesInterface = ({ isModal = false }) => {
 
             // Clear local state
             setMessages([]);
+
+            // Remove from activeChats and close chat view
+            setActiveChats(prev => prev.filter(c => c.id !== activeChat.id));
+            setActiveChat(null);
+
             toast.success('Chat cleared for both users');
         } catch (err) {
             console.error("Failed to clear chat", err);
@@ -332,9 +375,25 @@ const MessagesInterface = ({ isModal = false }) => {
         );
     }
 
-    const filteredFriends = friends.filter(friend =>
+    const filteredActiveChats = activeChats.filter(friend =>
         (friend.first_name + ' ' + friend.last_name).toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const filteredNewChatFriends = friends.filter(friend =>
+        (friend.first_name + ' ' + friend.last_name).toLowerCase().includes(newChatSearchTerm.toLowerCase())
+    );
+
+    const handleStartNewChat = (friend) => {
+        setActiveChat(friend);
+        setShowNewChatModal(false);
+        // Add to active chats immediately so it appears in the list
+        setActiveChats(prev => {
+            if (!prev.some(p => p.id === friend.id)) {
+                return [friend, ...prev];
+            }
+            return prev;
+        });
+    };
 
     return (
         <div className="flex bg-black h-full overflow-hidden relative">
@@ -344,8 +403,12 @@ const MessagesInterface = ({ isModal = false }) => {
                 <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
                     <h1 className="text-xl font-bold text-white font-display">Chats</h1>
                     <div className="flex gap-2">
-                        <button className="p-2 hover:bg-white/10 rounded-full text-gray-400 hover:text-white transition-colors">
-                            <MoreVertical size={20} />
+                        <button
+                            onClick={() => setShowNewChatModal(true)}
+                            className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-white transition-colors border border-white/10"
+                            title="Start New Chat"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         </button>
                     </div>
                 </div>
@@ -356,7 +419,7 @@ const MessagesInterface = ({ isModal = false }) => {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
                         <input
                             type="text"
-                            placeholder="Search friends..."
+                            placeholder="Search chats..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-accent/50 transition-colors"
@@ -364,14 +427,14 @@ const MessagesInterface = ({ isModal = false }) => {
                     </div>
                 </div>
 
-                {/* Friends List */}
+                {/* Active Chats List */}
                 <div className="flex-1 overflow-y-auto px-2 pb-20 md:pb-2 custom-scrollbar">
                     {loading && friends.length === 0 ? (
                         <div className="text-center py-10 text-gray-500 text-sm">Loading chats...</div>
-                    ) : filteredFriends.length === 0 ? (
-                        <div className="text-center py-10 text-gray-500 text-sm">No friends found</div>
+                    ) : filteredActiveChats.length === 0 ? (
+                        <div className="text-center py-10 text-gray-500 text-sm">No active chats found. Try starting a new one!</div>
                     ) : (
-                        filteredFriends.map(friend => (
+                        filteredActiveChats.map(friend => (
                             <button
                                 key={friend.id}
                                 onClick={() => setActiveChat(friend)}
@@ -546,8 +609,76 @@ const MessagesInterface = ({ isModal = false }) => {
                     </div>
                 )}
             </div>
+
+            {/* New Chat Modal Overlays entirely within this component container */}
+            {showNewChatModal && (
+                <div className="absolute inset-0 z-[60] bg-black/80 flex flex-col pt-10 px-4 pb-4 animate-fade-in backdrop-blur-sm">
+                    <div className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-md mx-auto flex flex-col h-full max-h-[80vh] shadow-2xl relative overflow-hidden">
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-white/10 shrink-0 bg-white/5">
+                            <h2 className="text-lg font-bold text-white">Start New Chat</h2>
+                            <button
+                                onClick={() => setShowNewChatModal(false)}
+                                className="p-2 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+
+                        {/* Search */}
+                        <div className="p-4 shrink-0">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search your friends..."
+                                    value={newChatSearchTerm}
+                                    onChange={(e) => setNewChatSearchTerm(e.target.value)}
+                                    className="w-full bg-black border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-accent/50 transition-colors"
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+
+                        {/* List */}
+                        <div className="flex-1 overflow-y-auto px-2 pb-4 custom-scrollbar">
+                            {filteredNewChatFriends.length === 0 ? (
+                                <div className="text-center py-10 text-gray-500 text-sm">
+                                    {friends.length === 0 ? "You don't have any friends yet." : "No friends found matching your search."}
+                                </div>
+                            ) : (
+                                filteredNewChatFriends.map(friend => {
+                                    const isActive = activeChats.some(c => c.id === friend.id);
+                                    return (
+                                        <button
+                                            key={friend.id}
+                                            onClick={() => handleStartNewChat(friend)}
+                                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors mb-1 group"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Avatar url={friend.avatar_url} firstName={friend.first_name} size="md" />
+                                                <div className="text-left">
+                                                    <h3 className="font-semibold text-white text-sm">{friend.first_name} {friend.last_name}</h3>
+                                                    <p className="text-xs text-gray-400 capitalize">{friend.role || 'Student'}</p>
+                                                </div>
+                                            </div>
+                                            {isActive ? (
+                                                <span className="text-xs text-gray-500 px-2 py-1 bg-white/5 rounded">Joined</span>
+                                            ) : (
+                                                <span className="text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity">Message</span>
+                                            )}
+                                        </button>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default MessagesInterface;
+

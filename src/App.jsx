@@ -205,7 +205,6 @@ const RouteController = () => {
 
   return (
     <>
-      <ToastStack />
       <PageCache />
 
       {!isAnimating && (
@@ -267,7 +266,7 @@ const MainLayout = ({ children }) => {
   );
 };
 
-const AppContent = () => {
+const AppContent = memo(() => {
   const { user } = useAuth();
   const location = useLocation();
   // Preload essential assets for offline experience
@@ -310,6 +309,7 @@ const AppContent = () => {
       <VersionButton />
       <GlobalBackground />
       <Navigation />
+      <ToastStack />
 
       <ClickSpark sparkColor="#3b82f6" sparkSize={8} sparkRadius={20} sparkCount={10} duration={600}>
         <MainLayout>
@@ -331,7 +331,7 @@ const AppContent = () => {
       <CartIcon />
     </>
   );
-};
+});
 
 const App = () => {
   const [offline, setOffline] = useState(false);
