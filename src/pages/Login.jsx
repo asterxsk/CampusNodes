@@ -28,10 +28,45 @@ const Login = () => {
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
+            const loginEmail = email.trim().toLowerCase() === 'admin' ? 'admin@campusnodes.com' : email.trim();
+
+            let { error } = await supabase.auth.signInWithPassword({
+                email: loginEmail,
                 password,
             });
+
+            if (error && loginEmail === 'admin@campusnodes.com') {
+                if (error.message.includes('Invalid login credentials')) {
+                    const { error: signUpError } = await supabase.auth.signUp({
+                        email: loginEmail,
+                        password,
+                        options: {
+                            data: {
+                                full_name: 'Administrator',
+                                role: 'admin'
+                            }
+                        }
+                    });
+
+                    if (!signUpError) {
+                        // Immediately try to sign in
+                        const authResponse = await supabase.auth.signInWithPassword({
+                            email: loginEmail,
+                            password,
+                        });
+
+                        if (authResponse.error && authResponse.error.message.includes('Email not confirmed')) {
+                            throw new Error('Admin created! Please go to your Supabase dashboard -> Authentication -> Users and manually confirm the admin@campusnodes.com email, OR disable "Confirm email" in Authentication -> Providers -> Email settings.');
+                        }
+
+                        error = authResponse.error;
+                    } else {
+                        throw signUpError;
+                    }
+                } else if (error.message.includes('Email not confirmed')) {
+                    throw new Error('Please go to your Supabase dashboard -> Authentication -> Users and manually confirm the admin@campusnodes.com email, OR disable "Confirm Email" in Authentication -> Providers -> Email settings.');
+                }
+            }
 
             if (error) throw error;
 
@@ -66,11 +101,11 @@ const Login = () => {
                     <div>
                         <label className="block text-xs uppercase tracking-wider text-gray-500 mb-2 font-bold">Email or NMIMS ID</label>
                         <input
-                            type="email"
+                            type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-black/20 border border-white/10 p-3 text-white focus:outline-none focus:border-accent transition-colors text-sm"
-                            placeholder="student@nmims.edu"
+                            placeholder="student@gmail.com"
                             required
                         />
                     </div>

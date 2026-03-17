@@ -7,11 +7,12 @@ export default {
     theme: {
         extend: {
             colors: {
-                background: '#050505',
-                surface: '#121212',
-                primary: '#ffffff',
-                secondary: '#9c9c9c',
-                accent: '#3b82f6', // Subtle blue accent for interactive elements
+                background: 'var(--bg-color)',
+                surface: 'var(--surface-color)',
+                primary: 'var(--text-primary)',
+                secondary: 'var(--text-secondary)',
+                accent: 'var(--accent-color)',
+                border: 'var(--border-color)', // Added explicit border color mapping
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],

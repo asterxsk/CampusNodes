@@ -1,18 +1,28 @@
 import React from 'react';
 import { MessageSquare } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
+import { useAuth } from '../../context/AuthContext';
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from 'framer-motion';
 
 const ChatFAB = () => {
-    const { setIsChatOpen, unreadCount } = useUI();
+    const { setIsChatOpen, unreadCount, openAuthModal } = useUI();
+    const { user } = useAuth();
+
+    const handleChatClick = () => {
+        if (!user) {
+            openAuthModal();
+        } else {
+            setIsChatOpen(true);
+        }
+    };
 
     return (
         <div className="hidden md:block fixed bottom-6 right-6 z-50">
             <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => setIsChatOpen(true)}
+                onClick={handleChatClick}
                 className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors relative"
             >
                 <MessageSquare size={24} className="text-black" />

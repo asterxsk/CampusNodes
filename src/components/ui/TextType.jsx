@@ -149,6 +149,7 @@ const TextType = ({
         getRandomSpeed
     ]);
 
+
     const shouldHideCursor =
         hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
 
@@ -157,7 +158,7 @@ const TextType = ({
     return (
         <Tag
             ref={containerRef}
-            className={twMerge('inline-block whitespace-pre-wrap tracking-tight', className)}
+            className={twMerge('relative inline-block whitespace-pre-wrap tracking-tight', className)}
             {...props}
         >
             <span className="inline" style={{ color: getCurrentTextColor() || 'inherit' }}>
@@ -166,7 +167,7 @@ const TextType = ({
             {showCursor && (
                 <span
                     ref={cursorRef}
-                    className={`ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
+                    className={`absolute left-full top-0 ml-1 inline-block opacity-100 ${shouldHideCursor ? 'hidden' : ''} ${cursorClassName}`}
                 >
                     {cursorCharacter}
                 </span>

@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { CartContext } from './Contexts';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, getMappedUUID, getFriendlyId } from '../lib/supabaseClient';
 import { MARKET_ITEMS } from '../data/marketItems';
 
 const MAX_QUANTITY = 99;
@@ -40,15 +40,16 @@ export const CartProvider = ({ children }) => {
                 
                 // Fetch product details from static MARKET_ITEMS array
                 const cartWithDetails = (data || []).map(item => {
-                    const product = MARKET_ITEMS.find(p => p.id === item.product_id);
+                    const friendlyId = getFriendlyId(item.product_id);
+                    const product = MARKET_ITEMS.find(p => String(p.id) === String(friendlyId));
                     
                     return {
-                        id: item.product_id,
+                        id: friendlyId,
                         cartItemId: item.id,
                         quantity: item.quantity,
-                        title: product?.title || `Product ${item.product_id}`,
+                        title: product?.title || `Product ${friendlyId}`,
                         price: product?.price || '₹0',
-                        image: product?.images?.[0] || null,
+                        image: product?.images?.[0] || item.image_url || null,
                         category: product?.category || 'Other',
                         added_at: item.added_at
                     };
@@ -119,12 +120,15 @@ export const CartProvider = ({ children }) => {
                 
                 safeToast.success(`Updated quantity: ${item.title}`);
             } else {
+                // Map the ID to stable UUID for seed items
+                const stableId = getMappedUUID(item.id);
+
                 // Insert new item - only using columns that exist in database
                 const { data, error } = await supabase
                     .from('cart_items')
                     .insert({
                         user_id: user.id,
-                        product_id: item.id,
+                        product_id: stableId,
                         quantity: 1,
                         added_at: new Date().toISOString()
                     })
@@ -134,12 +138,12 @@ export const CartProvider = ({ children }) => {
                 if (error) throw error;
                 
                 setCartItems(prev => [...prev, {
-                    id: item.id,
+                    id: getFriendlyId(stableId),
                     cartItemId: data.id,
                     quantity: 1,
                     title: item.title,
                     price: item.price,
-                    image: item.image,
+                    image: item.image || item.images?.[0],
                     category: item.category
                 }]);
                 

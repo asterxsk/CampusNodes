@@ -1,11 +1,14 @@
 import { useEffect, useState, useRef, useCallback, memo } from 'react';
 import { HashRouter as Router, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AdminProvider } from './context/AdminContext';
 import { CartProvider } from './context/CartContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { UIProvider } from './context/UIContext';
 import { ToastProvider } from './context/ToastContext';
 import { ModalProvider } from './context/ModalContext';
 import Navigation from './components/layout/Navigation';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 import Preloader from './components/ui/Preloader';
 import Hero from './components/hero/Hero';
 import Marketplace from './pages/Marketplace';
@@ -26,14 +29,14 @@ import ForgotPassword from './pages/ForgotPassword';
 import VersionButton from './components/ui/VersionButton';
 import AuthModal from './components/ui/AuthModal';
 import ProfileModal from './components/ui/ProfileModal';
+import EditProfileModal from './components/ui/EditProfileModal';
+import ChangePasswordModal from './components/ui/ChangePasswordModal';
 import MessagesModal from './components/chat/MessagesModal';
 import CartIcon from './components/layout/CartIcon';
 import LiquidEther from './components/hero/LiquidEther';
 import ChatFAB from './components/chat/ChatFAB';
 import ClickSpark from './components/effects/ClickSpark';
 import OnboardingFlow from './components/ui/OnboardingFlow';
-import ToastStack from './components/ui/ToastStack';
-import './utils/ToastBridge';
 import Offline404 from './components/offline/Offline404';
 import { useOfflinePreload } from './hooks/useOfflinePreload';
 import ErrorBoundary from './components/ui/ErrorBoundary';
@@ -187,14 +190,14 @@ const RouteController = () => {
       '/connections': <MemoConnections />,
       '/login': <Login />,
       '/signup': <Signup />,
-      '/profile': <Profile />,
-      '/messages': <Messages />,
-      '/settings': <Settings />,
-      '/payment': <Payment />,
-      '/cart': <Cart />,
-      '/checkout': <Checkout />,
+      '/profile': <ProtectedRoute><Profile /></ProtectedRoute>,
+      '/messages': <ProtectedRoute><Messages /></ProtectedRoute>,
+      '/settings': <ProtectedRoute><Settings /></ProtectedRoute>,
+      '/payment': <ProtectedRoute><Payment /></ProtectedRoute>,
+      '/cart': <ProtectedRoute><Cart /></ProtectedRoute>,
+      '/checkout': <ProtectedRoute><Checkout /></ProtectedRoute>,
       '/forgot-password': <ForgotPassword />,
-      '/book': <Checkout />
+      '/book': <ProtectedRoute><Checkout /></ProtectedRoute>
     };
 
     if (componentMap[path]) return componentMap[path];
@@ -266,10 +269,15 @@ const MainLayout = ({ children }) => {
   );
 };
 
+import AdminConsoleButton from './components/admin/AdminConsoleButton';
+import AdminConsole from './components/admin/AdminConsole';
+
 const AppContent = memo(() => {
   const { user } = useAuth();
   const location = useLocation();
+  const [isAdminConsoleOpen, setIsAdminConsoleOpen] = useState(false);
   // Preload essential assets for offline experience
+
   useOfflinePreload([
     '/offline/essential.json',
     '/assets/config.json',
@@ -309,7 +317,6 @@ const AppContent = memo(() => {
       <VersionButton />
       <GlobalBackground />
       <Navigation />
-      <ToastStack />
 
       <ClickSpark sparkColor="#3b82f6" sparkSize={8} sparkRadius={20} sparkCount={10} duration={600}>
         <MainLayout>
@@ -326,9 +333,14 @@ const AppContent = memo(() => {
 
       <AuthModal />
       <ProfileModal />
+      <EditProfileModal />
+      <ChangePasswordModal />
       <MessagesModal />
       <ChatFAB />
       <CartIcon />
+
+      <AdminConsoleButton onClick={() => setIsAdminConsoleOpen(true)} />
+      <AdminConsole isOpen={isAdminConsoleOpen} onClose={() => setIsAdminConsoleOpen(false)} />
     </>
   );
 });
@@ -358,9 +370,13 @@ const App = () => {
           <UIProvider>
             <ToastProvider>
               <ModalProvider>
-                <Router>
-                  <AppContent />
-                </Router>
+                <ThemeProvider>
+                  <AdminProvider>
+                    <Router>
+                      <AppContent />
+                    </Router>
+                  </AdminProvider>
+                </ThemeProvider>
               </ModalProvider>
             </ToastProvider>
           </UIProvider>

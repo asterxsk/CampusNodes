@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 import { useToast } from '../context/ToastContext';
 import { Heart, MessageCircle, User, Trash2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
@@ -36,7 +37,7 @@ const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLike
         >
             <div className="flex gap-3">
                 <div className="shrink-0">
-                    <Avatar 
+                    <Avatar
                         url={post.profiles?.avatar_url}
                         firstName={post.profiles?.first_name}
                         size="sm"
@@ -97,7 +98,7 @@ const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLike
                             className="mt-4 pt-3 border-t border-white/5 w-full text-left group/comment cursor-pointer"
                         >
                             <div className="flex gap-2 items-start">
-                                <Avatar 
+                                <Avatar
                                     url={topComment.profiles?.avatar_url}
                                     firstName={topComment.profiles?.first_name}
                                     size="xs"
@@ -126,6 +127,7 @@ const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLike
 
 const Forum = () => {
     const { user } = useAuth();
+    const { openAuthModal } = useUI();
     const toast = useToast();
 
     const [posts, setPosts] = useState([]);
@@ -160,7 +162,7 @@ const Forum = () => {
 
             // Get unique user_ids from posts
             const userIds = [...new Set(postsData.map(p => p.user_id))];
-            
+
             // Fetch profiles separately
             const { data: profilesData, error: profilesError } = await supabase
                 .from('profiles')
@@ -195,14 +197,14 @@ const Forum = () => {
 
             const counts = {};
             const userLikedSet = new Set();
-            
+
             likesData?.forEach(like => {
                 counts[like.post_id] = (counts[like.post_id] || 0) + 1;
                 if (user && like.user_id === user.id) {
                     userLikedSet.add(like.post_id);
                 }
             });
-            
+
             setLikeCounts(counts);
             setUserLikes(userLikedSet);
 
@@ -283,7 +285,10 @@ const Forum = () => {
     }, [fetchPosts]);
 
     const handleCreatePost = async () => {
-        if (!user) return;
+        if (!user) {
+            openAuthModal();
+            return;
+        }
         if (!newPostContent.trim()) return;
 
         setIsSubmitting(true);
@@ -309,7 +314,7 @@ const Forum = () => {
 
     const handleDeletePost = async (postId) => {
         if (!user) return;
-        
+
         try {
             const { error } = await supabase
                 .from('posts')
@@ -328,7 +333,7 @@ const Forum = () => {
 
     const handleLike = async (postId) => {
         if (!user) {
-            toast.error('Please sign in to like posts');
+            openAuthModal();
             return;
         }
 
@@ -344,7 +349,7 @@ const Forum = () => {
             }
             return newSet;
         });
-        
+
         setLikeCounts(prev => ({
             ...prev,
             [postId]: (prev[postId] || 0) + (isLiked ? -1 : 1)
@@ -418,7 +423,7 @@ const Forum = () => {
                                 </div>
                                 <Button
                                     onClick={handleCreatePost}
-                                    disabled={!newPostContent.trim() || isSubmitting}
+                                    disabled={isSubmitting || (user && !newPostContent.trim())}
                                     className="px-4 py-1.5 h-8 text-xs rounded-full"
                                 >
                                     {isSubmitting ? 'Posting...' : 'Post'}

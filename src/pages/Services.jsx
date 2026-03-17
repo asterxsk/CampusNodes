@@ -6,9 +6,11 @@ import Skeleton from '../components/ui/Skeleton';
 
 import {
     BookOpen, Printer, Wrench, Camera, Code, Calendar,
-    ArrowUp, ArrowDown, ArrowLeft, ArrowRight,
-    Zap, Star, Sparkles, X, Hexagon, Triangle
+    Zap, Star, Sparkles, X, Hexagon, Triangle, ArrowUp, ArrowDown
 } from 'lucide-react';
+import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 
 const SERVICES_DATA = [
     {
@@ -224,15 +226,54 @@ const ServiceCard = ({ service }) => {
 };
 
 const Services = () => {
+    const { user } = useAuth();
+    const { openAuthModal } = useUI();
     const [isLoading, setIsLoading] = useState(true);
+    const [dbServices, setDbServices] = useState([]);
 
     React.useEffect(() => {
-        // Simulate data fetching delay for skeletons
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 800);
-        return () => clearTimeout(timer);
+        const fetchDbServices = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('services')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // Map database fields to frontend fields
+                const mappedServices = (data || []).map(service => {
+                    // Reconstruct icon
+                    let IconComp = BookOpen;
+                    if (service.icon_name === 'Printer') IconComp = Printer;
+                    if (service.icon_name === 'Wrench') IconComp = Wrench;
+                    if (service.icon_name === 'Camera') IconComp = Camera;
+                    if (service.icon_name === 'Code') IconComp = Code;
+                    if (service.icon_name === 'Calendar') IconComp = Calendar;
+
+                    return {
+                        id: service.id,
+                        title: service.title,
+                        description: service.description,
+                        icon: <IconComp size={40} />,
+                        availableCount: service.available_count,
+                        provider: service.provider,
+                        isDbService: true
+                    };
+                });
+
+                setDbServices(mappedServices);
+            } catch (error) {
+                console.error("Error fetching admin services:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDbServices();
     }, []);
+
+    const allServices = [...dbServices, ...SERVICES_DATA];
 
     // Header and CTA slide in naturally with page transition
 
@@ -289,7 +330,7 @@ const Services = () => {
                             </div>
                         ))
                     ) : (
-                        SERVICES_DATA.map((service) => (
+                        allServices.map((service) => (
                             <div
                                 key={service.id}
                                 className="service-card-wrapper opacity-0"
@@ -306,7 +347,11 @@ const Services = () => {
                     <p className="text-gray-400 mb-8 max-w-xl mx-auto">
                         Post a request for tasks, tutoring, or help. The community is here to support you.
                     </p>
-                    <Button variant="primary" className="px-8 py-3 hover:bg-[#f0fff0] hover:text-black transition-all duration-300">
+                    <Button
+                        variant="primary"
+                        className="px-8 py-3 hover:bg-[#f0fff0] hover:text-black transition-all duration-300"
+                        onClick={() => !user ? openAuthModal() : null}
+                    >
                         Post Request
                     </Button>
                 </div>

@@ -4,9 +4,9 @@ import Avatar from '../components/ui/Avatar';
 import { Shield, Trophy, UserPlus, Search, UserCheck, Check, X, UserMinus, Users, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { useUI } from '../context/UIContext';
 import Skeleton from '../components/ui/Skeleton';
 import anime from 'animejs/lib/anime.es.js';
+import DiscoverPeople from '../components/social/DiscoverPeople';
 
 const ConnectionCardSkeleton = () => (
   <div className="bg-white/5 border border-white/10 p-5 rounded-xl">
@@ -22,13 +22,10 @@ const ConnectionCardSkeleton = () => (
 
 const Connections = () => {
   const { user } = useAuth();
-  const { openAuthModal } = useUI();
 
   const [friends, setFriends] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [processing, setProcessing] = useState(null);
   const [removeId, setRemoveId] = useState(null);
   const [popoverPos, setPopoverPos] = useState({ top: 0, left: 0 });
@@ -55,7 +52,6 @@ const Connections = () => {
       const profilesData = allProfiles || [];
 
       if (!user) {
-        setSuggestions(profilesData);
         setFriends([]);
         return;
       }
@@ -70,21 +66,9 @@ const Connections = () => {
       });
       setFriends(myFriendsWithIds);
 
-      const pendingSent = friendships.filter(f => f.status === 'pending' && f.user1_id === user.id).map(f => f.user2_id);
       const pendingReceived = friendships.filter(f => f.status === 'pending' && f.user2_id === user.id).map(f => f.user1_id);
 
       setPendingRequests(profilesData.filter(p => pendingReceived.includes(p.id)));
-
-      const discoverList = profilesData.filter(p =>
-        p.id !== user.id &&
-        !friendIds.includes(p.id) &&
-        !pendingReceived.includes(p.id)
-      ).map(p => ({
-        ...p,
-        status: pendingSent.includes(p.id) ? 'sent' : 'none'
-      }));
-
-      setSuggestions(discoverList);
 
     } catch (err) {
       console.error("Error fetching connections:", err);
@@ -122,20 +106,7 @@ const Connections = () => {
     });
   }, [loading]);
 
-  const handleConnect = async (targetId) => {
-    if (!user) return openAuthModal();
-    setProcessing(targetId);
-    try {
-      const { error } = await supabase.from('friendships').insert({ user1_id: user.id, user2_id: targetId, status: 'pending' });
-      if (error) throw error;
-      fetchData();
-    } catch (e) {
-      console.error(e);
-      alert("Action failed");
-    } finally {
-      setProcessing(null);
-    }
-  };
+  // handleConnect removed (moved to DiscoverPeople)
 
   const handleAccept = async (targetId) => {
     setProcessing(targetId);
@@ -221,9 +192,7 @@ const Connections = () => {
     }
   };
 
-  const filteredSuggestions = suggestions.filter(u =>
-    (u.first_name + ' ' + u.last_name).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // filteredSuggestions removed (moved to DiscoverPeople)
 
   return (
     <div className="min-h-screen bg-background pt-4 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 xl:px-12 relative overflow-hidden">
@@ -323,82 +292,7 @@ const Connections = () => {
           </section>
         )}
 
-        <section>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-            <div className="flex items-center gap-3">
-              <Search className="text-purple-400" size={24} />
-              <h2 className="text-2xl font-bold text-white">Discover People</h2>
-            </div>
-            <div className="relative w-full md:w-80">
-              <input
-                type="text"
-                placeholder="Search students..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-black border border-white/20 rounded-full px-4 py-2 pl-10 text-white focus:outline-none focus:border-accent"
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => <ConnectionCardSkeleton key={i} />)}
-            </div>
-          ) : filteredSuggestions.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
-                <Users size={40} className="text-gray-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                {searchTerm ? 'No matches found' : 'No suggestions available'}
-              </h3>
-              <p className="text-gray-400 mb-4">
-                {searchTerm ? 'Try adjusting your search terms' : 'Check back later for new people to connect with'}
-              </p>
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="text-accent hover:text-accent/80 text-sm"
-                >
-                  Clear search
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSuggestions.map(user => (
-                <div key={user.id} className="connection-card opacity-0 bg-white/5 border border-white/10 p-6 rounded-xl hover:border-accent/50 transition-colors">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar url={user.avatar_url} firstName={user.first_name} size="lg" />
-                    <div>
-                      <h3 className="text-white font-bold text-lg">{user.first_name} {user.last_name}</h3>
-                      <p className="text-accent text-xs font-bold uppercase tracking-wider">{user.role || 'Student'}</p>
-                    </div>
-                  </div>
-                  <div className="pt-4 border-t border-white/10 flex justify-end">
-                    <Button
-                      onClick={() => handleConnect(user.id)}
-                      variant={user.status === 'sent' || user.status === 'accepted' ? 'outline' : 'primary'}
-                      disabled={user.status === 'sent' || processing === user.id}
-                      className="px-6 py-2 text-sm"
-                    >
-                      {processing === user.id ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : user.status === 'sent' ? (
-                        'Requested'
-                      ) : user.status === 'received' ? (
-                        'Accept Request'
-                      ) : (
-                        'Connect'
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+        <DiscoverPeople />
 
         {removeId && (
           <>

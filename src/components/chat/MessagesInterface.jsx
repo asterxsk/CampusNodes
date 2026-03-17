@@ -7,6 +7,10 @@ import { useToast } from '../../context/ToastContext';
 import { useModal } from '../../context/ModalContext';
 import { encryptMessage, decryptMessage } from '../../lib/encryption';
 import Avatar from '../../components/ui/Avatar';
+import DiscoverPeople from '../social/DiscoverPeople';
+import VerifiedBadge from '../ui/VerifiedBadge';
+
+const ADMIN_SENDER_ID = '00000000-0000-0000-0000-000000000000';
 
 const MessagesInterface = ({ isModal = false }) => {
     const { user } = useAuth();
@@ -100,7 +104,7 @@ const MessagesInterface = ({ isModal = false }) => {
         } catch (err) {
             console.error("Error marking messages as read:", err);
         }
-    }, [user.id, removeUnreadSender]);
+    }, [user?.id, removeUnreadSender]);
 
     const markMessagesAsReadCallback = useCallback(markMessagesAsRead, [markMessagesAsRead]);
 
@@ -147,6 +151,17 @@ const MessagesInterface = ({ isModal = false }) => {
 
             // Filter friends to only those with active chat history
             const activeProfiles = (profiles || []).filter(p => activeFriendIds.has(p.id));
+
+            if (activeFriendIds.has(ADMIN_SENDER_ID)) {
+                activeProfiles.unshift({
+                    id: ADMIN_SENDER_ID,
+                    first_name: 'CampusNodes',
+                    last_name: '',
+                    role: 'Official System',
+                    avatar_url: null,
+                });
+            }
+
             setActiveChats(activeProfiles);
 
         } catch (err) {
@@ -218,7 +233,7 @@ const MessagesInterface = ({ isModal = false }) => {
         }
     };
 
-    const fetchMessagesCallback = React.useCallback(fetchMessages, [user.id, scrollToBottom, markMessagesAsRead]);
+    const fetchMessagesCallback = React.useCallback(fetchMessages, [user?.id, scrollToBottom, markMessagesAsRead]);
 
     // Refresh messages on window focus to ensure read status is up to date
     useEffect(() => {
@@ -282,7 +297,7 @@ const MessagesInterface = ({ isModal = false }) => {
 
             return () => supabase.removeChannel(channel);
         }
-    }, [activeChat, user.id, fetchMessagesCallback, markMessagesAsReadCallback, scrollToBottom]);
+    }, [activeChat, user?.id, fetchMessagesCallback, markMessagesAsReadCallback, scrollToBottom]);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -369,8 +384,12 @@ const MessagesInterface = ({ isModal = false }) => {
 
     if (!user) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <p className="text-gray-400">Please log in to access messages.</p>
+            <div className="flex flex-col h-full bg-background p-6 overflow-y-auto custom-scrollbar">
+                <div className="mb-8 text-center">
+                    <h2 className="text-2xl font-bold text-white mb-2 font-display">Join the Conversation</h2>
+                    <p className="text-gray-400 text-sm">Sign in to message your friends, or discover new connections below.</p>
+                </div>
+                <DiscoverPeople />
             </div>
         );
     }
@@ -452,8 +471,11 @@ const MessagesInterface = ({ isModal = false }) => {
                                 </div>
                                 <div className="flex-1 text-left overflow-hidden">
                                     <div className="flex items-center justify-between mb-0.5">
-                                        <h3 className="font-semibold text-white truncate text-sm">{friend.first_name} {friend.last_name}</h3>
-                                        <span className="text-[10px] text-gray-500">12:30 PM</span>
+                                        <h3 className="font-semibold text-white truncate text-sm flex items-center gap-1">
+                                            {friend.first_name} {friend.last_name}
+                                            {friend.id === ADMIN_SENDER_ID && <VerifiedBadge size={14} />}
+                                        </h3>
+                                        <span className="text-[10px] text-gray-500"></span>
                                     </div>
                                     <p className="text-xs text-gray-400 truncate">
                                         {unreadSenders.has(friend.id) ? <span className="text-accent font-medium">New message</span> : friend.role || 'Student'}
@@ -487,9 +509,12 @@ const MessagesInterface = ({ isModal = false }) => {
                                     size="md"
                                 />
                                 <div>
-                                    <h2 className="font-bold text-white text-sm">{activeChat.first_name} {activeChat.last_name}</h2>
+                                    <h2 className="font-bold text-white text-sm flex items-center gap-1">
+                                        {activeChat.first_name} {activeChat.last_name}
+                                        {activeChat.id === ADMIN_SENDER_ID && <VerifiedBadge size={16} />}
+                                    </h2>
                                     <p className="text-[10px] text-accent flex items-center gap-1">
-                                        <Lock size={8} /> End-to-end encrypted
+                                        {activeChat.id === ADMIN_SENDER_ID ? 'Verified System Message' : <><Lock size={8} /> End-to-end encrypted</>}
                                     </p>
                                 </div>
                                 <button onClick={clearChat} className="p-2 hover:bg-red-500/10 rounded-full hover:text-red-500 transition-colors ml-2" title="Clear Chat">
@@ -569,32 +594,38 @@ const MessagesInterface = ({ isModal = false }) => {
                         </div>
 
                         {/* Input Area - Keyboard responsive on mobile */}
-                        <form
-                            onSubmit={sendMessage}
-                            className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-[90px] md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
-                        >
-                            <div
-                                className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors cursor-text"
-                                onClick={() => inputRef.current?.focus()}
-                            >
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    placeholder="Type a message..."
-                                    className="flex-1 bg-transparent text-white placeholder:text-gray-500 focus:outline-none text-sm py-1 cursor-text"
-                                    autoFocus
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!newMessage.trim()}
-                                    className="p-2 bg-accent text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_10px_rgba(37,99,235,0.4)] transition-all"
-                                >
-                                    <Send size={16} />
-                                </button>
+                        {activeChat.id === ADMIN_SENDER_ID ? (
+                            <div className="p-4 text-center text-gray-500 text-xs bg-black/50 border-t border-white/10 shrink-0">
+                                This is an official CampusNodes broadcast channel. Replies are disabled.
                             </div>
-                        </form>
+                        ) : (
+                            <form
+                                onSubmit={sendMessage}
+                                className={`p-4 ${isModal ? 'pb-4' : 'pb-4'} ${keyboardOffset === 0 && !isModal ? 'pb-[90px] md:pb-4' : ''} bg-background border-t border-white/10 shrink-0 transition-all`}
+                            >
+                                <div
+                                    className="flex items-center gap-2 bg-[#1a1a1a] rounded-full px-4 py-2 border border-white/5 focus-within:border-white/20 transition-colors cursor-text"
+                                    onClick={() => inputRef.current?.focus()}
+                                >
+                                    <input
+                                        ref={inputRef}
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="Type a message..."
+                                        className="flex-1 bg-transparent text-white placeholder:text-gray-500 focus:outline-none text-sm py-1 cursor-text"
+                                        autoFocus
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!newMessage.trim()}
+                                        className="p-2 bg-accent text-black rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_10px_rgba(37,99,235,0.4)] transition-all"
+                                    >
+                                        <Send size={16} />
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </>
                 ) : (
                     // Empty State (Desktop Right Side)

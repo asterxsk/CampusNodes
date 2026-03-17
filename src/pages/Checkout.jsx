@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useToast } from '../context/ToastContext';
-import { ArrowLeft, MapPin, Clock, Package, CreditCard } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import useRazorpay from '../hooks/useRazorpay';
+import { ArrowLeft, MapPin, Clock, Package, CreditCard, Loader2 } from 'lucide-react';
 import Button from '../components/ui/Button';
 
 const Checkout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const toast = useToast();
-    const { cartItems } = useCart();
+    const { user } = useAuth();
+    const { openCheckout, isLoading: isPaymentLoading } = useRazorpay();
+    const { cartItems, clearCart } = useCart();
 
     // Check if this is a direct "Buy Now" purchase or a service booking
     const directPurchase = location.state?.directPurchase;
@@ -87,7 +90,7 @@ const Checkout = () => {
         // Date Validation
         const selectedDate = new Date(formData.deliveryDate);
         const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+        currentDate.setHours(0, 0, 0, 0);
         const currentYear = currentDate.getFullYear();
 
         if (!formData.deliveryDate) {
@@ -97,7 +100,6 @@ const Checkout = () => {
         } else if (selectedDate < currentDate) {
             newErrors.deliveryDate = 'Delivery date cannot be in the past';
         } else if (selectedDate.getFullYear() < currentYear || selectedDate.getFullYear() > currentYear + 1) {
-            // Basic sanity check: prevent year 0001 or far future
             newErrors.deliveryDate = 'Please select a valid date within this year';
         }
 
@@ -113,28 +115,41 @@ const Checkout = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e) => {
+        e?.preventDefault();
         if (!validateForm()) {
             toast.error('Please fill all required fields');
             return;
         }
 
-        // Store order details and proceed to payment
-        const orderDetails = {
-            items,
-            subtotal,
-            platformFee,
-            gst,
-            total,
-            delivery: formData
-        };
+        if (!user) {
+            toast.error('Please sign in to make a purchase.');
+            return;
+        }
 
-        // In a real app, you'd save this to state/localStorage before redirecting
-        sessionStorage.setItem('pendingOrder', JSON.stringify(orderDetails));
-
-        // Navigate to payment gateway
-        navigate('/payment', { state: { orderDetails } });
+        // Amount in paise (Razorpay uses smallest currency unit: ₹1 = 100 paise)
+        const amountInPaise = Math.round(total * 100);
+        const itemNames = items.map(i => i.title || i.name).filter(Boolean).join(', ');
+        
+        await openCheckout({
+            amount: amountInPaise,
+            currency: 'INR',
+            productName: 'Campus Nodes Order',
+            description: itemNames || 'Marketplace purchase',
+            prefill: {
+                name:    user.user_metadata?.full_name ?? '',
+                email:   user.email ?? '',
+                contact: user.user_metadata?.phone ?? formData.contactNumber ?? '',
+            },
+            onSuccess: () => {
+                clearCart();
+                toast.success('Order placed successfully! Thank you for your purchase.');
+                navigate('/market');
+            },
+            onFailure: (err) => {
+                toast.error(err.message ?? 'Payment failed. Please try again.');
+            },
+        });
     };
 
     // Get minimum date (today)
@@ -327,7 +342,7 @@ const Checkout = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-white truncate">{item.title}</p>
+                                            <p className="text-sm text-white truncate">{item.title || item.name}</p>
                                             <p className="text-xs text-gray-400">₹{parsePrice(item.price).toLocaleString()}</p>
                                         </div>
                                     </div>
@@ -362,14 +377,28 @@ const Checkout = () => {
                                 onClick={handleSubmit}
                                 variant="primary"
                                 className="w-full py-3 flex items-center justify-center gap-2"
+                                disabled={isPaymentLoading}
                             >
-                                <CreditCard size={18} />
-                                Proceed to Payment
+                                {isPaymentLoading ? (
+                                    <>
+                                        <Loader2 size={18} className="animate-spin" />
+                                        Opening Razorpay…
+                                    </>
+                                ) : (
+                                    <>
+                                        <CreditCard size={18} />
+                                        Proceed to Payment
+                                    </>
+                                )}
                             </Button>
 
                             <div className="flex items-center justify-center gap-2 mt-4">
-                                <img src="https://badges.razorpay.com/badge-light.png" alt="Razorpay" className="h-6 opacity-50"
-                                    onError={(e) => e.target.style.display = 'none'} />
+                                <img
+                                    src="https://badges.razorpay.com/badge-light.png"
+                                    alt="Razorpay"
+                                    className="h-6 opacity-50"
+                                    onError={(e) => e.target.style.display = 'none'}
+                                />
                                 <span className="text-xs text-gray-500">Secure Checkout</span>
                             </div>
                         </div>

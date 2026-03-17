@@ -4,6 +4,29 @@
 
 @layer base {
 
+  :root,
+  [data-theme="dark"] {
+    --bg-color: #050505;
+    --surface-color: #121212;
+    --text-primary: #ffffff;
+    --text-secondary: #9c9c9c;
+    --accent-color: #3b82f6;
+    --border-color: rgba(255, 255, 255, 0.1);
+  }
+
+
+
+  [data-theme="catppuccin-mocha"] {
+    --bg-color: #11111b;
+    --surface-color: #181825;
+    --text-primary: #cdd6f4;
+    --text-secondary: #a6adc8;
+    --accent-color: #89b4fa;
+    --border-color: rgba(205, 214, 244, 0.1);
+  }
+
+
+
   /* Performance: Enable GPU acceleration globally + Smooth Scroll */
   html {
     -webkit-font-smoothing: antialiased;
@@ -13,7 +36,9 @@
   }
 
   body {
-    @apply bg-background text-primary antialiased overflow-x-hidden;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    @apply antialiased overflow-x-hidden;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
 
@@ -103,6 +128,16 @@
   .pb-safe {
     padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
   }
+
+  /* Utility to hide scrollbars */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Anime.js targets will use specific classes often, but we can keep it utility-first */
@@ -114,4 +149,109 @@
 .motion-reduce * {
   animation: none !important;
   transition: none !important;
+}
+
+/* View Transitions for Theme Switching */
+::view-transition-group(root) {
+  animation-duration: 0.9s;
+  animation-timing-function: cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+::view-transition-new(root) {
+  animation-name: seed-fill;
+  mix-blend-mode: normal;
+  z-index: 9999;
+}
+
+::view-transition-old(root) {
+  animation: none;
+  z-index: 1;
+}
+
+@keyframes seed-fill {
+  from {
+    clip-path: circle(0% at 50% 100%);
+  }
+
+  to {
+    clip-path: circle(150% at 50% 100%);
+  }
+}
+
+/* Specific Transition for Marketplace Filters */
+html.filter-transition::view-transition-group(root) {
+  animation-duration: 0.65s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.filter-transition::view-transition-new(root) {
+  animation-name: filter-seed-fill;
+  mix-blend-mode: normal;
+  z-index: 9999;
+}
+
+html.filter-transition::view-transition-old(root) {
+  animation-name: filter-seed-old;
+  z-index: 1;
+}
+
+/* New state expands as a circle from click point in ALL directions */
+@keyframes filter-seed-fill {
+  from {
+    clip-path: circle(0px at var(--click-x, 50%) var(--click-y, 50%));
+  }
+
+  to {
+    clip-path: circle(200vmax at var(--click-x, 50%) var(--click-y, 50%));
+  }
+}
+
+/* Old state stays put then fades slightly at the end */
+@keyframes filter-seed-old {
+  0% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Glowing Whoosh Ring - expands 360° from click point */
+html.filter-transition::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at var(--click-x, 50%) var(--click-y, 50%),
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(255, 255, 255, 0.35) 40%,
+      rgba(255, 255, 255, 0.12) 60%,
+      transparent 80%);
+  pointer-events: none;
+  z-index: 10001;
+  mix-blend-mode: screen;
+  animation: filter-glow-ring 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes filter-glow-ring {
+  0% {
+    clip-path: circle(0px at var(--click-x) var(--click-y));
+    opacity: 0.9;
+  }
+
+  30% {
+    opacity: 0.7;
+  }
+
+  100% {
+    clip-path: circle(200vmax at var(--click-x) var(--click-y));
+    opacity: 0;
+  }
 }

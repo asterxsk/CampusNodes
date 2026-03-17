@@ -39,9 +39,7 @@ const Hero = () => {
                 </h1>
 
                 <p className="hero-element opacity-0 text-blue-200 text-lg md:text-2xl max-w-2xl mx-auto font-light tracking-wide mb-12">
-                    The decentralized marketplace for everything on campus.
-                    <br />
-                    Trade gears, find mentors, build your network.
+                    The decentralized marketplace for everything on campus. Trade gears, find mentors, build your network.
                 </p>
 
                 <div className="hero-element opacity-0 flex flex-col md:flex-row gap-6 justify-center items-center">

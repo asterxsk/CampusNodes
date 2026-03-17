@@ -4,6 +4,26 @@ import { createContext, useContext } from 'react';
 export const AuthContext = createContext({});
 export const useAuth = () => useContext(AuthContext);
 
+// Admin
+export const AdminContext = createContext();
+export const useAdmin = () => {
+    const context = useContext(AdminContext);
+    if (!context) {
+        throw new Error('useAdmin must be used within an AdminProvider');
+    }
+    return context;
+};
+
+// Theme
+export const ThemeContext = createContext();
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (!context) {
+        throw new Error('useTheme must be used within a ThemeProvider');
+    }
+    return context;
+};
+
 // UI
 export const UIContext = createContext();
 export const useUI = () => {

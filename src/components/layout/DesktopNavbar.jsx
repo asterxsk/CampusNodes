@@ -2,18 +2,31 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import PillNav from '../ui/PillNav';
 import Logo from '../ui/Logo';
+import { useUI } from '../../context/UIContext';
+import { useAuth } from '../../context/AuthContext';
 
 const DesktopNavbar = () => {
     const location = useLocation();
-    // const { unreadCount, setIsChatOpen } = useUI();
+    const { unreadCount, setIsChatOpen, openAuthModal } = useUI();
+    const { user } = useAuth();
 
     const navItems = useMemo(() => [
         { label: 'Home', href: '/' },
         { label: 'Market', href: '/market' },
         { label: 'Services', href: '/services' },
         { label: 'Forum', href: '/forum' },
-        { label: 'Social', href: '/connections' }
-    ], []);
+        { label: 'Social', href: '/connections' },
+        {
+            label: unreadCount > 0 ? `Chat (${unreadCount})` : 'Chat',
+            onClick: () => {
+                if (!user) {
+                    openAuthModal();
+                } else {
+                    setIsChatOpen(true);
+                }
+            }
+        }
+    ], [unreadCount, user, setIsChatOpen, openAuthModal]);
     // Removed href for Chat to ensure it works as an overlay button via PillNav's new onClick support
 
     return (

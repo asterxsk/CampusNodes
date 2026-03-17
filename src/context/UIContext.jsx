@@ -12,6 +12,8 @@ export const UIProvider = ({ children }) => {
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
     const [isNavHovered, setIsNavHovered] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+    const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
     const openAuthModal = () => setIsAuthModalOpen(true);
     const closeAuthModal = () => setIsAuthModalOpen(false);
@@ -135,8 +137,27 @@ export const UIProvider = ({ children }) => {
             isSidebarCollapsed, setIsSidebarCollapsed,
             isNavHovered, setIsNavHovered,
             isProfileModalOpen, setIsProfileModalOpen,
-            openProfileModal: () => setIsProfileModalOpen(true),
-            closeProfileModal: () => setIsProfileModalOpen(false)
+            isEditProfileModalOpen, setIsEditProfileModalOpen,
+            openProfileModal: () => {
+                setIsProfileModalOpen(true);
+            },
+            openEditProfileModal: () => {
+                setIsProfileModalOpen(false);
+                setIsEditProfileModalOpen(true);
+            },
+            closeEditProfileModal: () => {
+                setIsEditProfileModalOpen(false);
+            },
+            isChangePasswordModalOpen,
+            openChangePasswordModal: () => {
+                setIsChangePasswordModalOpen(true);
+            },
+            closeChangePasswordModal: () => {
+                setIsChangePasswordModalOpen(false);
+            },
+            closeProfileModal: () => {
+                setIsProfileModalOpen(false);
+            }
         }}>
             {children}
         </UIContext.Provider>
