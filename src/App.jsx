@@ -21,6 +21,7 @@ import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Payment from './pages/Payment';
+import Orders from './pages/Orders';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProductDetails from './pages/ProductDetails';
@@ -193,7 +194,7 @@ const RouteController = () => {
       '/profile': <ProtectedRoute><Profile /></ProtectedRoute>,
       '/messages': <ProtectedRoute><Messages /></ProtectedRoute>,
       '/settings': <ProtectedRoute><Settings /></ProtectedRoute>,
-      '/payment': <ProtectedRoute><Payment /></ProtectedRoute>,
+      '/orders': <ProtectedRoute><Orders /></ProtectedRoute>,
       '/cart': <ProtectedRoute><Cart /></ProtectedRoute>,
       '/checkout': <ProtectedRoute><Checkout /></ProtectedRoute>,
       '/forgot-password': <ForgotPassword />,
@@ -201,6 +202,7 @@ const RouteController = () => {
     };
 
     if (componentMap[path]) return componentMap[path];
+    if (path.startsWith('/orders/')) return <ProtectedRoute><Payment /></ProtectedRoute>;
     if (path.startsWith('/market/')) return <ProductDetails />;
     if (path.startsWith('/services/')) return <ServiceDetails />;
     return <MemoHero />;

@@ -87,7 +87,7 @@ export const UIProvider = ({ children }) => {
             return;
         }
 
-        const channel = supabase.channel('ui_friend_requests')
+        const channel = supabase.channel(`ui_friend_requests_${Date.now()}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
@@ -97,7 +97,7 @@ export const UIProvider = ({ children }) => {
             .subscribe();
 
         const messagesChannel = supabase
-            .channel('ui_messages_tracking')
+            .channel(`ui_messages_tracking_${Date.now()}`)
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',

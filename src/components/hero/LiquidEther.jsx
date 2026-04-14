@@ -196,24 +196,40 @@ class CommonClass {
         this.container = container;
         this.pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
         this.resize();
-        this.renderer = new THREE.WebGLRenderer({ 
-            antialias: true, 
+
+        // Create canvas with explicit attributes to avoid multisampling
+        const canvas = document.createElement('canvas');
+        const contextAttributes = {
             alpha: true,
-            powerPreference: 'high-performance'
+            antialias: false,
+            depth: false,
+            stencil: false,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false
+        };
+
+        this.renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            context: canvas.getContext('webgl2', contextAttributes),
+            antialias: false,
+            alpha: true,
+            powerPreference: 'high-performance',
+            depth: false,
+            stencil: false
         });
-        
-        // Enable required WebGL extensions to suppress warnings
+
+        // Enable required WebGL extensions
         const gl = this.renderer.getContext();
         if (gl) {
             gl.getExtension('EXT_color_buffer_float');
             gl.getExtension('OES_texture_float_linear');
             gl.getExtension('EXT_float_blend');
         }
-        
+
         this.renderer.autoClear = false;
         this.renderer.setClearColor(new THREE.Color(0x000000), 0);
-        this.renderer.setPixelRatio(this.pixelRatio);
-        this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(1); // Use 1 to avoid internal scaling issues
+        this.renderer.setSize(this.width, this.height, false);
         this.renderer.domElement.style.width = '100%';
         this.renderer.domElement.style.height = '100%';
         this.renderer.domElement.style.display = 'block';
@@ -731,17 +747,26 @@ class Simulation {
     }
     createAllFBO() {
         const type = this.getFloatType();
-        const opts = {
-            type,
-            depthBuffer: false,
-            stencilBuffer: false,
+        const textureOptions = {
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
             wrapS: THREE.ClampToEdgeWrapping,
-            wrapT: THREE.ClampToEdgeWrapping
+            wrapT: THREE.ClampToEdgeWrapping,
+            generateMipmaps: false,
+            type: type
         };
+
         for (let key in this.fbos) {
-            this.fbos[key] = new THREE.WebGLRenderTarget(this.fboSize.x, this.fboSize.y, opts);
+            this.fbos[key] = new THREE.WebGLRenderTarget(
+                this.fboSize.x,
+                this.fboSize.y,
+                {
+                    samples: 0, // Disable multisampling to avoid immutable texture warning
+                    depthBuffer: false,
+                    stencilBuffer: false,
+                    ...textureOptions
+                }
+            );
         }
     }
     createShaderPass() {
@@ -799,10 +824,38 @@ class Simulation {
     }
     resize() {
         this.calcSize();
+        // Dispose old FBOs and recreate them to avoid immutable texture warning
         for (let key in this.fbos) {
             if (this.fbos[key]) {
-                this.fbos[key].setSize(this.fboSize.x, this.fboSize.y);
+                this.fbos[key].dispose();
             }
+        }
+        this.createAllFBO();
+        // Update shader uniform references to new textures
+        if (this.advection) {
+            this.advection.uniforms.velocity.value = this.fbos.vel_0.texture;
+        }
+        if (this.viscous) {
+            this.viscous.uniforms.velocity.value = this.fbos.vel_1.texture;
+            this.viscous.uniforms.velocity_new.value = this.fbos.vel_viscous0.texture;
+            this.viscous.props.output0 = this.fbos.vel_viscous0;
+            this.viscous.props.output1 = this.fbos.vel_viscous1;
+        }
+        if (this.divergence) {
+            this.divergence.uniforms.velocity.value = this.fbos.vel_viscous0.texture;
+        }
+        if (this.poisson) {
+            this.poisson.uniforms.divergence.value = this.fbos.div.texture;
+            this.poisson.uniforms.pressure.value = this.fbos.pressure_0.texture;
+            this.poisson.props.output0 = this.fbos.pressure_0;
+            this.poisson.props.output1 = this.fbos.pressure_1;
+        }
+        if (this.pressure) {
+            this.pressure.uniforms.pressure.value = this.fbos.pressure_0.texture;
+            this.pressure.uniforms.velocity.value = this.fbos.vel_viscous0.texture;
+        }
+        if (this.externalForce) {
+            this.externalForce.props.output = this.fbos.vel_1;
         }
     }
     update() {
@@ -868,6 +921,8 @@ class Output {
     }
     resize() {
         this.simulation.resize();
+        // Update output texture reference after FBO recreation
+        this.output.material.uniforms.velocity.value = this.simulation.fbos.vel_0.texture;
     }
     render() {
         this.common.renderer.setRenderTarget(null);
@@ -1009,7 +1064,6 @@ const LiquidEther = ({
             tex.minFilter = THREE.LinearFilter;
             tex.wrapS = THREE.ClampToEdgeWrapping;
             tex.wrapT = THREE.ClampToEdgeWrapping;
-            tex.generateMipmaps = false;
             tex.needsUpdate = true;
             return tex;
         }

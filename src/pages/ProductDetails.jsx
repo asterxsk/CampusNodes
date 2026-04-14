@@ -287,15 +287,32 @@ const ProductDetails = () => {
         navigate('/checkout', { state: { directPurchase: true, item: product } });
     };
 
-    const handleAddToCart = () => {
-        if (!user) { openAuthModal(); return; }
-        const success = addToCart(product);
-        if (success) {
-            setCartAdded(true);
-            toast.success(`${product.title} added to cart!`);
-            setTimeout(() => setCartAdded(false), 2500);
-        } else {
-            toast.info('Item already in cart');
+    const handleAddToCart = async () => {
+        console.log('[ProductDetails] handleAddToCart called');
+        console.log('[ProductDetails] user:', user);
+        console.log('[ProductDetails] product:', product);
+        console.log('[ProductDetails] addToCart function:', addToCart);
+
+        if (!user) {
+            console.log('[ProductDetails] No user, opening auth modal');
+            openAuthModal();
+            return;
+        }
+
+        try {
+            console.log('[ProductDetails] Calling addToCart...');
+            const success = await addToCart(product);
+            console.log('[ProductDetails] addToCart returned:', success);
+
+            if (success) {
+                console.log('[ProductDetails] Success! Setting cartAdded to true');
+                setCartAdded(true);
+                setTimeout(() => setCartAdded(false), 2500);
+            } else {
+                console.log('[ProductDetails] addToCart returned false');
+            }
+        } catch (error) {
+            console.error('[ProductDetails] Error adding to cart:', error);
         }
     };
 
@@ -623,7 +640,7 @@ const ProductDetails = () => {
 
                             {/* Add to Cart */}
                             <motion.button
-                                whileHover={{ y: -2 }}
+                                whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.97 }}
                                 onClick={handleAddToCart}
                                 className="flex items-center justify-center gap-2.5 w-full py-3.5 px-6 bg-white text-black rounded-full text-sm font-semibold hover:bg-gray-100 transition-all"

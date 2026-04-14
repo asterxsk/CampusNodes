@@ -37,24 +37,24 @@ export const CartProvider = ({ children }) => {
                     .eq('user_id', user.id);
 
                 if (error) throw error;
-                
+
                 // Fetch product details from static MARKET_ITEMS array
                 const cartWithDetails = (data || []).map(item => {
-                    const friendlyId = getFriendlyId(item.product_id);
-                    const product = MARKET_ITEMS.find(p => String(p.id) === String(friendlyId));
-                    
+                    const productId = item.product_id; // Use numeric ID directly
+                    const product = MARKET_ITEMS.find(p => String(p.id) === String(productId));
+
                     return {
-                        id: friendlyId,
+                        id: productId, // Use numeric ID directly
                         cartItemId: item.id,
                         quantity: item.quantity,
-                        title: product?.title || `Product ${friendlyId}`,
+                        title: product?.title || `Product ${productId}`,
                         price: product?.price || '₹0',
                         image: product?.images?.[0] || item.image_url || null,
                         category: product?.category || 'Other',
                         added_at: item.added_at
                     };
                 });
-                
+
                 setCartItems(cartWithDetails);
             } catch (err) {
                 console.error('Error fetching cart:', err);
@@ -64,25 +64,6 @@ export const CartProvider = ({ children }) => {
         };
 
         fetchCart();
-
-        // Subscribe to realtime changes
-        if (user) {
-            const channel = supabase
-                .channel(`cart_${user.id}`)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'cart_items',
-                    filter: `user_id=eq.${user.id}`
-                }, () => {
-                    fetchCart();
-                })
-                .subscribe();
-
-            return () => {
-                supabase.removeChannel(channel);
-            };
-        }
     }, [user]);
 
     const addToCart = useCallback(async (item) => {
@@ -91,6 +72,7 @@ export const CartProvider = ({ children }) => {
             return false;
         }
 
+        console.log('[CartContext] addToCart called with item:', item);
         setOperationLoading(true);
 
         try {
@@ -120,15 +102,15 @@ export const CartProvider = ({ children }) => {
                 
                 safeToast.success(`Updated quantity: ${item.title}`);
             } else {
-                // Map the ID to stable UUID for seed items
-                const stableId = getMappedUUID(item.id);
+                // Use the original numeric ID for the database instead of mapped UUID
+                const productId = item.id; // Keep as original numeric ID
 
                 // Insert new item - only using columns that exist in database
                 const { data, error } = await supabase
                     .from('cart_items')
                     .insert({
                         user_id: user.id,
-                        product_id: stableId,
+                        product_id: productId, // Use numeric ID directly
                         quantity: 1,
                         added_at: new Date().toISOString()
                     })
@@ -136,9 +118,9 @@ export const CartProvider = ({ children }) => {
                     .single();
 
                 if (error) throw error;
-                
+
                 setCartItems(prev => [...prev, {
-                    id: getFriendlyId(stableId),
+                    id: productId, // Use numeric ID directly
                     cartItemId: data.id,
                     quantity: 1,
                     title: item.title,
@@ -147,6 +129,7 @@ export const CartProvider = ({ children }) => {
                     category: item.category
                 }]);
                 
+                console.log('[CartContext] Updated cartItems with new item');
                 safeToast.success(`Added to cart: ${item.title}`);
             }
             

@@ -40,8 +40,12 @@ export const ToastProvider = ({ children }) => {
     const warning = useCallback((message) => addToast(message, 'warning'), [addToast]);
     const info = useCallback((message) => addToast(message, 'info'), [addToast]);
 
+    const contextValue = React.useMemo(() => ({
+        addToast, removeToast, success, error, warning, info
+    }), [addToast, removeToast, success, error, warning, info]);
+
     return (
-        <ToastContext.Provider value={{ addToast, removeToast, success, error, warning, info }}>
+        <ToastContext.Provider value={contextValue}>
             {children}
             <div className="fixed top-4 md:top-auto md:bottom-12 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-3 pointer-events-none">
                 <AnimatePresence mode="popLayout">

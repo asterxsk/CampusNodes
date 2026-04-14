@@ -5,8 +5,8 @@ import anime from 'animejs/lib/anime.es.js';
 import { ChevronLeft, ChevronRight, ShoppingCart, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import Logo from '../components/ui/Logo';
-import Skeleton from '../components/ui/Skeleton';
 import StarDisplay from '../components/ui/StarDisplay';
+import Skeleton from '../components/ui/Skeleton';
 import { MARKET_ITEMS } from '../data/marketItems';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -30,15 +30,26 @@ const MarketCard = ({ item }) => {
     scrollContainer.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
   };
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation();
+    console.log('[Marketplace] handleAddToCart called');
+    console.log('[Marketplace] user:', user);
+    console.log('[Marketplace] item:', item);
+    console.log('[Marketplace] addToCart function:', addToCart);
+
     if (!user) {
+      console.log('[Marketplace] No user, opening auth modal');
       openAuthModal();
       return;
     }
 
-    const success = addToCart(item);
-    toast[success ? 'success' : 'info'](success ? `${item.title} added to cart!` : 'Item already in cart');
+    try {
+      console.log('[Marketplace] Calling addToCart...');
+      const success = await addToCart(item);
+      console.log('[Marketplace] addToCart returned:', success);
+    } catch (error) {
+      console.error('[Marketplace] Error adding to cart:', error);
+    }
   };
 
   return (
@@ -110,7 +121,7 @@ const MarketCard = ({ item }) => {
           <span>@{item.seller}</span>
           <button
             onClick={handleAddToCart}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full text-sm font-bold hover:bg-zinc-200 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white text-black rounded-full text-sm font-bold hover:scale-105 hover:bg-zinc-200 transition-transform"
           >
             <ShoppingCart size={18} />
             Add

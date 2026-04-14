@@ -34,13 +34,22 @@ class ErrorBoundary extends React.Component {
                             <p className="text-gray-400 mb-8 text-sm">
                                 {this.state.error?.message || "An unexpected error occurred while loading this page. Please try refreshing or contact support if the problem persists."}
                             </p>
-                            <Button
-                                variant="primary"
-                                onClick={() => window.location.reload()}
-                                className="w-full !bg-blue-600 hover:!bg-red-600 !text-white border-none py-3"
-                            >
-                                Refresh Page
-                            </Button>
+                            <div className="w-full flex flex-col sm:flex-row gap-3">
+                                <Button
+                                    variant="primary"
+                                    onClick={() => window.location.reload()}
+                                    className="w-full !bg-blue-600 hover:!bg-red-600 !text-white border-none py-3"
+                                >
+                                    Refresh Page
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => window.location.href = '/'}
+                                    className="w-full border border-gray-700 hover:bg-white/5 text-white py-3"
+                                >
+                                    Go to Home
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>

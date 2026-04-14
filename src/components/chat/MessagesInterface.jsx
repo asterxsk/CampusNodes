@@ -262,7 +262,7 @@ const MessagesInterface = ({ isModal = false }) => {
             fetchMessagesCallback(activeChat.id);
 
             const channel = supabase
-                .channel(`chat:${activeChat.id}`)
+                .channel(`chat:${activeChat.id}_${Date.now()}`)
                 .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',

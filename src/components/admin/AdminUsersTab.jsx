@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { useModal } from '../../context/ModalContext';
 import { useToast } from '../../context/ToastContext';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Avatar from '../ui/Avatar';
 import { Search, Edit2, Trash2, ImageOff, Loader2 } from 'lucide-react';
 import useAdminFetch from '../../hooks/useAdminFetch';
@@ -207,13 +208,17 @@ const AdminUsersTab = () => {
             )}
 
             {/* Edit Modal */}
-            <AnimatePresence>
-                {editingUser && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            {createPortal(
+                <AnimatePresence>
+                    {editingUser && (
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                        key="edit-modal"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+                    >
+                        <div
                             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                             onClick={() => setEditingUser(null)}
                         />
@@ -221,6 +226,7 @@ const AdminUsersTab = () => {
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
                             className="relative bg-[#111] border border-white/10 p-6 rounded-2xl w-full max-w-md shadow-2xl"
                         >
                             <h3 className="text-xl font-bold text-white mb-4">Edit User Details</h3>
@@ -271,9 +277,11 @@ const AdminUsersTab = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     );
 };

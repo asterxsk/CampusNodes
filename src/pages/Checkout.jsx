@@ -24,11 +24,15 @@ const Checkout = () => {
     // Use direct item, service, or cart items
     const items = isBooking && service ? [service] : (directPurchase && directItem ? [directItem] : cartItems);
 
+    // Get minimum date (today) and first available time slot
+    const today = new Date().toISOString().split('T')[0];
+    const defaultTimeSlot = '09:00 AM - 11:00 AM'; // First time window
+
     const [formData, setFormData] = useState({
-        deliveryLocation: '',
+        deliveryLocation: 'Main Gate',
         landmark: '',
-        deliveryDate: '',
-        deliveryTime: '',
+        deliveryDate: today,
+        deliveryTime: defaultTimeSlot,
         contactNumber: '',
         instructions: ''
     });
@@ -127,33 +131,68 @@ const Checkout = () => {
             return;
         }
 
+        // Generate idempotency key to prevent duplicate orders
+        const idempotencyKey = crypto.randomUUID();
+
         // Amount in paise (Razorpay uses smallest currency unit: ₹1 = 100 paise)
         const amountInPaise = Math.round(total * 100);
         const itemNames = items.map(i => i.title || i.name).filter(Boolean).join(', ');
-        
-        await openCheckout({
-            amount: amountInPaise,
-            currency: 'INR',
-            productName: 'Campus Nodes Order',
-            description: itemNames || 'Marketplace purchase',
-            prefill: {
-                name:    user.user_metadata?.full_name ?? '',
-                email:   user.email ?? '',
-                contact: user.user_metadata?.phone ?? formData.contactNumber ?? '',
-            },
-            onSuccess: () => {
-                clearCart();
-                toast.success('Order placed successfully! Thank you for your purchase.');
-                navigate('/market');
-            },
-            onFailure: (err) => {
-                toast.error(err.message ?? 'Payment failed. Please try again.');
-            },
-        });
-    };
 
-    // Get minimum date (today)
-    const today = new Date().toISOString().split('T')[0];
+        // Show creating order toast
+        const orderToastId = toast.loading('Creating order...');
+
+        try {
+            await openCheckout({
+                amount: amountInPaise,
+                currency: 'INR',
+                productName: 'Campus Nodes Order',
+                description: itemNames || 'Marketplace purchase',
+                idempotencyKey,
+                items: items.map(item => ({
+                    id: item.id,
+                    title: item.title || item.name,
+                    price: parsePrice(item.price),
+                    quantity: item.quantity || 1,
+                    image: item.image,
+                })),
+                deliveryDetails: {
+                    deliveryLocation: formData.deliveryLocation,
+                    landmark: formData.landmark,
+                    deliveryDate: formData.deliveryDate,
+                    deliveryTime: formData.deliveryTime,
+                    contactNumber: formData.contactNumber,
+                    instructions: formData.instructions,
+                },
+                userId: user.id,
+                prefill: {
+                    name:    user.user_metadata?.full_name ?? '',
+                    email:   user.email ?? '',
+                    contact: user.user_metadata?.phone ?? formData.contactNumber ?? '',
+                },
+                onSuccess: (data) => {
+                    // Dismiss creating order toast and show success
+                    toast.dismiss(orderToastId);
+                    toast.success('Order placed successfully! Thank you for your purchase.');
+                    // Navigate to order details page
+                    navigate(`/orders/${data.orderId}`);
+                },
+                onFailure: (err) => {
+                    // Dismiss creating order toast and show error
+                    toast.dismiss(orderToastId);
+                    toast.error(err.message ?? 'Payment failed. Please try again.');
+                },
+            });
+
+            // Dismiss creating order toast when modal opens
+            toast.dismiss(orderToastId);
+
+            // Show verifying payment toast (will be dismissed by callbacks)
+            toast.loading('Verifying payment...', { id: 'verify-payment' });
+        } catch (error) {
+            toast.dismiss(orderToastId);
+            toast.error(error.message ?? 'Failed to initiate payment. Please try again.');
+        }
+    };
 
     if (items.length === 0) {
         return (

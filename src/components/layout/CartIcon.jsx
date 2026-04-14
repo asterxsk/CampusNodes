@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ShoppingCart } from 'lucide-react';
-import { useCart } from '../../context/CartContext';
-import { AnimatePresence } from 'framer-motion';
+import { useCart } from '../../context/Contexts';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-const CartIcon = () => {
+const CartIcon = React.memo(() => {
     const { cartItems } = useCart();
     const navigate = useNavigate();
 
@@ -12,35 +12,41 @@ const CartIcon = () => {
         navigate('/cart');
     };
 
-    const totalQuantity = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    
-    const hasItems = cartItems.length > 0;
-
-    if (!hasItems) return null;
+    const { totalQuantity, hasItems } = useMemo(() => {
+        const total = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        return {
+            totalQuantity: total,
+            hasItems: cartItems.length > 0
+        };
+    }, [cartItems]);
 
     return (
-        <AnimatePresence>
-            <div
-                className="fixed top-4 right-4 md:top-[4.5rem] md:right-6 z-[60]"
-                style={{
-                    opacity: 1,
-                    animation: 'cartFadeIn 0.3s ease'
-                }}
+        <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{
+                opacity: hasItems ? 1 : 0,
+                scale: hasItems ? 1 : 0.8,
+                y: hasItems ? 0 : 20
+            }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="fixed bottom-24 md:bottom-28 right-6 z-[60]"
+            style={{ display: hasItems ? 'block' : 'none' }}
+        >
+            <button
+                onClick={handleClick}
+                className="relative p-3 bg-white rounded-full text-black hover:bg-gray-100 transition-all duration-300 group shadow-lg"
             >
-                <button
-                    onClick={handleClick}
-                    className="relative p-3 bg-black/80 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white hover:text-black transition-all duration-300 group shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                <ShoppingCart size={20} />
+                <span
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white shadow-lg"
                 >
-                    <ShoppingCart size={20} />
-                    <span
-                        className="absolute -top-1 -right-1 w-5 h-5 bg-accent text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-black shadow-lg"
-                    >
-                        {totalQuantity > 9 ? '9+' : totalQuantity}
-                    </span>
-                </button>
-            </div>
-        </AnimatePresence>
+                    {totalQuantity > 9 ? '9+' : totalQuantity}
+                </span>
+            </button>
+        </motion.div>
     );
-};
+});
+
+CartIcon.displayName = 'CartIcon';
 
 export default CartIcon;

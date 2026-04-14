@@ -37,12 +37,16 @@ const useRazorpay = () => {
     const clearError = useCallback(() => setError(null), []);
 
     const openCheckout = useCallback(async (args) => {
-        const { 
-            amount, 
-            currency = 'INR', 
+        const {
+            amount,
+            currency = 'INR',
             receipt = `rcpt_${Date.now()}`,
             productName = 'Campus Nodes',
             description = 'Order Purchase',
+            idempotencyKey,
+            items,
+            deliveryDetails,
+            userId,
             prefill = {},
             onSuccess,
             onFailure
@@ -54,12 +58,10 @@ const useRazorpay = () => {
             // ── Step 1: Load Razorpay checkout.js script ──────────────────────
             const scriptLoaded = await loadRazorpayScript();
             if (!scriptLoaded) {
-                throw new Error('Could not load Razorpay checkout. Check your internet connection.');
+                throw new Error('Connection failed. Check internet and retry.');
             }
 
             // ── Step 2: Create order on the server ────────────────────────────
-            // We always include the Supabase auth token so Edge Functions can
-            // optionally verify the caller is an authenticated user.
             const { data: { session } } = await supabase.auth.getSession();
             const headers = { 'Content-Type': 'application/json' };
             if (session?.access_token) {
@@ -71,15 +73,23 @@ const useRazorpay = () => {
             const orderRes = await fetch(`${supabaseUrl}/functions/v1/create-order`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ amount, currency, receipt }),
+                body: JSON.stringify({
+                    amount,
+                    currency,
+                    receipt,
+                    idempotencyKey,
+                    items,
+                    deliveryDetails,
+                    userId
+                }),
             });
 
             if (!orderRes.ok) {
                 const errData = await orderRes.json().catch(() => ({}));
-                throw new Error(errData.error ?? 'Failed to create payment order. Please try again.');
+                throw new Error(errData.error ?? 'Connection failed. Check internet and retry.');
             }
 
-            const { orderId, amount: orderAmount, currency: orderCurrency, keyId } = await orderRes.json();
+            const { orderId, amount: orderAmount, currency: orderCurrency, keyId, orderRecordId } = await orderRes.json();
 
             // ── Step 3: Open Razorpay Checkout modal ──────────────────────────
             const options = {
@@ -105,17 +115,11 @@ const useRazorpay = () => {
                 },
 
                 // ── Step 4: Verify payment on success ─────────────────────────
-                // ── Step 4: Verify payment on success ─────────────────────────
                 handler: async (response) => {
-                    // Pre-clear cart and show success immediately since user saw success in modal
-                    onSuccess?.({ 
-                        paymentId: response.razorpay_payment_id,
-                        orderId: response.razorpay_order_id,
-                        verified: false // Flag to indicate server-side check skipped
-                    });
-
-                    // Still try to verify in background/silently if possible
                     try {
+                        setIsLoading(true);
+
+                        // BLOCKING verification - wait for server confirmation
                         const verifyRes = await fetch(`${supabaseUrl}/functions/v1/verify-payment`, {
                             method: 'POST',
                             headers,
@@ -125,12 +129,32 @@ const useRazorpay = () => {
                                 razorpay_signature:  response.razorpay_signature,
                             }),
                         });
-                        
+
                         if (!verifyRes.ok) {
-                             console.warn('Background verification failed but payment handled locally.');
+                            const errData = await verifyRes.json().catch(() => ({}));
+                            const errorMsg = errData.error === 'Invalid signature'
+                                ? "Payment couldn't be verified. Contact support."
+                                : `Verification failed. Money is safe. Contact support with order ID: ${response.razorpay_order_id}`;
+                            throw new Error(errorMsg);
                         }
+
+                        const verifyData = await verifyRes.json();
+
+                        if (!verifyData.success) {
+                            throw new Error(`Verification failed. Money is safe. Contact support with order ID: ${response.razorpay_order_id}`);
+                        }
+
+                        // Cart is already cleared by server, call success callback
+                        onSuccess?.({
+                            paymentId: response.razorpay_payment_id,
+                            orderId: verifyData.orderId,
+                            verified: true
+                        });
+
                     } catch (verifyErr) {
-                        console.error('Background Verification Network Error:', verifyErr);
+                        console.error('Verification Error:', verifyErr);
+                        setError(verifyErr.message);
+                        onFailure?.(verifyErr);
                     } finally {
                         setIsLoading(false);
                     }
@@ -142,7 +166,7 @@ const useRazorpay = () => {
             // Handle payment failures reported through the modal itself
             rzp.on('payment.failed', (response) => {
                 const failErr = new Error(
-                    response.error?.description ?? 'Payment failed. Please try again.'
+                    response.error?.description ?? `Payment failed. Contact support with order ID: ${orderId}`
                 );
                 setError(failErr.message);
                 setIsLoading(false);

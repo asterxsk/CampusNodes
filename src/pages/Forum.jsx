@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useAdmin } from '../context/Contexts';
 import { useUI } from '../context/UIContext';
 import { useToast } from '../context/ToastContext';
 import { Heart, MessageCircle, User, Trash2 } from 'lucide-react';
@@ -26,7 +27,7 @@ const timeAgo = (dateString) => {
 };
 
 // Memoized Post Card to prevent re-renders when modal opens
-const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLiked, likeCount, commentCount, topComment }) => {
+const PostCard = memo(({ post, user, isAdmin, onLike, onDelete, onToggleComments, hasLiked, likeCount, commentCount, topComment }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -57,12 +58,12 @@ const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLike
                             </div>
                         </div>
 
-                        {/* Options (Delete) */}
-                        {user && user.id === post.user_id && (
+                        {/* Options (Delete) - show for post author OR admin */}
+                        {user && (user.id === post.user_id || isAdmin) && (
                             <button
-                                onClick={() => onDelete(post.id)}
+                                onClick={() => onDelete(post.id, post.user_id)}
                                 className="p-2 text-gray-500 hover:text-red-400 transition-colors"
-                                title="Delete post"
+                                title={isAdmin && user.id !== post.user_id ? "Delete post (Admin)" : "Delete post"}
                             >
                                 <Trash2 size={16} />
                             </button>
@@ -127,6 +128,7 @@ const PostCard = memo(({ post, user, onLike, onDelete, onToggleComments, hasLike
 
 const Forum = () => {
     const { user } = useAuth();
+    const { isAdmin } = useAdmin();
     const { openAuthModal } = useUI();
     const toast = useToast();
 
@@ -267,7 +269,7 @@ const Forum = () => {
 
         // Realtime Subscription
         const channel = supabase
-            .channel('forum_updates')
+            .channel(`forum_updates_${crypto.randomUUID()}`)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
                 fetchPosts();
             })
@@ -312,18 +314,36 @@ const Forum = () => {
         }
     };
 
-    const handleDeletePost = async (postId) => {
+    const handleDeletePost = async (postId, postUserId) => {
         if (!user) return;
 
-        try {
-            const { error } = await supabase
-                .from('posts')
-                .delete()
-                .eq('id', postId)
-                .eq('user_id', user.id);
+        const isAdminDeletion = isAdmin && postUserId !== user.id;
 
-            if (error) throw error;
-            toast.success('Post deleted');
+        try {
+            if (isAdminDeletion) {
+                // Admin deleting any post
+                const { data, error } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error('Deletion blocked by permission (no rows affected).');
+            } else {
+                // Regular user deleting their own post
+                const { data, error } = await supabase
+                    .from('posts')
+                    .delete()
+                    .eq('id', postId)
+                    .eq('user_id', user.id)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error('Deletion failed (no rows affected).');
+            }
+
+            toast.success(isAdminDeletion ? 'Post removed by admin' : 'Post deleted');
             fetchPosts();
         } catch (err) {
             console.error('Error deleting post:', err);
@@ -446,6 +466,7 @@ const Forum = () => {
                                     key={post.id}
                                     post={post}
                                     user={user}
+                                    isAdmin={isAdmin}
                                     onLike={handleLike}
                                     onDelete={handleDeletePost}
                                     onToggleComments={toggleComments}

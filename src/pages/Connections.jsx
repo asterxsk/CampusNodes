@@ -77,7 +77,7 @@ const Connections = () => {
 
   useEffect(() => {
     fetchData();
-    const channel = supabase.channel('connections_page_realtime')
+    const channel = supabase.channel(`connections_page_realtime_${Date.now()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
       .subscribe();

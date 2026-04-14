@@ -79,7 +79,7 @@ const DiscoverPeople = ({ className = "" }) => {
 
   useEffect(() => {
     fetchData();
-    const channel = supabase.channel('discover_people_realtime')
+    const channel = supabase.channel(`discover_people_realtime_${Date.now()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => fetchData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => fetchData())
       .subscribe();

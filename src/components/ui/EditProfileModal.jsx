@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabaseClient';
 import Avatar from './Avatar';
 import { X, Camera, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { useUI } from '../../context/UIContext';
-import { AnimatePresence, motion } from 'framer-motion'; // eslint-disable-next-line no-unused-vars
+import { AnimatePresence, motion } from 'framer-motion';  
 
 const COLLEGES = ['MPSTME', 'NMIMS', 'DJ Sanghvi'];
 const COURSES = [

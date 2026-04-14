@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Send, X, User, Trash2 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
+import { useAdmin } from '../../context/Contexts';
 import { useUI } from '../../context/UIContext';
 import { useToast } from '../../context/ToastContext';
 import Avatar from '../../components/ui/Avatar';
@@ -26,6 +27,7 @@ const timeAgo = (dateString) => {
 
 const PostCommentsModal = ({ postId, onClose }) => {
     const { user } = useAuth();
+    const { isAdmin } = useAdmin();
     const { openAuthModal } = useUI();
     const toast = useToast();
 
@@ -104,7 +106,7 @@ const PostCommentsModal = ({ postId, onClose }) => {
 
         // Realtime subscription for this post's comments
         const channel = supabase
-            .channel(`comments_${postId}`)
+            .channel(`comments_${postId}_${crypto.randomUUID()}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
@@ -147,18 +149,36 @@ const PostCommentsModal = ({ postId, onClose }) => {
         }
     };
 
-    const handleDeleteComment = async (commentId) => {
+    const handleDeleteComment = async (commentId, commentUserId) => {
         if (!user) return;
 
-        try {
-            const { error } = await supabase
-                .from('post_comments')
-                .delete()
-                .eq('id', commentId)
-                .eq('user_id', user.id); // Ensure user can only delete their own comments
+        const isAdminDeletion = isAdmin && commentUserId !== user.id;
 
-            if (error) throw error;
-            toast.success('Comment deleted');
+        try {
+            if (isAdminDeletion) {
+                // Admin deleting any comment
+                const { data, error } = await supabase
+                    .from('post_comments')
+                    .delete()
+                    .eq('id', commentId)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error('Deletion blocked by permission (no rows affected).');
+            } else {
+                // Regular user deleting their own comment
+                const { data, error } = await supabase
+                    .from('post_comments')
+                    .delete()
+                    .eq('id', commentId)
+                    .eq('user_id', user.id)
+                    .select();
+
+                if (error) throw error;
+                if (!data || data.length === 0) throw new Error('Deletion failed (no rows affected).');
+            }
+
+            toast.success(isAdminDeletion ? 'Comment removed by admin' : 'Comment deleted');
             // Realtime will handle the UI update
         } catch (err) {
             console.error("Error deleting comment:", err);
@@ -217,12 +237,12 @@ const PostCommentsModal = ({ postId, onClose }) => {
                                                 </span>
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] text-gray-500">{timeAgo(comment.created_at)}</span>
-                                                    {/* Delete button - only show for comment author */}
-                                                    {user && user.id === comment.user_id && (
+                                                    {/* Delete button - show for comment author OR admin */}
+                                                    {user && (user.id === comment.user_id || isAdmin) && (
                                                         <button
-                                                            onClick={() => handleDeleteComment(comment.id)}
+                                                            onClick={() => handleDeleteComment(comment.id, comment.user_id)}
                                                             className="p-1 text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                                                            title="Delete comment"
+                                                            title={isAdmin && user.id !== comment.user_id ? "Delete comment (Admin)" : "Delete comment"}
                                                         >
                                                             <Trash2 size={14} />
                                                         </button>
